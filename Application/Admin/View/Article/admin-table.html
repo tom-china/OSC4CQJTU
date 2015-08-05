@@ -96,24 +96,13 @@ $(function(){
   $('.am-table>tbody>tr>td:gt(0)').click(function(){
     $(this).parent().find('.ids').click();
   });
-  $('#Del').click(function(){
-    $.ajax({
-      'type':'post',
-      'url':"{:U('Article/del')}",
-      'data':$('form').serialize(),
-      'dataType':'text',
-      success:function(res){
-          if(res>0){
-            alert('删除成功');
-            window.location.reload();
-          }else{
-            alert('删除失败');
-          }
-      },
-      error:function(res){
-          alert('连接失败');
-      }
-    });
+  $('#Del').click(function(){	
+    var string = '';
+    var config = {
+      action:'del',
+      error:'网络错误'
+    };
+    modal_confirm(string,config);	
   });   
 })
 </script>

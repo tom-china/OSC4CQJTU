@@ -46,7 +46,7 @@
           <table class="am-table am-table-striped am-table-hover table-main">
             <thead>
               <tr>
-                <th class="table-check"><input type="checkbox" class="check-all" /></th><th class="table-id">学号</th><th class="table-title">姓名</th><th class="table-title am-hide-sm-only">校区</th><th class="table-type">楼栋</th><th class="table-author am-hide-sm-only">寝室</th><th class="table-date am-hide-sm-only">联系电话</th><th class="table-set">操作</th>
+                <th class="table-check"><input type="checkbox" class="check-all" /></th><th class="table-id">学号</th><th class="table-title">姓名</th><th class="table-title am-hide-sm-only">区域</th><th class="table-type">楼栋</th><th class="table-author am-hide-sm-only">地点</th><th class="table-date am-hide-sm-only">联系电话</th><th class="table-set">操作</th>
               </tr>
           </thead>
           <tbody>
@@ -109,9 +109,7 @@ $(function(){
     var string = '';
     var config = {
       action:'del',
-      success:'删除成功',
-      fail:'删除失败',
-      error:'操作失败'
+      error:'网络错误'
     };
     modal_confirm(string,config);
   });

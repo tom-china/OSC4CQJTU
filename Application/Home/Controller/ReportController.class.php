@@ -116,7 +116,7 @@ class ReportController extends SimpleController {
 	
 	//评价与回复
 	public function rank(){
-		if(!session('?admin') or !session('?uid'))$this->error('非法访问');
+		if(!session('?admin') and !session('?uid'))$this->error('非法访问');
 		if(IS_POST){
 			$data['order'] = I('get.order');
 			$order = M('order')->where($data)->find();
@@ -140,6 +140,22 @@ class ReportController extends SimpleController {
 			}else{
 				$this->error('操作失败');
 			}
+		}
+	}
+	
+	public function rankDel(){
+		if(!session('?admin') and !session('?uid'))$this->error('非法访问');
+		if(IS_POST && IS_AJAX){
+			$data['order'] = I('post.order');
+			$order = M('order')->where($data)->find();	
+			if(session('?uid') && session('uid') != $order['user'])$this->error('操作无权限');
+			if(!session('?admin') and I('post.type')==1)$this->error('操作无权限');
+			$data['type'] = I('post.type');
+			if(M('rank')->where($data)->order('time desc')->limit(1)->delete()){
+				$this->success('操作成功');
+			}else{
+				$this->error('操作失败');
+			}		
 		}
 	}
 	

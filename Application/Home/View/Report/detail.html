@@ -136,14 +136,14 @@ ul.timeline p{
   <div class="am-panel-bd">
 	<if condition="$user['uid'] eq session('uid')">
 	<if condition="time()-$detail['donetime'] gt 3600*24*3">
-	<p>工单已完成超过三日，评价关闭。</p>
+	<p class="am-text-center">工单已完成超过三日，评价关闭。</p>
 	<else/>
 	<form action="{:U('Report/rank',array('order'=>I('get.order'),'type'=>0))}" method="post" class="am-form am-form-horizontal">
 	  <fieldset>
 		<div class="am-input-group">
 		  <input type="text" class="am-form-field" name="rankc" placeholder="说点什么...">
 		  <span class="am-input-group-btn">
-			<button class="am-btn am-btn-default" type="submit">评价</button>
+			<button class="am-btn am-btn-default" type="submit">用户评价</button>
 		  </span>
 		</div>
 	  </fieldset>
@@ -152,7 +152,7 @@ ul.timeline p{
 	<hr data-am-widget="divider" style="" class="am-divider am-divider-dashed"/>
 	</if>
 	<ul class="am-comments-list">
-	<if condition="empty($rank)"><p>暂无评价</p></if>
+	<if condition="empty($rank[user]) and empty($rank[admin])"><p class="am-text-center">暂无评价</p></if>
 	<notempty name="rank.user">
 	 <li class="am-comment">
       <img class="am-comment-avatar" src="{:U('Report/avatar',array('data'=>sha1($user['uid'])))}">
@@ -162,13 +162,18 @@ ul.timeline p{
 			<a class="am-comment-author">用户</a>
 			评价于 <time datetime="">{:date('Y年m月d日 H:i:s',$rank[user][time])}</time>
 		  </div>
+		  <div class="am-comment-actions">
+		  <if condition="session('?admin') or $user['uid'] eq session('uid')">
+			<a href="javascript:;"><i class="am-icon-close" data-type="0"></i></a>
+			</if>
+		  </div>
 		</header>
 		<div class="am-comment-bd">{$rank.user.content}</div>
 	  </div>
 	 </li>
 	 </notempty>
 	 <notempty name="rank.admin">
-	 <li class="am-comment am-comment-flip am-comment-highlight">  
+	 <li class="am-comment am-comment-flip">  
       <img class="am-comment-avatar" src="{:U('Report/avatar',array('data'=>sha1($rank[admin][user])))}">	 
 	  <div class="am-comment-main">
 		<header class="am-comment-hd">
@@ -176,6 +181,11 @@ ul.timeline p{
 			<a class="am-comment-author">{$rank.admin.user}</a>
 			回复于 <time datetime="">{:date('Y年m月d日 H:i:s',$rank[admin][time])}</time>
 		  </div>
+		  <div class="am-comment-actions">
+			<if condition="session('?admin')">
+			<a href="javascript:;"><i class="am-icon-close" data-type="1"></i></a>
+			</if>
+		  </div>		  
 		</header>
 		<div class="am-comment-bd">{$rank.admin.content}</div>
 	  </div>  
@@ -185,14 +195,14 @@ ul.timeline p{
 	<if condition="session('?admin')">
 	<hr data-am-widget="divider" style="" class="am-divider am-divider-dashed"/>
 	<if condition="time()-$detail['donetime'] gt 3600*24*3">
-	<p>工单已完成超过三日，评价关闭。</p>
+	<p class="am-text-center">工单已完成超过三日，评价关闭。</p>
 	<else/>	
 	<form action="{:U('Report/rank',array('order'=>I('get.order'),'type'=>1))}" method="post"  class="am-form am-form-horizontal">
 	  <fieldset>
 		<div class="am-input-group">
 		  <input type="text" class="am-form-field" name="rankc" placeholder="说点什么...">
 		  <span class="am-input-group-btn">
-			<button class="am-btn am-btn-default" type="submit">回复</button>
+			<button class="am-btn am-btn-default" type="submit">管理员回复</button>
 		  </span>
 		</div>
 	  </fieldset>
@@ -205,4 +215,69 @@ ul.timeline p{
 
 </div>
 
+<div class="am-modal am-modal-alert" tabindex="-1" id="alert">
+  <div class="am-modal-dialog">
+    <div class="am-modal-hd">操作提示</div>
+    <div class="am-modal-bd">
+      
+    </div>
+    <div class="am-modal-footer">
+      <span class="am-modal-btn" onclick="window.location.reload();">确定</span>
+    </div>
+  </div>
+</div>
+
+<div class="am-modal am-modal-confirm" tabindex="-1" id="confirm">
+  <div class="am-modal-dialog">
+    <div class="am-modal-hd">操作提示</div>
+    <div class="am-modal-bd">
+      亲，确定要删除<span></span>吗？
+    </div>
+    <div class="am-modal-footer">
+      <span class="am-modal-btn" data-am-modal-cancel>取消</span>
+      <span class="am-modal-btn" data-am-modal-confirm>确定</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  function modal_alert(string){
+  	$('#alert').find('.am-modal-bd').text(string);
+    $('#alert').modal();
+  }
+
+  function modal_confirm(string,config){
+   	$('#confirm').find('.am-modal-bd>span').text(string);
+    $('#confirm').modal({
+    	relatedTarget: this,
+    	onConfirm: function(options) {
+		     $.ajax({
+		      'type':'post',
+		      'url':"{:U('"+config.action+"')}",
+		      'data':{order:'{:I('get.order')}',type:config.obj.data('type')},
+		      'dataType':'json',
+		      success:function(res){
+		            modal_alert(res.info);
+		      },
+		      error:function(res){
+		          modal_alert(config.error);
+		      }
+		    });   		
+    	},
+    	onCancel: function() {
+
+    	}	
+    });
+  }
+  
+  $('.am-icon-close').click(function(){
+    var string = '';
+    var config = {
+	  obj:$(this),
+      action:'rankDel',
+      error:'网络错误'
+    };
+    modal_confirm(string,config);
+  });
+</script>
 <include file="Public/footer" />

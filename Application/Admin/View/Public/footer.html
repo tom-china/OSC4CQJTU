@@ -80,14 +80,9 @@
 		      'type':'post',
 		      'url':"{:U('"+config.action+"')}",
 		      'data':$('form').serialize(),
-		      'dataType':'text',
+		      'dataType':'json',
 		      success:function(res){
-		          if(res==1){
-		            modal_alert(config.success);
-		            window.location.reload();
-		          }else{
-		            modal_alert(config.fail);
-		          }
+		          modal_alert(res.info);
 		      },
 		      error:function(res){
 		          modal_alert(config.error);

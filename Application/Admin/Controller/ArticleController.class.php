@@ -70,12 +70,23 @@ class ArticleController extends SimpleController {
     	$database = M('article');
     	if(IS_AJAX){
     		if(is_array(I('post.id'))){
+				$count = count(I('post.uid'));
     			$order = implode(',', I('post.id'));
     			$res = $database->delete($order);
+    			if($res){
+					$this->success(intval($res).'/'.$count.'条记录删除成功');
+				}else{
+					$this->error(intval($res).'/'.$count.'条记录删除成功');
+				}				
     		}else{
     			$res = $database->delete(I('post.id'));
+    			if($res){
+					$this->success(I('post.id').'删除成功');
+				}else{
+					$this->error(I('post.id').'删除失败');
+				}				
     		}
-    		echo $res;
+
     	}    	
     }
 }

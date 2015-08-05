@@ -15,20 +15,33 @@ class TaskController extends SimpleController {
     	$database = M('order');
     	if(IS_AJAX && IS_POST){
     		$order = I('post.order');
-    		if(is_array($order)){  	   				
+    		if(is_array($order)){ 
+				$count = count($order);
+				$r = 0;
     			foreach($order as $k=>$v){
 		    		$database->status = '0';
 		    		$database->donetime = '';
 		    		$database->dotime = '';
-					$res = $database->lock(true)->where('`order`=:order')->bind(':order',$v)->save();	
+					$res = $database->lock(true)->where('`order`=:order')->bind(':order',$v)->save();
+					$r+=intval($res);
     			}
+    			if($res){
+					$this->success($r.'/'.$count.'条记录标记成功');
+				}else{
+					$this->error($r.'/'.$count.'条记录标记成功');
+				}				
     		}else{
 	    		$database->status = '0';
 	    		$database->donetime = '';
 	    		$database->dotime = '';   			
     			$res = $database->lock(true)->where('`order`=:order')->bind(':order',$order)->save();
+    			if($res){
+					$this->success($order.'标记成功');
+				}else{
+					$this->error($order.'标记成功');
+				}				
     		}
-    		echo $res;
+
     	}else{
             $admin = M('admin')->where('username=:username')->bind(':username',session('admin'))->find();
             $admin = json_decode($admin['location'],true);
@@ -90,14 +103,22 @@ class TaskController extends SimpleController {
     	if(IS_AJAX && IS_POST){
     		$order = I('post.order');  		
     		if(is_array($order)){
+				$count = count($order);
+				$r = 0;				
     			foreach($order as $k=>$v){
     				$database->status = '1';
     				$database->dotime = time(); 
     				$database->donetime = '';
                     $database->doctor = session('admin'); //记录操作管理员
                     if(!empty(I('post.repairer')))$database->repairer = I('post.repairer'); //记录维修工人
-    				$res = $database->lock(true)->where('`order`=:order')->bind(':order',$v)->save();	
+    				$res = $database->lock(true)->where('`order`=:order')->bind(':order',$v)->save();
+					$r+=intval($res);
     			}
+    			if($res){
+					$this->success($r.'/'.$count.'条记录标记成功');
+				}else{
+					$this->error($r.'/'.$count.'条记录标记成功');
+				}				
     		}else{
     			$database->status = '1';
     			$database->dotime = time(); 
@@ -105,8 +126,13 @@ class TaskController extends SimpleController {
                 $database->doctor = session('admin'); //记录操作管理员 
                 if(!empty(I('post.repairer')))$database->repairer = I('post.repairer'); //记录维修工人  			
     			$res = $database->lock(true)->where('`order`=:order')->bind(':order',$order)->save();
+    			if($res){
+					$this->success($order.'标记成功');
+				}else{
+					$this->error($order.'标记成功');
+				}				
     		}
-    		echo $res;
+
     	}else{  
             $admin = M('admin')->where('username=:username')->bind(':username',session('admin'))->find();
             $admin = json_decode($admin['location'],true);
@@ -167,22 +193,35 @@ class TaskController extends SimpleController {
     	$database = M('order');
     	if(IS_AJAX && IS_POST){
     		$order = I('post.order');
-    		if(is_array($order)){    			
+    		if(is_array($order)){    	
+				$count = count($order);
+				$r = 0;			
     			foreach($order as $k=>$v){
 		    		$database->status = '2';
 		    		$database->donetime = time();  
                     $database->doctor = session('admin'); //记录操作管理员
                     if(!empty(I('post.repairer')))$database->repairer = I('post.repairer'); //记录维修工人                      				
     				$res = $database->lock(true)->where('`order`=:order')->bind(':order',$v)->save();	
+					$r+=intval($res);
     			}
+    			if($res){
+					$this->success($r.'/'.$count.'条记录标记成功');
+				}else{
+					$this->error($r.'/'.$count.'条记录标记成功');
+				}				
     		}else{
 	    		$database->status = '2';
 	    		$database->donetime = time();  
                 $database->doctor = session('admin'); //记录操作管理员
                 if(!empty(I('post.repairer')))$database->repairer = I('post.repairer'); //记录维修工人                  			
     			$res = $database->lock(true)->where('`order`=:order')->bind(':order',$order)->save();
+    			if($res){
+					$this->success($order.'标记成功');
+				}else{
+					$this->error($order.'标记成功');
+				}				
     		}
-    		echo $res;
+
     	}else{
             $admin = M('admin')->where('username=:username')->bind(':username',session('admin'))->find();
             $admin = json_decode($admin['location'],true);
@@ -244,10 +283,21 @@ class TaskController extends SimpleController {
     	$database = M('order');
     	if(IS_AJAX && IS_POST){
     		if(is_array(I('post.order'))){
+				$count = count(I('post.order'));
     			$order = implode(',', I('post.order'));
     			$res = $database->delete($order);
+    			if($res){
+					$this->success(intval($res).'/'.$count.'条记录删除成功');
+				}else{
+					$this->error(intval($res).'/'.$count.'条记录删除成功');
+				}				
     		}else{
-    			$res = $database->delete(I('post.order'));
+				$res = $database->delete(I('post.order'));
+    			if($res){
+					$this->success(I('post.order').'删除成功');
+				}else{
+					$this->error(I('post.order').'删除失败');
+				}
     		}
     		echo $res;
     	}

@@ -219,14 +219,25 @@ class UserController extends SimpleController {
     	if(!session('?admin'))$this->redirect('Main/index');
         if(session('right')!=1)$this->error('访问无权限');
     	$database = M('user');
-    	if(IS_AJAX){
+    	if(IS_POST AND IS_AJAX){
     		if(is_array(I('post.uid'))){
+				$count = count(I('post.uid'));
     			$uid = implode(',', I('post.uid'));
     			$res = $database->delete($uid);
+    			if($res){
+					$this->success(intval($res).'/'.$count.'条记录删除成功');
+				}else{
+					$this->error(intval($res).'/'.$count.'条记录删除成功');
+				}				
     		}else{
     			$res = $database->delete(I('post.uid'));
+    			if($res){
+					$this->success(I('post.uid').'删除成功');
+				}else{
+					$this->error(I('post.uid').'删除失败');
+				}				
     		}
-    		echo $res;
+
     	}
     } 
 
@@ -272,16 +283,27 @@ class UserController extends SimpleController {
     	if(session('right')!=1)$this->error('访问无权限');
     	$database = M('admin');
     	$user = $database->where('username=:username')->bind(':username',session('admin'))->find();
-    	if(IS_AJAX){
+    	if(IS_POST AND IS_AJAX){
     		if(is_array(I('post.uid'))){
     			if(in_array($user['uid'],I('post.uid')))die;
+				$count = count(I('post.uid'));
     			$uid = implode(',', I('post.uid'));
     			$res = $database->delete($uid);
+    			if($res){
+					$this->success(intval($res).'/'.$count.'条记录删除成功');
+				}else{
+					$this->error(intval($res).'/'.$count.'条记录删除成功');
+				}				
     		}else{
     			if($user['uid']==I('post.uid'))die;
     			$res = $database->delete(I('post.uid'));
+    			if($res){
+					$this->success(I('post.uid').'删除成功');
+				}else{
+					$this->error(I('post.uid').'删除失败');
+				}				
     		}
-    		echo $res;
+
     	}
     } 
 

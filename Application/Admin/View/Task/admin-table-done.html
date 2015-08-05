@@ -172,13 +172,9 @@
       'type':'post',
       'url':"{:U('Task/todo')}",
       'data':$('form').serialize(),
-      'dataType':'text',
+      'dataType':'json',
       success:function(res){
-          if(res==1){
-            modal_alert('标记[未处理]成功');
-          }else{
-            modal_alert('标记失败');
-          }
+          modal_alert(res.info);
       },
       error:function(res){
           modal_alert('连接失败');
@@ -191,13 +187,9 @@
       'type':'post',
       'url':"{:U('Task/doing')}",
       'data':$('form').serialize(),
-      'dataType':'text',
+      'dataType':'json',
       success:function(res){
-          if(res==1){
-            modal_alert('标记[处理中]成功');
-          }else{
-            modal_alert('标记失败');
-          }
+          modal_alert(res.info);
       },
       error:function(res){
           modal_alert('连接失败');
@@ -209,8 +201,6 @@
     var string = '';
     var config = {
       action:'del',
-      success:'删除成功',
-      fail:'删除失败',
       error:'连接失败'
     };
     modal_confirm(string,config);
