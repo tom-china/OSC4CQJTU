@@ -130,6 +130,7 @@ ul.timeline p{
 </div>
 </div>
 
+<if condition="$allowrank eq 'true'">
 <notempty name="detail.donetime">
 <div class="am-panel am-panel-default">
   <div class="am-panel-hd">用户评价</div>
@@ -280,4 +281,5 @@ ul.timeline p{
     modal_confirm(string,config);
   });
 </script>
+</if>
 <include file="Public/footer" />

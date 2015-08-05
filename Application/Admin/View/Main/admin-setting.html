@@ -20,16 +20,16 @@
     <hr/>
 
     <div class="am-container">
-	<ul class="am-nav am-nav-pills am-nav-justify">
-	  <li><a href="#set">全局设置</a></li>
+	<div>
+	<ul class="am-nav am-nav-tabs am-nav-justify">
+	  <li class="am-active"><a href="#set">全局设置</a></li>
 	  <li><a href="#copyright">版权信息设置</a></li>
 	  <li><a href="#tips">提示语设计</a></li>
 	  <li><a href="#designer">区域/楼栋设计器</a></li>
 	</ul>
-	<hr>
-    	<div class="am-panel am-panel-default">
-		  <div class="am-panel-hd am-cf" data-am-collapse="{target: '#set'}">全局设置<span class="am-icon-chevron-down am-fr" ></span></div>
-		  <div class="am-panel-bd am-collapse am-in" id="set"> 
+
+	<div class="am-tabs-bd">
+    	<div class="am-tab-panel am-active" id="set">
 			<form action="{:U('Main/setGlobal')}" method="post" class="am-form am-form-horizontal">
 		    <div class="am-form-group">
 		      <label for="doc-select-1">是否开放站点</label>
@@ -66,17 +66,22 @@
 		        <option value="diy">自定义表验证</option>
 		      </select>
 		      <span class="am-form-caret"></span>
-		    </div>			
+		    </div>	
+
+		    <div class="am-form-group">
+		      <label for="doc-select-5">是否开启用户评价</label>
+		      <select id="doc-select-5" name="global[allowrank]">
+				<option value="true">开启</option>
+		        <option value="false">关闭</option>
+		      </select>
+		      <span class="am-form-caret"></span>
+		    </div>				
 
 		    <button type="submit" class="am-btn am-btn-block">确 定</button>
-			</form>
-		  </div> 
-		  <div class="am-panel-footer">点击展开</div>  		
+			</form>  		
     	</div>
 
-    	<div class="am-panel am-panel-default">
-    	<div class="am-panel-hd am-cf" data-am-collapse="{target: '#copyright'}">版权信息设置<span class="am-icon-chevron-down am-fr" ></span></div>
-    	<div class="am-panel-bd am-collapse am-in" id="copyright">
+    	<div class="am-tab-panel am-hide" id="copyright">
     		<form action="{:U('Main/setCopyright')}" method="post" class="am-form am-form-horizontal">
 		    <div class="am-form-group">
 		      <label for="doc-cr-1">通用底部版权</label>
@@ -93,12 +98,8 @@
 		    <button type="submit" class="am-btn am-btn-block">确 定</button>		    
 		    </form>
     	</div>
-    	<div class="am-panel-footer">点击展开</div> 
-    	</div>
 
-    	<div class="am-panel am-panel-default">
-    	<div class="am-panel-hd am-cf" data-am-collapse="{target: '#tips'}">提示语设计<span class="am-icon-chevron-down am-fr" ></span></div>
-    	<div class="am-panel-bd am-collapse am-in" id="tips">
+    	<div class="am-tab-panel am-hide" id="tips">
     		<form action="{:U('Main/setTips')}" method="post" class="am-form am-form-horizontal">
 		    <div class="am-form-group">
 		      <label for="doc-ta-1">用户登录页面提示</label>
@@ -122,13 +123,10 @@
 		    </div>
 		    <button type="submit" class="am-btn am-btn-block">确 定</button>	    		    
     		</form>
-		</div>
-    	<div class="am-panel-footer">点击展开</div>
     	</div>
 
-		<div class="am-panel am-panel-default">
-		  <div class="am-panel-hd am-cf" data-am-collapse="{target: '#designer'}">区域/楼栋设计器<span class="am-icon-chevron-down am-fr" ></span></div>
-		  <div class="am-panel-bd am-collapse am-in" id="designer">
+		<div class="am-tab-panel am-hide" id="designer">
+		  <p>可以使用 <i class="am-icon-arrows"></i> 进行拖动排序 ; <a href="javascript:$('.add-button:eq(0)').click();"><i class="am-icon-plus"></i>添加一级菜单</a></p>
 		  	<form method="post" class="am-form am-form-horizontal">
 	        <div class="controls">
 	        	<if condition="empty($area) or empty($building)">
@@ -142,7 +140,6 @@
 	                	<a class="am-icon-arrows" title="拖动调整此菜单位置" href="javascript:;"></a>
 	                    <a class="add-sub-cate am-icon-plus" title="添加二级菜单" href="javascript:;"></a> 
 	                    <a class="remove-sub-cate am-icon-close" title="删除二级菜单" href="javascript:;"></a>
-	                    </label>
 	                    <label>名称： 
 	                    <input type="text" name="config[menu][button][0][sub_button][0][name]" class="text input-large" required></label>
 	                    <label>标识： 
@@ -163,7 +160,6 @@
 	                    <a class="add-sub-cate am-icon-plus" title="添加二级菜单" href="javascript:;"></a>
 	                    <a class="remove-sub-cate am-icon-close" title="删除二级菜单" href="javascript:;"></a>
 	                    <a></a>  
-	                    </label>
 	                    <label>名称： 
 	                    <input type="text" name="config[menu][button][{$k}][sub_button][{$key}][name]" class="text input-large" value="{$value.name}" required></label>
 	                    <label>标识： 
@@ -177,11 +173,12 @@
 	        </div><!-- controls end -->		
         	<button type="submit" class="am-btn am-btn-block">确 定</button>
 		    </form>
-		  </div>
-		  <div class="am-panel-footer">可以使用 <i class="am-icon-arrows"></i> 进行拖动排序</div>  	
-    	</div>
-
-       <hr />
+		</div>
+		    	
+    </div>
+		
+	</div>
+       <hr/>
        <p>后勤在线服务中心 Online Service Center</p>
   	</div>	
   <!-- content end -->
@@ -248,16 +245,25 @@ $(function() {
     $('#doc-select-3').find('option[value="{$global.quickreport}"]').attr('selected', 'selected');
     if (!$.AMUI.support.mutationobserver) {
       $('#doc-select-3').trigger('changed.selected.amui');
-    }        
+    } 
+    $('#doc-select-4').find('option[value="{$global.uclogin}"]').attr('selected', 'selected');
+    if (!$.AMUI.support.mutationobserver) {
+      $('#doc-select-4').trigger('changed.selected.amui');
+    }
+    $('#doc-select-5').find('option[value="{$global.allowrank}"]').attr('selected', 'selected');
+    if (!$.AMUI.support.mutationobserver) {
+      $('#doc-select-5').trigger('changed.selected.amui');
+    }	
     clearInterval(timer);
   },100);
 </script>
 <script type="text/javascript">
 $(function() {
-	$(".am-nav").find("a[href='"+location.hash+"']").parent().addClass('am-active');
 	window.onhashchange=function(){
 		$(".am-nav").find("li").removeClass('am-active');
 		$(".am-nav").find("a[href="+location.hash+"]").parent().addClass('am-active');
+		$('.am-tab-panel').removeClass('am-active').addClass('am-hide');
+		$(location.hash).removeClass('am-hide').addClass('am-active');
 	}
 });
 </script>

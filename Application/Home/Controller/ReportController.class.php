@@ -99,6 +99,11 @@ class ReportController extends SimpleController {
     	if(empty($detail)){
     		$this->error('该工单不存在');
     	}else{
+			//是否开启用户评价
+			$global = M('setting')->where("`key`='global'")->find();
+			$global = json_decode($global['value'],true);		
+			$this->assign('allowrank',$global['allowrank']); 
+ 			
             $tips = M('setting')->where("`key`='tips'")->find();
             $tips = json_decode($tips['value'],true); 
             $this->assign('tips',$tips['detail']);             
@@ -117,6 +122,12 @@ class ReportController extends SimpleController {
 	//评价与回复
 	public function rank(){
 		if(!session('?admin') and !session('?uid'))$this->error('非法访问');
+		
+		//是否开启用户评价
+        $global = M('setting')->where("`key`='global'")->find();
+        $global = json_decode($global['value'],true);		
+		if($global['allowrank']=='false')$this->error('用户评价未开启');
+		
 		if(IS_POST){
 			$data['order'] = I('get.order');
 			$order = M('order')->where($data)->find();
@@ -145,6 +156,12 @@ class ReportController extends SimpleController {
 	
 	public function rankDel(){
 		if(!session('?admin') and !session('?uid'))$this->error('非法访问');
+		
+		//是否开启用户评价
+        $global = M('setting')->where("`key`='global'")->find();
+        $global = json_decode($global['value'],true);		
+		if($global['allowrank']=='false')$this->error('用户评价未开启');	
+	
 		if(IS_POST && IS_AJAX){
 			$data['order'] = I('post.order');
 			$order = M('order')->where($data)->find();	

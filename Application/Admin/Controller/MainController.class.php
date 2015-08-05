@@ -128,32 +128,34 @@ class MainController extends SimpleController {
             }
             $data['key'] = 'area';
             $data['value'] = json_encode($area);
-            $database->add($data,array(),true);
+			if(!$database->add($data,array(),true))$this->error('设置（一级地点）保存失败');
             $data['key'] = 'building';
             $data['value'] = json_encode($building);
-            $database->add($data,array(),true);            
-        }
-        $global = $database->where("`key`='global'")->find();
-        $global = json_decode($global['value'],true);
-        $this->assign('global',$global);
+			if(!$database->add($data,array(),true))$this->error('设置（二级地点）保存失败');
+			$this->success('设置保存成功');
+        }else{
+			$global = $database->where("`key`='global'")->find();
+			$global = json_decode($global['value'],true);
+			$this->assign('global',$global);
 
-        $tips = $database->where("`key`='tips'")->find();
-        $tips = json_decode($tips['value'],true);
-        $this->assign('tips',$tips);
+			$tips = $database->where("`key`='tips'")->find();
+			$tips = json_decode($tips['value'],true);
+			$this->assign('tips',$tips);
 
-        $copyright = $database->where("`key`='copyright'")->find();
-        $copyright = json_decode($copyright['value'],true);
-        $this->assign('copyright',$copyright);       
+			$copyright = $database->where("`key`='copyright'")->find();
+			$copyright = json_decode($copyright['value'],true);
+			$this->assign('copyright',$copyright);       
 
-        $area = $database->where("`key`='area'")->find();
-        $area = json_decode($area['value'],true);
-        $this->assign('area',$area);
+			$area = $database->where("`key`='area'")->find();
+			$area = json_decode($area['value'],true);
+			$this->assign('area',$area);
 
-        $building = $database->where("`key`='building'")->find();
-        $building = json_decode($building['value'],true);
-        $this->assign('building',$building);
+			$building = $database->where("`key`='building'")->find();
+			$building = json_decode($building['value'],true);
+			$this->assign('building',$building);
 
-        $this->display('admin-setting');
+			$this->display('admin-setting');			
+		}
     }
 
     public function setGlobal(){
