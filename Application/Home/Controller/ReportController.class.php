@@ -13,7 +13,7 @@ class ReportController extends SimpleController {
  			$user = $database->where('uid = :uid')->bind(':uid',session('uid'))->find(); 
  			$this->assign('user',$user);
     	}else{
-    		$this->redirect('User/login',array('returnURL'=>base64_encode(__SELF__)));
+    		$this->redirect('User/login',array('returnURL'=>base64_decode(base64_encode(__SELF__))));
     	}
     	if(IS_POST){
     		$database = M('order');
@@ -58,7 +58,7 @@ class ReportController extends SimpleController {
  			$user = $database->where('uid = :uid')->bind(':uid',session('uid'))->find(); 
  			$this->assign('user',$user); 
     	}else{
-    		$this->redirect('User/login',array('returnURL'=>base64_encode(__SELF__)));
+    		$this->redirect('User/login',array('returnURL'=>base64_decode(base64_encode(__SELF__))));
     	}	
     	if(IS_POST){
     		$database = M('order');
@@ -119,7 +119,7 @@ class ReportController extends SimpleController {
     	}
     }
 	
-	//评价与回复
+	//评价
 	public function rank(){
 		if(!session('?admin') and !session('?uid'))$this->error('非法访问');
 		
@@ -154,6 +154,7 @@ class ReportController extends SimpleController {
 		}
 	}
 	
+	//评价删除
 	public function rankDel(){
 		if(!session('?admin') and !session('?uid'))$this->error('非法访问');
 		
@@ -176,6 +177,7 @@ class ReportController extends SimpleController {
 		}
 	}
 	
+	//头像
 	public function avatar(){
 		$data = I('get.data');
 		$identicon = new \Org\Identicon\Identicon();

@@ -91,7 +91,7 @@ class UserController extends SimpleController {
 			$database->where('uid=:uid')->bind(':uid',$user['uid'])->save($data);
 			session('uid',$user['uid']);
 			if(!empty($user['username']))session('username',$user['username']);
-			if(!empty(I('get.returnURL')))redirect(base64_decode(I('get.returnURL')));
+			if(!empty(I('get.returnURL')))redirect(base64_decode(base64_decode(I('get.returnURL'))));
 			$this->redirect('Main/index');
     	}else{
 	        $tips = M('setting')->where("`key`='tips'")->find();
@@ -146,7 +146,7 @@ class UserController extends SimpleController {
 
     //找回密码
     public function findpsw(){
-    	
+    	$this->error('请联系网站管理员解决');
     }
 
     //用户注销
@@ -217,7 +217,8 @@ class UserController extends SimpleController {
         $verify = new \Think\Verify();
         return $verify->check($code, $id);
     }     
-
+	
+	//取消报修
     public function cancel(){
     	if(!session('?uid'))$this->redirect('login');
     	if(IS_AJAX && IS_POST){
