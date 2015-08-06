@@ -1,11 +1,9 @@
-/*! Amaze UI v2.4.0 | by Amaze UI Team | (c) 2015 AllMobilize, Inc. | Licensed under MIT | 2015-06-01T09:54:08+0800 */ 
+/*! Amaze UI v2.4.2 | by Amaze UI Team | (c) 2015 AllMobilize, Inc. | Licensed under MIT | 2015-07-06T10:25:45+0800 */ 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.AMUI = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-
-_dereq_(2);
+var $ = (window.jQuery);
+var UI = _dereq_(2);
 _dereq_(30);
 _dereq_(3);
 _dereq_(4);
@@ -57,16 +55,14 @@ _dereq_(50);
 _dereq_(51);
 _dereq_(52);
 
-module.exports = $.AMUI;
+module.exports = $.AMUI = UI;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"10":10,"11":11,"12":12,"13":13,"14":14,"15":15,"16":16,"17":17,"18":18,"19":19,"2":2,"20":20,"21":21,"22":22,"23":23,"24":24,"25":25,"26":26,"27":27,"28":28,"29":29,"3":3,"30":30,"31":31,"32":32,"33":33,"34":34,"35":35,"36":36,"37":37,"38":38,"39":39,"4":4,"40":40,"41":41,"42":42,"43":43,"44":44,"45":45,"46":46,"47":47,"48":48,"49":49,"5":5,"50":50,"51":51,"52":52,"6":6,"7":7,"8":8,"9":9}],2:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
 /* jshint -W040 */
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 
 if (typeof $ === 'undefined') {
   throw new Error('Amaze UI 2.x requires jQuery :-(\n' +
@@ -79,7 +75,7 @@ var $win = $(window);
 var doc = window.document;
 var $html = $('html');
 
-UI.VERSION = '2.4.0';
+UI.VERSION = '2.4.2';
 
 UI.support = {};
 
@@ -233,6 +229,76 @@ UI.utils.generateGUID = function(namespace) {
   return uid;
 };
 
+/**
+ * Plugin AMUI Component to jQuery
+ *
+ * @param {String} name - plugin name
+ * @param {Function} Component - plugin constructor
+ * @param {Object} [pluginOption]
+ * @param {String} pluginOption.dataOptions
+ * @param {Function} pluginOption.methodCall - custom method call
+ * @param {Function} pluginOption.before
+ * @param {Function} pluginOption.after
+ * @since v2.4.1
+ */
+UI.plugin = function UIPlugin(name, Component, pluginOption) {
+  var old = $.fn[name];
+  pluginOption = pluginOption || {};
+
+  $.fn[name] = function(option) {
+    var allArgs = Array.prototype.slice.call(arguments, 0);
+    var args = allArgs.slice(1);
+    var propReturn;
+    var $set = this.each(function() {
+      var $this = $(this);
+      var dataName = 'amui.' + name;
+      var dataOptionsName = pluginOption.dataOptions || ('data-am-' + name);
+      var instance = $this.data(dataName);
+      var options = $.extend({},
+        UI.utils.parseOptions($this.attr(dataOptionsName)),
+        typeof option === 'object' && option);
+
+      if (!instance && option === 'destroy') {
+        return;
+      }
+
+      if (!instance) {
+        $this.data(dataName, (instance = new Component(this, options)));
+      }
+
+      // custom method call
+      if (pluginOption.methodCall) {
+        pluginOption.methodCall.call($this, allArgs, instance);
+      } else {
+        // before method call
+        pluginOption.before &&
+        pluginOption.before.call($this, allArgs, instance);
+
+        if (typeof option === 'string') {
+          propReturn = typeof instance[option] === 'function' ?
+            instance[option].apply(instance, args) : instance[option];
+        }
+
+        // after method call
+        pluginOption.after && pluginOption.after.call($this, allArgs, instance);
+      }
+    });
+
+    return (propReturn === undefined) ? $set : propReturn;
+  };
+
+  $.fn[name].Constructor = Component;
+
+  // no conflict
+  $.fn[name].noConflict = function() {
+    $.fn[name] = old;
+    console.log(this);
+    return this;
+  };
+
+  UI[name] = Component;
+};
+
 // http://blog.alexmaccaw.com/css-transitions
 $.fn.emulateTransitionEnd = function(duration) {
   var called = false;
@@ -253,11 +319,10 @@ $.fn.emulateTransitionEnd = function(duration) {
 };
 
 $.fn.redraw = function() {
-  $(this).each(function() {
+  return this.each(function() {
     /* jshint unused:false */
     var redraw = this.offsetHeight;
   });
-  return this;
 };
 
 /* jshint unused:true */
@@ -587,26 +652,28 @@ $(function() {
   });
 });
 
-$.AMUI = UI;
-
 module.exports = UI;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],3:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-_dereq_(2);
+var UI = _dereq_(2);
 
 /* jshint -W101, -W106 */
-/* Add to Homescreen v3.0.8 ~ (c) 2014 Matteo Spinelli ~ @license: http://cubiq.org/license */
+/**
+ * Add to Homescreen v3.2.2
+ * (c) 2015 Matteo Spinelli
+ * @license: http://cubiq.org/license
+ */
+
+// Check for addEventListener browser support (prevent errors in IE<9)
+var _eventListener = 'addEventListener' in window;
 
 // Check if document is loaded, needed by autostart
 var _DOMReady = false;
 if (document.readyState === 'complete') {
   _DOMReady = true;
-} else {
+} else if (_eventListener) {
   window.addEventListener('load', loaded, false);
 }
 
@@ -621,7 +688,6 @@ var _reQueryString = /([\?&]ath=[^&]*$|&ath=[^&]*(&))/;
 
 // singleton
 var _instance;
-
 function ath(options) {
   _instance = _instance || new ath.Class(options);
 
@@ -631,22 +697,18 @@ function ath(options) {
 // message in all supported languages
 ath.intl = {
   en_us: {
-    message: 'To add this web app to the home screen: tap %icon and then <strong>%action</strong>.',
-    action: {
-      ios: 'Add to Home Screen',
-      android: 'Add to homescreen',
-      windows: 'pin to start'
-    }
+    ios: 'To add this web app to the home screen: tap %icon and then <strong>Add to Home Screen</strong>.',
+    android: 'To add this web app to the home screen open the browser option menu and tap on <strong>Add to homescreen</strong>. <small>The menu can be accessed by pressing the menu hardware button if your device has one, or by tapping the top right menu icon <span class="ath-action-icon">icon</span>.</small>'
   },
 
   zh_cn: {
-    message: '如要把应用程式加至主屏幕,请点击%icon, 然后<strong>%action</strong>',
-    action: {ios: '加至主屏幕', android: '加至主屏幕', windows: '按住启动'}
+    ios: '如要把应用程式加至主屏幕,请点击%icon, 然后<strong>加至主屏幕</strong>',
+    android: 'To add this web app to the home screen open the browser option menu and tap on <strong>Add to homescreen</strong>. <small>The menu can be accessed by pressing the menu hardware button if your device has one, or by tapping the top right menu icon <span class="ath-action-icon">icon</span>.</small>'
   },
 
   zh_tw: {
-    message: '如要把應用程式加至主屏幕, 請點擊%icon, 然後<strong>%action</strong>.',
-    action: {ios: '加至主屏幕', android: '加至主屏幕', windows: '按住啟動'}
+    ios: '如要把應用程式加至主屏幕, 請點擊%icon, 然後<strong>加至主屏幕</strong>.',
+    android: 'To add this web app to the home screen open the browser option menu and tap on <strong>Add to homescreen</strong>. <small>The menu can be accessed by pressing the menu hardware button if your device has one, or by tapping the top right menu icon <span class="ath-action-icon">icon</span>.</small>'
   }
 };
 
@@ -660,6 +722,7 @@ ath.defaults = {
   appID: 'org.cubiq.addtohome',		// local storage name (no need to change)
   fontSize: 15,				// base font size, used to properly resize the popup based on viewport scale factor
   debug: false,				// override browser checks
+  logging: false,				// log reasons for showing or not showing to js console; defaults to true when debug is true
   modal: false,				// prevent further actions until the message is closed
   mandatory: false,			// you can't proceed if you don't add the app to the homescreen
   autostart: true,			// show the message automatically
@@ -676,6 +739,7 @@ ath.defaults = {
   onRemove: null,				// executed when the message is removed
   onAdd: null,				// when the application is launched the first time from the homescreen (guesstimate)
   onPrivate: null,			// executed if user is in private mode
+  privateModeOverride: false,	// show the message even in private mode (very rude)
   detectHomescreen: false		// try to detect if the site has been added to the homescreen (false | true | 'hash' | 'queryString' | 'smartURL')
 };
 
@@ -687,7 +751,7 @@ _extend(ath, {
   hasToken: document.location.hash == '#ath' || _reSmartURL.test(document.location.href) || _reQueryString.test(document.location.search),
   isRetina: window.devicePixelRatio && window.devicePixelRatio > 1,
   isIDevice: (/iphone|ipod|ipad/i).test(_ua),
-  isMobileChrome: _ua.indexOf('Android') > -1 && (/Chrome\/[.0-9]*/).test(_ua),
+  isMobileChrome: _ua.indexOf('Android') > -1 && (/Chrome\/[.0-9]*/).test(_ua) && _ua.indexOf("Version") == -1,
   isMobileIE: _ua.indexOf('Windows Phone') > -1,
   language: _nav.language && _nav.language.toLowerCase().replace('-', '_') || ''
 });
@@ -701,7 +765,7 @@ ath.OS = ath.isIDevice ? 'ios' : ath.isMobileChrome ? 'android' : ath.isMobileIE
 ath.OSVersion = _ua.match(/(OS|Android) (\d+[_\.]\d+)/);
 ath.OSVersion = ath.OSVersion && ath.OSVersion[2] ? +ath.OSVersion[2].replace('_', '.') : 0;
 
-ath.isStandalone = window.navigator.standalone || ( ath.isMobileChrome && ( screen.height - document.documentElement.clientHeight < 40 ) );	// TODO: check the lame polyfill
+ath.isStandalone = 'standalone' in window.navigator && window.navigator.standalone;
 ath.isTablet = (ath.isMobileSafari && _ua.indexOf('iPad') > -1) || (ath.isMobileChrome && _ua.indexOf('Mobile') < 0);
 
 ath.isCompatible = (ath.isMobileSafari && ath.OSVersion >= 6) || ath.isMobileChrome;	// TODO: add winphone
@@ -716,16 +780,38 @@ var _defaultSession = {
 
 ath.removeSession = function(appID) {
   try {
+    if (!localStorage) {
+      throw new Error('localStorage is not defined');
+    }
+
     localStorage.removeItem(appID || ath.defaults.appID);
   } catch (e) {
     // we are most likely in private mode
   }
 };
 
+ath.doLog = function(logStr) {
+  if (this.options.logging) {
+    console.log(logStr);
+  }
+};
+
 ath.Class = function(options) {
+  // class methods
+  this.doLog = ath.doLog;
+
   // merge default options with user config
   this.options = _extend({}, ath.defaults);
   _extend(this.options, options);
+  // override defaults that are dependent on each other
+  if (options.debug && (typeof options.logging === "undefined")) {
+    this.options.logging = true;
+  }
+
+  // IE<9 so exit (I hate you, really)
+  if (!_eventListener) {
+    return;
+  }
 
   // normalize some options
   this.options.mandatory = this.options.mandatory && ( 'standalone' in window.navigator || this.options.debug );
@@ -746,7 +832,7 @@ ath.Class = function(options) {
   this.container = document.documentElement;
 
   // load session
-  this.session = localStorage.getItem(this.options.appID);
+  this.session = this.getItem(this.options.appID);
   this.session = this.session ? JSON.parse(this.session) : undefined;
 
   // user most likely came from a direct link containing our token, we don't need it and we remove it
@@ -757,6 +843,7 @@ ath.Class = function(options) {
 
   // the device is not supported
   if (!ath.isCompatible) {
+    this.doLog("Add to homescreen: not displaying callout because device not supported");
     return;
   }
 
@@ -764,6 +851,10 @@ ath.Class = function(options) {
 
   // check if we can use the local storage
   try {
+    if (!localStorage) {
+      throw new Error('localStorage is not defined');
+    }
+
     localStorage.setItem(this.options.appID, JSON.stringify(this.session));
     ath.hasLocalStorage = true;
   } catch (e) {
@@ -785,13 +876,21 @@ ath.Class = function(options) {
   }
 
   // check compatibility with old versions of add to homescreen. Opt-out if an old session is found
-  if (localStorage.getItem('addToHome')) {
+  if (this.getItem('addToHome')) {
     this.optOut();
   }
 
   // critical errors:
-  // user opted out, already added to the homescreen, not a valid location
-  if (this.session.optedout || this.session.added || !isValidLocation) {
+  if (this.session.optedout) {
+    this.doLog("Add to homescreen: not displaying callout because user opted out");
+    return;
+  }
+  if (this.session.added) {
+    this.doLog("Add to homescreen: not displaying callout because already added to the homescreen");
+    return;
+  }
+  if (!isValidLocation) {
+    this.doLog("Add to homescreen: not displaying callout because not a valid location");
     return;
   }
 
@@ -807,6 +906,7 @@ ath.Class = function(options) {
       }
     }
 
+    this.doLog("Add to homescreen: not displaying callout because in standalone mode");
     return;
   }
 
@@ -826,6 +926,7 @@ ath.Class = function(options) {
         }
       }
 
+      this.doLog("Add to homescreen: not displaying callout because URL has token, so we are likely coming from homescreen");
       return;
     }
 
@@ -846,12 +947,14 @@ ath.Class = function(options) {
 
     // we do not show the message if this is your first visit
     if (this.options.skipFirstVisit) {
+      this.doLog("Add to homescreen: not displaying callout because skipping first visit");
       return;
     }
   }
 
   // we do no show the message in private mode
-  if (!ath.hasLocalStorage) {
+  if (!this.options.privateModeOverride && !ath.hasLocalStorage) {
+    this.doLog("Add to homescreen: not displaying callout because browser is in private mode");
     return;
   }
 
@@ -863,6 +966,7 @@ ath.Class = function(options) {
   }
 
   if (this.options.autostart) {
+    this.doLog("Add to homescreen: autostart displaying callout");
     this.show();
   }
 };
@@ -893,11 +997,14 @@ ath.Class.prototype = {
     // in autostart mode wait for the document to be ready
     if (this.options.autostart && !_DOMReady) {
       setTimeout(this.show.bind(this), 50);
+      // we are not displaying callout because DOM not ready, but don't log that because
+      // it would log too frequently
       return;
     }
 
     // message already on screen
     if (this.shown) {
+      this.doLog("Add to homescreen: not displaying callout because already shown on screen");
       return;
     }
 
@@ -907,16 +1014,19 @@ ath.Class.prototype = {
     if (force !== true) {
       // this is needed if autostart is disabled and you programmatically call the show() method
       if (!this.ready) {
+        this.doLog("Add to homescreen: not displaying callout because not ready");
         return;
       }
 
       // we obey the display pace (prevent the message to popup too often)
       if (now - lastDisplayTime < this.options.displayPace * 60000) {
+        this.doLog("Add to homescreen: not displaying callout because displayed recently");
         return;
       }
 
       // obey the maximum number of display count
       if (this.options.maxDisplayCount && this.session.displayCount >= this.options.maxDisplayCount) {
+        this.doLog("Add to homescreen: not displaying callout because displayed too many times already");
         return;
       }
     }
@@ -939,12 +1049,16 @@ ath.Class.prototype = {
 
     var message = '';
 
-    if (this.options.message in ath.intl) {		// you can force the locale
-      message = ath.intl[this.options.message].message.replace('%action', ath.intl[this.options.message].action[ath.OS]);
-    } else if (this.options.message !== '') {		// or use a custom message
+    if (typeof this.options.message == 'object' && ath.language in this.options.message) {		// use custom language message
+      message = this.options.message[ath.language][ath.OS];
+    } else if (typeof this.options.message == 'object' && ath.OS in this.options.message) {		// use custom os message
+      message = this.options.message[ath.OS];
+    } else if (this.options.message in ath.intl) {				// you can force the locale
+      message = ath.intl[this.options.message][ath.OS];
+    } else if (this.options.message !== '') {						// use a custom message
       message = this.options.message;
-    } else {										// otherwise we use our message
-      message = ath.intl[ath.language].message.replace('%action', ath.intl[ath.language].action[ath.OS]);
+    } else if (ath.OS in ath.intl[ath.language]) {				// otherwise we use our message
+      message = ath.intl[ath.language][ath.OS];
     }
 
     // add the action icon
@@ -964,9 +1078,9 @@ ath.Class.prototype = {
     // create the actual message element
     this.element = document.createElement('div');
     this.element.className = 'ath-container ath-' + ath.OS + ' ath-' + ath.OS + (ath.OSVersion + '').substr(0, 1) + ' ath-' + (ath.isTablet ? 'tablet' : 'phone');
-    this.element.style.cssText = '-webkit-transition-property:-webkit-transform,opacity;-webkit-transition-duration:0;-webkit-transform:translate3d(0,0,0);transition-property:transform,opacity;transition-duration:0;transform:translate3d(0,0,0);-webkit-transition-timing-function:ease-out';
+    this.element.style.cssText = '-webkit-transition-property:-webkit-transform,opacity;-webkit-transition-duration:0s;-webkit-transition-timing-function:ease-out;transition-property:transform,opacity;transition-duration:0s;transition-timing-function:ease-out;';
     this.element.style.webkitTransform = 'translate3d(0,-' + window.innerHeight + 'px,0)';
-    this.element.style.webkitTransitionDuration = '0s';
+    this.element.style.transform = 'translate3d(0,-' + window.innerHeight + 'px,0)';
 
     // add the application icon
     if (this.options.icon && this.applicationIcon) {
@@ -990,7 +1104,9 @@ ath.Class.prototype = {
     this.container.appendChild(this.viewport);
 
     // if we don't have to wait for an image to load, show the message right away
-    if (!this.img) {
+    if (this.img) {
+      this.doLog("Add to homescreen: not displaying callout because waiting for img to load");
+    } else {
       this._delayedShow();
     }
   },
@@ -1024,8 +1140,10 @@ ath.Class.prototype = {
 
     // kick the animation
     setTimeout(function() {
-      that.element.style.webkitTransform = 'translate3d(0,0,0)';
       that.element.style.webkitTransitionDuration = '1.2s';
+      that.element.style.transitionDuration = '1.2s';
+      that.element.style.webkitTransform = 'translate3d(0,0,0)';
+      that.element.style.transform = 'translate3d(0,0,0)';
     }, 0);
 
     // set the destroy timer
@@ -1110,12 +1228,27 @@ ath.Class.prototype = {
       return;
     }
 
-    localStorage.setItem(this.options.appID, JSON.stringify(this.session));
+    if (localStorage) {
+      localStorage.setItem(this.options.appID, JSON.stringify(this.session));
+    }
   },
 
   clearSession: function() {
     this.session = _defaultSession;
     this.updateSession();
+  },
+
+  getItem: function(item) {
+    try {
+      if (!localStorage) {
+        throw new Error('localStorage is not defined');
+      }
+
+      return localStorage.getItem(item);
+    } catch (e) {
+      // Preventing exception for some browsers when fetching localStorage key
+      ath.hasLocalStorage = false;
+    }
   },
 
   optOut: function() {
@@ -1164,16 +1297,14 @@ function _removeToken() {
 
 /* jshint +W101, +W106 */
 
-$.AMUI.addToHomescreen = ath;
+ath.VERSION = '3.2.2';
 
-module.exports = ath;
+module.exports = UI.addToHomescreen = ath;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],4:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 
 /**
@@ -1189,10 +1320,10 @@ var Alert = function(element, options) {
   this.options = $.extend({}, Alert.DEFAULTS, options);
   this.$element = $(element);
 
-  this.$element.
-    addClass('am-fade am-in').
-    on('click.alert.amui', '.am-close', function() {
-      _this.close.call(this);
+  this.$element
+    .addClass('am-fade am-in')
+    .on('click.alert.amui', '.am-close', function() {
+      _this.close();
     });
 };
 
@@ -1201,59 +1332,36 @@ Alert.DEFAULTS = {
 };
 
 Alert.prototype.close = function() {
-  var $this = $(this);
-  var $target = $this.hasClass('am-alert') ?
-    $this :
-    $this.parent('.am-alert');
+  var $element = this.$element;
 
-  $target.trigger('close.alert.amui');
-
-  $target.removeClass('am-in');
+  $element.trigger('close.alert.amui').removeClass('am-in');
 
   function processAlert() {
-    $target.trigger('closed.alert.amui').remove();
+    $element.trigger('closed.alert.amui').remove();
   }
 
-  UI.support.transition && $target.hasClass('am-fade') ?
-    $target.
-      one(UI.support.transition.end, processAlert).
-      emulateTransitionEnd(200) : processAlert();
+  UI.support.transition && $element.hasClass('am-fade') ?
+    $element
+      .one(UI.support.transition.end, processAlert)
+      .emulateTransitionEnd(200) :
+    processAlert();
 };
 
-// Alert Plugin
-$.fn.alert = function(option) {
-  return this.each(function() {
-    var $this = $(this);
-    var data = $this.data('amui.alert');
-    var options = typeof option == 'object' && option;
-
-    if (!data) {
-      $this.data('amui.alert', (data = new Alert(this, options || {})));
-    }
-
-    if (typeof option == 'string') {
-      data[option].call($this);
-    }
-  });
-};
+// plugin
+UI.plugin('alert', Alert);
 
 // Init code
 $(document).on('click.alert.amui.data-api', '[data-am-alert]', function(e) {
   var $target = $(e.target);
-  $(this).addClass('am-fade am-in');
   $target.is('.am-close') && $(this).alert('close');
 });
 
-$.AMUI.alert = Alert;
-
 module.exports = Alert;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],5:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 
 /**
@@ -1271,22 +1379,19 @@ var Button = function(element, options) {
 
 Button.DEFAULTS = {
   loadingText: 'loading...',
-  className: {
-    loading: 'am-btn-loading',
-    disabled: 'am-disabled'
-  },
+  disabledClassName: 'am-disabled',
   spinner: undefined
 };
 
-Button.prototype.setState = function(state) {
-  var disabled = 'disabled';
+Button.prototype.setState = function(state, stateText) {
   var $element = this.$element;
+  var disabled = 'disabled';
+  var data = $element.data();
   var options = this.options;
   var val = $element.is('input') ? 'val' : 'html';
-  var loadingClassName = options.className.disabled + ' ' +
-    options.className.loading;
+  var stateClassName = 'am-btn-' + state + ' ' + options.disabledClassName;
 
-  state = state + 'Text';
+  state += 'Text';
 
   if (!options.resetText) {
     options.resetText = $element[val]();
@@ -1295,22 +1400,25 @@ Button.prototype.setState = function(state) {
   // add spinner for element with html()
   if (UI.support.animation && options.spinner &&
     val === 'html' && !this.hasSpinner) {
-    options.loadingText = '<span class="am-icon-' +
-    options.spinner +
-    ' am-icon-spin"></span>' + options.loadingText;
+    options.loadingText = '<span class="am-icon-' + options.spinner +
+      ' am-icon-spin"></span>' + options.loadingText;
 
     this.hasSpinner = true;
   }
 
-  $element[val](options[state]);
+  stateText = stateText ||
+    (data[state] === undefined ? options[state] : data[state]);
+
+  $element[val](stateText);
 
   // push to event loop to allow forms to submit
   setTimeout($.proxy(function() {
-    if (state == 'loadingText') {
-      $element.addClass(loadingClassName).attr(disabled, disabled);
+    // TODO: add stateClass for other states
+    if (state === 'loadingText') {
+      $element.addClass(stateClassName).attr(disabled, disabled);
       this.isLoading = true;
     } else if (this.isLoading) {
-      $element.removeClass(loadingClassName).removeAttr(disabled);
+      $element.removeClass(stateClassName).removeAttr(disabled);
       this.isLoading = false;
     }
   }, this), 0);
@@ -1319,7 +1427,7 @@ Button.prototype.setState = function(state) {
 Button.prototype.toggle = function() {
   var changed = true;
   var $element = this.$element;
-  var $parent = this.$element.parent('.am-btn-group');
+  var $parent = this.$element.parent('[class*="am-btn-group"]');
 
   if ($parent.length) {
     var $input = this.$element.find('input');
@@ -1346,55 +1454,39 @@ Button.prototype.toggle = function() {
   }
 };
 
-// Button plugin
-function Plugin(option) {
-  return this.each(function() {
-    var $this = $(this);
-    var data = $this.data('amui.button');
-    var options = typeof option == 'object' && option || {};
-
-    if (!data) {
-      $this.data('amui.button', (data = new Button(this, options)));
+UI.plugin('button', Button, {
+  dataOptions: 'data-am-loading',
+  methodCall: function(args, instance) {
+    if (args[0] === 'toggle') {
+      instance.toggle();
+    } else if (typeof args[0] === 'string') {
+      instance.setState.apply(instance, args);
     }
-
-    if (option == 'toggle') {
-      data.toggle();
-    } else if (typeof option == 'string') {
-      data.setState(option);
-    }
-  });
-}
-
-$.fn.button = Plugin;
+  }
+});
 
 // Init code
 $(document).on('click.button.amui.data-api', '[data-am-button]', function(e) {
+  e.preventDefault();
   var $btn = $(e.target);
 
   if (!$btn.hasClass('am-btn')) {
     $btn = $btn.closest('.am-btn');
   }
 
-  Plugin.call($btn, 'toggle');
-  e.preventDefault();
+  $btn.button('toggle');
 });
 
 UI.ready(function(context) {
-  $('[data-am-loading]', context).each(function() {
-    $(this).button(UI.utils.parseOptions($(this).data('amLoading')));
-  });
+  $('[data-am-loading]', context).button();
 });
 
-$.AMUI.button = Button;
+module.exports = UI.button = Button;
 
-module.exports = Button;
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],6:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 
 /**
@@ -1454,12 +1546,12 @@ Collapse.prototype.open = function() {
   this.transitioning = 1;
 
   var complete = function() {
-    this.$element.
-      removeClass('am-collapsing').
-      addClass('am-collapse am-in').
-      height('');
+    this.$element
+      .removeClass('am-collapsing')
+      .addClass('am-collapse am-in')
+      .height('')
+      .trigger('opened.collapse.amui');
     this.transitioning = 0;
-    this.$element.trigger('opened.collapse.amui');
   };
 
   if (!UI.support.transition) {
@@ -1470,8 +1562,8 @@ Collapse.prototype.open = function() {
 
   this.$element
     .one(UI.support.transition.end, $.proxy(complete, this))
-    .emulateTransitionEnd(300).
-    css({height: scrollHeight}); // 当折叠的容器有 padding 时，如果用 height() 只能设置内容的宽度
+    .emulateTransitionEnd(300)
+    .css({height: scrollHeight}); // 当折叠的容器有 padding 时，如果用 height() 只能设置内容的宽度
 };
 
 Collapse.prototype.close = function() {
@@ -1495,9 +1587,10 @@ Collapse.prototype.close = function() {
 
   var complete = function() {
     this.transitioning = 0;
-    this.$element.trigger('closed.collapse.amui').
-      removeClass('am-collapsing').
-      addClass('am-collapse');
+    this.$element
+      .trigger('closed.collapse.amui')
+      .removeClass('am-collapsing')
+      .addClass('am-collapse');
     // css({height: '0'});
   };
 
@@ -1523,12 +1616,14 @@ function Plugin(option) {
       UI.utils.options($this.attr('data-am-collapse')),
       typeof option == 'object' && option);
 
-    if (!data && options.toggle && option == 'open') {
+    if (!data && options.toggle && option === 'open') {
       option = !option;
     }
+
     if (!data) {
       $this.data('amui.collapse', (data = new Collapse(this, options)));
     }
+
     if (typeof option == 'string') {
       data[option]();
     }
@@ -1559,27 +1654,23 @@ $(document).on('click.collapse.amui.data-api', '[data-am-collapse]',
         $parent.find('[data-am-collapse]').not($this).addClass('am-collapsed');
       }
 
-      $this[$target.hasClass('am-in') ? 'addClass' :
-        'removeClass']('am-collapsed');
+      $this[$target.hasClass('am-in') ?
+        'addClass' : 'removeClass']('am-collapsed');
     }
 
     Plugin.call($target, option);
   });
 
-$.AMUI.collapse = Collapse;
-
-module.exports = Collapse;
+module.exports = UI.collapse = Collapse;
 
 // TODO: 更好的 target 选择方式
 //       折叠的容器必须没有 border/padding 才能正常处理，否则动画会有一些小问题
 //       寻找更好的未知高度 transition 动画解决方案，max-height 之类的就算了
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],7:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 var $doc = $(document);
 
@@ -1707,7 +1798,8 @@ Datepicker.prototype.close = function() {
   this.viewMode = this.startViewMode;
   this.showMode();
   if (!this.isInput) {
-    $(document).off('mousedown.datapicker.amui touchstart.datepicker.amui', this.close);
+    $(document).off('mousedown.datapicker.amui touchstart.datepicker.amui',
+      this.close);
   }
   // this.set();
   this.$element.trigger({
@@ -1881,7 +1973,7 @@ Datepicker.prototype.fill = function() {
 
   var monthLen = 0;
 
-  while(monthLen < 12) {
+  while (monthLen < 12) {
     if (this.onRender(d.setFullYear(year, monthLen))) {
       months.eq(monthLen).addClass('am-disabled');
     }
@@ -1907,7 +1999,7 @@ Datepicker.prototype.fill = function() {
   year -= 1;
   for (var i = -1; i < 11; i++) {
     yearClassName = this.onRender(d.setFullYear(year));
-    html += '<span class="'+ yearClassName +'' +
+    html += '<span class="' + yearClassName + '' +
     (i === -1 || i === 10 ? ' am-datepicker-old' : '') +
     (currentYear === year ? ' am-active' : '') + '">' + year + '</span>';
     year += 1;
@@ -1949,7 +2041,7 @@ Datepicker.prototype.click = function(event) {
         break;
       case 'span':
         if ($target.is('.am-disabled')) {
-          return
+          return;
         }
 
         if ($target.is('.am-datepicker-month')) {
@@ -2229,43 +2321,23 @@ DPGlobal.contTemplate +
 '</div>' +
 '</div>';
 
-$.fn.datepicker = function(option, val) {
-  return this.each(function() {
-    var $this = $(this);
-    var data = $this.data('amui.datepicker');
-
-    var options = $.extend({},
-      UI.utils.options($this.data('amDatepicker')),
-      typeof option === 'object' && option);
-    if (!data) {
-      $this.data('amui.datepicker', (data = new Datepicker(this, options)));
-    }
-    if (typeof option === 'string') {
-      data[option] && data[option](val);
-    }
-  });
-};
-
-$.fn.datepicker.Constructor = Datepicker;
+// jQuery plugin
+UI.plugin('datepicker', Datepicker);
 
 // Init code
 UI.ready(function(context) {
   $('[data-am-datepicker]').datepicker();
 });
 
-$.AMUI.datepicker = Datepicker;
-
-module.exports = Datepicker;
+module.exports = UI.datepicker = Datepicker;
 
 // TODO: 1. 载入动画
 //       2. less 优化
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],8:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 var $doc = $(document);
 var transition = UI.support.transition;
@@ -2290,6 +2362,9 @@ Dimmer.prototype.init = function() {
     $(document.body).append(this.$element);
     this.inited = true;
     $doc.trigger('init.dimmer.amui');
+    this.$element.on('touchmove.dimmer.amui', function(e) {
+      e.preventDefault();
+    });
   }
 
   return this;
@@ -2309,7 +2384,9 @@ Dimmer.prototype.open = function(relatedElement) {
 
   this.checkScrollbar().setScrollbar();
 
-  $element.off(transition.end).show().trigger('open.dimmer.amui');
+  $element.show().trigger('open.dimmer.amui');
+
+  transition && $element.off(transition.end);
 
   setTimeout(function() {
     $element.addClass('am-active');
@@ -2365,18 +2442,12 @@ Dimmer.prototype.resetScrollbar = function() {
   return this;
 };
 
-var dimmer = new Dimmer();
+module.exports = UI.dimmer = new Dimmer();
 
-$.AMUI.dimmer = dimmer;
-
-module.exports = dimmer;
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],9:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 var animation = UI.support.animation;
 
@@ -2571,25 +2642,7 @@ Dropdown.prototype.events = function() {
 };
 
 // Dropdown Plugin
-function Plugin(option) {
-  return this.each(function() {
-    var $this = $(this);
-    var data = $this.data('amui.dropdown');
-    var options = $.extend({},
-      UI.utils.parseOptions($this.attr('data-am-dropdown')),
-      typeof option == 'object' && option);
-
-    if (!data) {
-      $this.data('amui.dropdown', (data = new Dropdown(this, options)));
-    }
-
-    if (typeof option == 'string') {
-      data[option]();
-    }
-  });
-}
-
-$.fn.dropdown = Plugin;
+UI.plugin('dropdown', Dropdown);
 
 // Init code
 UI.ready(function(context) {
@@ -2601,18 +2654,14 @@ $(document).on('click.dropdown.amui.data-api', '.am-dropdown form',
     e.stopPropagation();
   });
 
-$.AMUI.dropdown = Dropdown;
-
-module.exports = Dropdown;
+module.exports = UI.dropdown = Dropdown;
 
 // TODO: 1. 处理链接 focus
 //       2. 增加 mouseenter / mouseleave 选项
 //       3. 宽度适应
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],10:[function(_dereq_,module,exports){
-(function (global){
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 
 // MODIFIED:
@@ -3748,85 +3797,86 @@ $(window).blur(function(e) {
 
 // FlexSlider: Default Settings
 $.flexslider.defaults = {
-  namespace: "am-",             //{NEW} String: Prefix string attached to the class of every element generated by the plugin
-  selector: ".am-slides > li",       //{NEW} Selector: Must match a simple pattern. '{container} > {slide}' -- Ignore pattern at your own peril
-  animation: "slide",              //String: Select your animation type, "fade" or "slide"
-  easing: "swing",                //{NEW} String: Determines the easing method used in jQuery transitions. jQuery easing plugin is supported!
-  direction: "horizontal",        //String: Select the sliding direction, "horizontal" or "vertical"
-  reverse: false,                 //{NEW} Boolean: Reverse the animation direction
-  animationLoop: true,            //Boolean: Should the animation loop? If false, directionNav will received "disable" classes at either end
-  smoothHeight: false,            //{NEW} Boolean: Allow height of the slider to animate smoothly in horizontal mode
-  startAt: 0,                     //Integer: The slide that the slider should start on. Array notation (0 = first slide)
-  slideshow: true,                //Boolean: Animate slider automatically
-  slideshowSpeed: 5000,           //Integer: Set the speed of the slideshow cycling, in milliseconds
-  animationSpeed: 600,            //Integer: Set the speed of animations, in milliseconds
-  initDelay: 0,                   //{NEW} Integer: Set an initialization delay, in milliseconds
-  randomize: false,               //Boolean: Randomize slide order
-  fadeFirstSlide: true,           //Boolean: Fade in the first slide when animation type is "fade"
-  thumbCaptions: false,           //Boolean: Whether or not to put captions on thumbnails when using the "thumbnails" controlNav.
+  namespace: 'am-',             // {NEW} String: Prefix string attached to the class of every element generated by the plugin
+  selector: '.am-slides > li',       // {NEW} Selector: Must match a simple pattern. '{container} > {slide}' -- Ignore pattern at your own peril
+  animation: 'slide',              // String: Select your animation type, 'fade' or 'slide'
+  easing: 'swing',                // {NEW} String: Determines the easing method used in jQuery transitions. jQuery easing plugin is supported!
+  direction: 'horizontal',        // String: Select the sliding direction, "horizontal" or "vertical"
+  reverse: false,                 // {NEW} Boolean: Reverse the animation direction
+  animationLoop: true,            // Boolean: Should the animation loop? If false, directionNav will received "disable" classes at either end
+  smoothHeight: false,            // {NEW} Boolean: Allow height of the slider to animate smoothly in horizontal mode
+  startAt: 0,                     // Integer: The slide that the slider should start on. Array notation (0 = first slide)
+  slideshow: true,                // Boolean: Animate slider automatically
+  slideshowSpeed: 5000,           // Integer: Set the speed of the slideshow cycling, in milliseconds
+  animationSpeed: 600,            // Integer: Set the speed of animations, in milliseconds
+  initDelay: 0,                   // {NEW} Integer: Set an initialization delay, in milliseconds
+  randomize: false,               // Boolean: Randomize slide order
+  fadeFirstSlide: true,           // Boolean: Fade in the first slide when animation type is "fade"
+  thumbCaptions: false,           // Boolean: Whether or not to put captions on thumbnails when using the "thumbnails" controlNav.
 
   // Usability features
-  pauseOnAction: true,            //Boolean: Pause the slideshow when interacting with control elements, highly recommended.
-  pauseOnHover: false,            //Boolean: Pause the slideshow when hovering over slider, then resume when no longer hovering
-  pauseInvisible: true,   		//{NEW} Boolean: Pause the slideshow when tab is invisible, resume when visible. Provides better UX, lower CPU usage.
-  useCSS: true,                   //{NEW} Boolean: Slider will use CSS3 transitions if available
-  touch: true,                    //{NEW} Boolean: Allow touch swipe navigation of the slider on touch-enabled devices
-  video: false,                   //{NEW} Boolean: If using video in the slider, will prevent CSS3 3D Transforms to avoid graphical glitches
+  pauseOnAction: true,            // Boolean: Pause the slideshow when interacting with control elements, highly recommended.
+  pauseOnHover: false,            // Boolean: Pause the slideshow when hovering over slider, then resume when no longer hovering
+  pauseInvisible: true,   		// {NEW} Boolean: Pause the slideshow when tab is invisible, resume when visible. Provides better UX, lower CPU usage.
+  useCSS: true,                   // {NEW} Boolean: Slider will use CSS3 transitions if available
+  touch: true,                    // {NEW} Boolean: Allow touch swipe navigation of the slider on touch-enabled devices
+  video: false,                   // {NEW} Boolean: If using video in the slider, will prevent CSS3 3D Transforms to avoid graphical glitches
 
   // Primary Controls
-  controlNav: true,               //Boolean: Create navigation for paging control of each slide? Note: Leave true for manualControls usage
-  directionNav: true,             //Boolean: Create navigation for previous/next navigation? (true/false)
-  prevText: " ",           //String: Set the text for the "previous" directionNav item
-  nextText: " ",               //String: Set the text for the "next" directionNav item
+  controlNav: true,               // Boolean: Create navigation for paging control of each slide? Note: Leave true for manualControls usage
+  directionNav: true,             // Boolean: Create navigation for previous/next navigation? (true/false)
+  prevText: ' ',           // String: Set the text for the "previous" directionNav item
+  nextText: ' ',               // String: Set the text for the "next" directionNav item
 
   // Secondary Navigation
-  keyboard: true,                 //Boolean: Allow slider navigating via keyboard left/right keys
-  multipleKeyboard: false,        //{NEW} Boolean: Allow keyboard navigation to affect multiple sliders. Default behavior cuts out keyboard navigation with more than one slider present.
-  mousewheel: false,              //{UPDATED} Boolean: Requires jquery.mousewheel.js (https://github.com/brandonaaron/jquery-mousewheel) - Allows slider navigating via mousewheel
-  pausePlay: false,               //Boolean: Create pause/play dynamic element
-  pauseText: "Pause",             //String: Set the text for the "pause" pausePlay item
-  playText: "Play",               //String: Set the text for the "play" pausePlay item
+  keyboard: true,                 // Boolean: Allow slider navigating via keyboard left/right keys
+  multipleKeyboard: false,        // {NEW} Boolean: Allow keyboard navigation to affect multiple sliders. Default behavior cuts out keyboard navigation with more than one slider present.
+  mousewheel: false,              // {UPDATED} Boolean: Requires jquery.mousewheel.js (https://github.com/brandonaaron/jquery-mousewheel) - Allows slider navigating via mousewheel
+  pausePlay: false,               // Boolean: Create pause/play dynamic element
+  pauseText: 'Pause',             // String: Set the text for the 'pause' pausePlay item
+  playText: 'Play',               // String: Set the text for the 'play' pausePlay item
 
-  // Special properties
-  controlsContainer: "",          //{UPDATED} jQuery Object/Selector: Declare which container the navigation elements should be appended too. Default container is the FlexSlider element. Example use would be $(".flexslider-container"). Property is ignored if given element is not found.
-  manualControls: "",             //{UPDATED} jQuery Object/Selector: Declare custom control navigation. Examples would be $(".flex-control-nav li") or "#tabs-nav li img", etc. The number of elements in your controlNav should match the number of slides/tabs.
-  sync: "",                       //{NEW} Selector: Mirror the actions performed on this slider with another slider. Use with care.
-  asNavFor: "",                   //{NEW} Selector: Internal property exposed for turning the slider into a thumbnail navigation for another slider
+  //  Special properties
+  controlsContainer: '',          // {UPDATED} jQuery Object/Selector: Declare which container the navigation elements should be appended too. Default container is the FlexSlider element. Example use would be $('.flexslider-container'). Property is ignored if given element is not found.
+  manualControls: '',             // {UPDATED} jQuery Object/Selector: Declare custom control navigation. Examples would be $(".flex-control-nav li") or "#tabs-nav li img", etc. The number of elements in your controlNav should match the number of slides/tabs.
+  sync: '',                       // {NEW} Selector: Mirror the actions performed on this slider with another slider. Use with care.
+  asNavFor: '',                   // {NEW} Selector: Internal property exposed for turning the slider into a thumbnail navigation for another slider
 
   // Carousel Options
-  itemWidth: 0,                   //{NEW} Integer: Box-model width of individual carousel items, including horizontal borders and padding.
-  itemMargin: 0,                  //{NEW} Integer: Margin between carousel items.
-  minItems: 1,                    //{NEW} Integer: Minimum number of carousel items that should be visible. Items will resize fluidly when below this.
-  maxItems: 0,                    //{NEW} Integer: Maxmimum number of carousel items that should be visible. Items will resize fluidly when above this limit.
-  move: 0,                        //{NEW} Integer: Number of carousel items that should move on animation. If 0, slider will move all visible items.
-  allowOneSlide: true,           //{NEW} Boolean: Whether or not to allow a slider comprised of a single slide
+  itemWidth: 0,                   // {NEW} Integer: Box-model width of individual carousel items, including horizontal borders and padding.
+  itemMargin: 0,                  // {NEW} Integer: Margin between carousel items.
+  minItems: 1,                    // {NEW} Integer: Minimum number of carousel items that should be visible. Items will resize fluidly when below this.
+  maxItems: 0,                    // {NEW} Integer: Maxmimum number of carousel items that should be visible. Items will resize fluidly when above this limit.
+  move: 0,                        // {NEW} Integer: Number of carousel items that should move on animation. If 0, slider will move all visible items.
+  allowOneSlide: true,           // {NEW} Boolean: Whether or not to allow a slider comprised of a single slide
 
   // Callback API
   start: function() {
-  },            //Callback: function(slider) - Fires when the slider loads the first slide
+  },            // Callback: function(slider) - Fires when the slider loads the first slide
   before: function() {
-  },           //Callback: function(slider) - Fires asynchronously with each slider animation
+  },           // Callback: function(slider) - Fires asynchronously with each slider animation
   after: function() {
-  },            //Callback: function(slider) - Fires after each slider animation completes
+  },            // Callback: function(slider) - Fires after each slider animation completes
   end: function() {
-  },              //Callback: function(slider) - Fires when the slider reaches the last slide (asynchronous)
+  },              // Callback: function(slider) - Fires when the slider reaches the last slide (asynchronous)
   added: function() {
-  },            //{NEW} Callback: function(slider) - Fires after a slide is added
+  },            // {NEW} Callback: function(slider) - Fires after a slide is added
   removed: function() {
-  },           //{NEW} Callback: function(slider) - Fires after a slide is removed
+  },           // {NEW} Callback: function(slider) - Fires after a slide is removed
   init: function() {
-  }             //{NEW} Callback: function(slider) - Fires after the slider is initially setup
+  }             // {NEW} Callback: function(slider) - Fires after the slider is initially setup
 };
 
 // FlexSlider: Plugin Function
 $.fn.flexslider = function(options) {
+  var args = Array.prototype.slice.call(arguments, 1);
   if (options === undefined) {options = {};}
 
-  if (typeof options === "object") {
+  if (typeof options === 'object') {
     return this.each(function() {
-      var $this = $(this),
-        selector = (options.selector) ? options.selector : ".am-slides > li",
-        $slides = $this.find(selector);
+      var $this = $(this);
+      var selector = (options.selector) ? options.selector : '.am-slides > li';
+      var $slides = $this.find(selector);
 
       if (($slides.length === 1 && options.allowOneSlide === true) || $slides.length === 0) {
         $slides.fadeIn(400);
@@ -3838,16 +3888,8 @@ $.fn.flexslider = function(options) {
   } else {
     // Helper strings to quickly pecdrform functions on the slider
     var $slider = $(this).data('flexslider');
+    var methodReturn;
     switch (options) {
-      case 'play':
-        $slider.play();
-        break;
-      case 'pause':
-        $slider.pause();
-        break;
-      case 'stop':
-        $slider.stop();
-        break;
       case 'next':
         $slider.flexAnimate($slider.getTarget('next'), true);
         break;
@@ -3858,8 +3900,13 @@ $.fn.flexslider = function(options) {
       default:
         if (typeof options === 'number') {
           $slider.flexAnimate(options, true);
+        } else if (typeof options === 'string') {
+          methodReturn = (typeof $slider[options] === 'function') ?
+            $slider[options].apply($slider, args) : $slider[options];
         }
     }
+
+    return methodReturn === undefined ? this : methodReturn;
   }
 };
 
@@ -3893,12 +3940,10 @@ UI.ready(function(context) {
 
 module.exports = $.flexslider;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],11:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 
 /* jshint unused: false */
@@ -4859,19 +4904,15 @@ IScroll.prototype = {
 
 IScroll.utils = utils;
 
-$.AMUI.iScroll = IScroll;
-
-module.exports = IScroll;
+module.exports = UI.iScroll = IScroll;
 
 /* jshint unused: true */
 /* jshint +W101, +W116, +W109 */
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],12:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 var dimmer = _dereq_(8);
 var $doc = $(document);
@@ -4915,6 +4956,8 @@ Modal.DEFAULTS = {
   },
   onCancel: function() {
   },
+  closeOnCancel: true,
+  closeOnConfirm: true,
   height: undefined,
   width: undefined,
   duration: 300, // must equal the CSS transition duration
@@ -5054,9 +5097,12 @@ Modal.prototype.close = function(relatedTarget) {
 };
 
 Modal.prototype.events = function() {
-  var that = this;
+  var options = this.options;
+  var _this = this;
   var $element = this.$element;
   var $ipt = $element.find('.am-modal-prompt-input');
+  var $confirm = $element.find('[data-am-modal-confirm]');
+  var $cancel = $element.find('[data-am-modal-cancel]');
   var getData = function() {
     var data = [];
     $ipt.each(function() {
@@ -5070,9 +5116,9 @@ Modal.prototype.events = function() {
   // close via Esc key
   if (this.options.cancelable) {
     $element.on('keyup.modal.amui', function(e) {
-        if (that.active && e.which === 27) {
+        if (_this.active && e.which === 27) {
           $element.trigger('cancel.modal.amui');
-          that.close();
+          _this.close();
         }
       });
   }
@@ -5080,26 +5126,34 @@ Modal.prototype.events = function() {
   // Close Modal when dimmer clicked
   if (this.options.closeViaDimmer && !this.isLoading) {
     dimmer.$element.on('click.dimmer.modal.amui', function(e) {
-      that.close();
+      _this.close();
     });
   }
 
   // Close Modal when button clicked
   $element.find('[data-am-modal-close], .am-modal-btn').
     on('click.close.modal.amui', function(e) {
-    e.preventDefault();
-    that.close();
-  });
+      e.preventDefault();
+      var $this = $(this);
 
-  $element.find('[data-am-modal-confirm]').on('click.confirm.modal.amui',
+      if ($this.is($confirm)) {
+        console.log('sdafdf');
+        options.closeOnConfirm && _this.close();
+      } else if ($this.is($cancel)) {
+        options.closeOnCancel && _this.close();
+      } else {
+        _this.close();
+      }
+    });
+
+  $confirm.on('click.confirm.modal.amui',
     function() {
       $element.trigger($.Event('confirm.modal.amui', {
         trigger: this
       }));
     });
 
-  $element.find('[data-am-modal-cancel]').
-    on('click.cancel.modal.amui', function() {
+  $cancel.on('click.cancel.modal.amui', function() {
       $element.trigger($.Event('cancel.modal.amui', {
         trigger: this
       }));
@@ -5107,10 +5161,10 @@ Modal.prototype.events = function() {
 
   $element.on('confirm.modal.amui', function(e) {
     e.data = getData();
-    that.options.onConfirm.call(that, e);
+    _this.options.onConfirm.call(_this, e);
   }).on('cancel.modal.amui', function(e) {
     e.data = getData();
-    that.options.onCancel.call(that, e);
+    _this.options.onCancel.call(_this, e);
   });
 };
 
@@ -5118,8 +5172,7 @@ function Plugin(option, relatedTarget) {
   return this.each(function() {
     var $this = $(this);
     var data = $this.data('amui.modal');
-    var options = $.extend({},
-      Modal.DEFAULTS, typeof option == 'object' && option);
+    var options = typeof option == 'object' && option;
 
     if (!data) {
       $this.data('amui.modal', (data = new Modal(this, options)));
@@ -5146,18 +5199,15 @@ $doc.on('click.modal.amui.data-api', '[data-am-modal]', function() {
   Plugin.call($target, option, this);
 });
 
-$.AMUI.modal = Modal;
+module.exports = UI.modal = Modal;
 
-module.exports = Modal;
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2,"8":8}],13:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
-var Hammer = _dereq_(30);
+_dereq_(30);
+
 var $win = $(window);
 var $doc = $(document);
 var scrollPos;
@@ -5257,8 +5307,14 @@ OffCanvas.prototype.close = function(relatedElement) {
   $element.trigger('close.offcanvas.amui');
 
   function complete() {
-    $body.removeClass('am-offcanvas-page').
-      css({width: '', height: '', 'margin-left': '', 'margin-right': ''});
+    $body
+      .removeClass('am-offcanvas-page')
+      .css({
+        width: '',
+        height: '',
+        'margin-left': '',
+        'margin-right': ''
+      });
     $element.removeClass('am-active');
     $bar.removeClass('am-offcanvas-bar-active');
     $html.css('margin-top', '');
@@ -5304,6 +5360,8 @@ OffCanvas.prototype.bindEvents = function() {
 };
 
 function Plugin(option, relatedElement) {
+  var args = Array.prototype.slice.call(arguments, 1);
+
   return this.each(function() {
     var $this = $(this);
     var data = $this.data('amui.offcanvas');
@@ -5315,7 +5373,7 @@ function Plugin(option, relatedElement) {
     }
 
     if (typeof option == 'string') {
-      data[option] && data[option](relatedElement);
+      data[option] && data[option].apply(data, args);
     }
   });
 }
@@ -5334,19 +5392,15 @@ $doc.on('click.offcanvas.amui', '[data-am-offcanvas]', function(e) {
   Plugin.call($target, option, this);
 });
 
-$.AMUI.offcanvas = OffCanvas;
-
-module.exports = OffCanvas;
+module.exports = UI.offcanvas = OffCanvas;
 
 // TODO: 优化动画效果
 // http://dbushell.github.io/Responsive-Off-Canvas-Menu/step4.html
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2,"30":30}],14:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 
 /**
@@ -6096,15 +6150,12 @@ var definePinchZoom = function($) {
   return PinchZoom;
 };
 
-$.AMUI.pichzoom = definePinchZoom($);
+module.exports = UI.pichzoom = definePinchZoom($);
 
-module.exports = definePinchZoom($);
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],15:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 var $w = $(window);
 
@@ -6114,13 +6165,13 @@ var $w = $(window);
  */
 
 var Popover = function(element, options) {
-  this.options = $.extend({}, Popover.DEFAULTS, options || {});
+  this.options = $.extend({}, Popover.DEFAULTS, options);
   this.$element = $(element);
   this.active = null;
   this.$popover = (this.options.target && $(this.options.target)) || null;
 
   this.init();
-  this.events();
+  this._bindEvents();
 };
 
 Popover.DEFAULTS = {
@@ -6135,7 +6186,7 @@ Popover.DEFAULTS = {
 };
 
 Popover.prototype.init = function() {
-  var me = this;
+  var _this = this;
   var $element = this.$element;
   var $popover;
 
@@ -6151,7 +6202,7 @@ Popover.prototype.init = function() {
   this.sizePopover();
 
   function sizePopover() {
-    me.sizePopover();
+    _this.sizePopover();
   }
 
   // TODO: 监听页面内容变化，重新调整位置
@@ -6278,10 +6329,10 @@ Popover.prototype.close = function() {
 
   this.$element.trigger('close.popover.amui');
 
-  $popover.
-    removeClass('am-active').
-    trigger('closed.popover.amui').
-    hide();
+  $popover
+    .removeClass('am-active')
+    .trigger('closed.popover.amui')
+    .hide();
 
   this.active = false;
 };
@@ -6295,16 +6346,17 @@ Popover.prototype.getPopover = function() {
       theme.push('am-popover-' + $.trim(item));
     });
   }
+
   return $(this.options.tpl).attr('id', uid).addClass(theme.join(' '));
 };
 
 Popover.prototype.setContent = function(content) {
   content = content || this.options.content;
-  this.$popover && this.$popover.find('.am-popover-inner').empty().
-    html(content);
+  this.$popover && this.$popover.find('.am-popover-inner')
+    .empty().html(content);
 };
 
-Popover.prototype.events = function() {
+Popover.prototype._bindEvents = function() {
   var eventNS = 'popover.amui';
   var triggers = this.options.trigger.split(' ');
 
@@ -6323,41 +6375,19 @@ Popover.prototype.events = function() {
   }
 };
 
-function Plugin(option) {
-  return this.each(function() {
-    var $this = $(this);
-    var data = $this.data('amui.popover');
-    var options = $.extend({},
-      UI.utils.parseOptions($this.attr('data-am-popover')),
-      typeof option == 'object' && option);
-
-    if (!data) {
-      $this.data('amui.popover', (data = new Popover(this, options)));
-    }
-
-    if (typeof option == 'string') {
-      data[option] && data[option]();
-    }
-  });
-}
-
-$.fn.popover = Plugin;
+UI.plugin('popover', Popover);
 
 // Init code
 UI.ready(function(context) {
   $('[data-am-popover]', context).popover();
 });
 
-$.AMUI.popover = Popover;
-
 module.exports = Popover;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],16:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 
 var Progress = (function() {
@@ -6367,9 +6397,8 @@ var Progress = (function() {
    */
 
   var NProgress = {};
-  var $html = $('html');
 
-  NProgress.version = '0.1.6';
+  NProgress.version = '0.2.0';
 
   var Settings = NProgress.settings = {
     minimum: 0.08,
@@ -6426,12 +6455,11 @@ var Progress = (function() {
     NProgress.status = (n === 1 ? null : n);
 
     var progress = NProgress.render(!started),
-      bar = progress.querySelector(Settings.barSelector),
-      speed = Settings.speed,
-      ease = Settings.easing;
+      bar      = progress.querySelector(Settings.barSelector),
+      speed    = Settings.speed,
+      ease     = Settings.easing;
 
-    progress.offsetWidth;
-    /* Repaint */
+    progress.offsetWidth; /* Repaint */
 
     queue(function(next) {
       // Set positionUsing if it hasn't already been set
@@ -6446,8 +6474,7 @@ var Progress = (function() {
           transition: 'none',
           opacity: 1
         });
-        progress.offsetWidth;
-        /* Repaint */
+        progress.offsetWidth; /* Repaint */
 
         setTimeout(function() {
           css(progress, {
@@ -6535,6 +6562,41 @@ var Progress = (function() {
     return NProgress.inc(Math.random() * Settings.trickleRate);
   };
 
+  /**
+   * Waits for all supplied jQuery promises and
+   * increases the progress as the promises resolve.
+   *
+   * @param $promise jQUery Promise
+   */
+  (function() {
+    var initial = 0, current = 0;
+
+    NProgress.promise = function($promise) {
+      if (!$promise || $promise.state() === "resolved") {
+        return this;
+      }
+
+      if (current === 0) {
+        NProgress.start();
+      }
+
+      initial++;
+      current++;
+
+      $promise.always(function() {
+        current--;
+        if (current === 0) {
+          initial = 0;
+          NProgress.done();
+        } else {
+          NProgress.set((initial - current) / initial);
+        }
+      });
+
+      return this;
+    };
+
+  })();
 
   /**
    * (Internal) renders the progress bar markup based on the `template`
@@ -6544,15 +6606,15 @@ var Progress = (function() {
   NProgress.render = function(fromStart) {
     if (NProgress.isRendered()) return document.getElementById('nprogress');
 
-    $html.addClass('nprogress-busy');
+    addClass(document.documentElement, 'nprogress-busy');
 
     var progress = document.createElement('div');
     progress.id = 'nprogress';
     progress.innerHTML = Settings.template;
 
-    var bar = progress.querySelector(Settings.barSelector),
-      perc = fromStart ? '-100' : toBarPerc(NProgress.status || 0),
-      parent = document.querySelector(Settings.parent),
+    var bar      = progress.querySelector(Settings.barSelector),
+      perc     = fromStart ? '-100' : toBarPerc(NProgress.status || 0),
+      parent   = document.querySelector(Settings.parent),
       spinner;
 
     css(bar, {
@@ -6562,11 +6624,11 @@ var Progress = (function() {
 
     if (!Settings.showSpinner) {
       spinner = progress.querySelector(Settings.spinnerSelector);
-      spinner && $(spinner).remove();
+      spinner && removeElement(spinner);
     }
 
     if (parent != document.body) {
-      $(parent).addClass('nprogress-custom-parent');
+      addClass(parent, 'nprogress-custom-parent');
     }
 
     parent.appendChild(progress);
@@ -6578,11 +6640,10 @@ var Progress = (function() {
    */
 
   NProgress.remove = function() {
-    $html.removeClass('nprogress-busy');
-    $(Settings.parent).removeClass('nprogress-custom-parent');
-
+    removeClass(document.documentElement, 'nprogress-busy');
+    removeClass(document.querySelector(Settings.parent), 'nprogress-custom-parent');
     var progress = document.getElementById('nprogress');
-    progress && $(progress).remove();
+    progress && removeElement(progress);
   };
 
   /**
@@ -6648,18 +6709,17 @@ var Progress = (function() {
     var barCSS;
 
     if (Settings.positionUsing === 'translate3d') {
-      barCSS = {transform: 'translate3d(' + toBarPerc(n) + '%,0,0)'};
+      barCSS = { transform: 'translate3d('+toBarPerc(n)+'%,0,0)' };
     } else if (Settings.positionUsing === 'translate') {
-      barCSS = {transform: 'translate(' + toBarPerc(n) + '%,0)'};
+      barCSS = { transform: 'translate('+toBarPerc(n)+'%,0)' };
     } else {
-      barCSS = {'margin-left': toBarPerc(n) + '%'};
+      barCSS = { 'margin-left': toBarPerc(n)+'%' };
     }
 
-    barCSS.transition = 'all ' + speed + 'ms ' + ease;
+    barCSS.transition = 'all '+speed+'ms '+ease;
 
     return barCSS;
   }
-
 
   /**
    * (Internal) Queues a function to be executed.
@@ -6681,7 +6741,6 @@ var Progress = (function() {
     };
   })();
 
-
   /**
    * (Internal) Applies css properties to an element, similar to the jQuery
    * css method.
@@ -6691,8 +6750,8 @@ var Progress = (function() {
    */
 
   var css = (function() {
-    var cssPrefixes = ['Webkit', 'O', 'Moz', 'ms'],
-      cssProps = {};
+    var cssPrefixes = [ 'Webkit', 'O', 'Moz', 'ms' ],
+      cssProps    = {};
 
     function camelCase(string) {
       return string.replace(/^-ms-/, 'ms-').replace(/-([\da-z])/gi, function(match, letter) {
@@ -6741,19 +6800,73 @@ var Progress = (function() {
     }
   })();
 
+  /**
+   * (Internal) Determines if an element or space separated list of class names contains a class name.
+   */
+
+  function hasClass(element, name) {
+    var list = typeof element == 'string' ? element : classList(element);
+    return list.indexOf(' ' + name + ' ') >= 0;
+  }
+
+  /**
+   * (Internal) Adds a class to an element.
+   */
+
+  function addClass(element, name) {
+    var oldList = classList(element),
+      newList = oldList + name;
+
+    if (hasClass(oldList, name)) return;
+
+    // Trim the opening space.
+    element.className = newList.substring(1);
+  }
+
+  /**
+   * (Internal) Removes a class from an element.
+   */
+
+  function removeClass(element, name) {
+    var oldList = classList(element),
+      newList;
+
+    if (!hasClass(element, name)) return;
+
+    // Replace the class name.
+    newList = oldList.replace(' ' + name + ' ', ' ');
+
+    // Trim the opening and closing spaces.
+    element.className = newList.substring(1, newList.length - 1);
+  }
+
+  /**
+   * (Internal) Gets a space separated list of the class names on the element.
+   * The list is wrapped with a single space on each end to facilitate finding
+   * matches within the list.
+   */
+
+  function classList(element) {
+    return (' ' + (element.className || '') + ' ').replace(/\s+/gi, ' ');
+  }
+
+  /**
+   * (Internal) Removes an element from the DOM.
+   */
+
+  function removeElement(element) {
+    element && element.parentNode && element.parentNode.removeChild(element);
+  }
+
   return NProgress;
 })();
 
-$.AMUI.progress = Progress;
+module.exports = UI.progress = Progress;
 
-module.exports = Progress;
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],17:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 var PinchZoom = _dereq_(14);
 var Hammer = _dereq_(30);
@@ -7034,6 +7147,7 @@ PureView.prototype.activate = function($slide) {
 
   this.loadImage($slide, function() {
     UI.utils.imageLoader($slide.find('img'), function(image) {
+      $slide.find('.am-pinch-zoom').addClass('am-pureview-loaded');
       $(image).addClass('am-img-loaded');
     });
   });
@@ -7147,32 +7261,12 @@ PureView.prototype.resetScrollbar = function() {
   this.$body.css('padding-right', '');
 };
 
-function Plugin(option) {
-  return this.each(function() {
-    var $this = $(this);
-    var data = $this.data('amui.pureview');
-    var options = $.extend({},
-      UI.utils.parseOptions($this.data('amPureview')),
-      typeof option == 'object' && option);
-
-    if (!data) {
-      $this.data('amui.pureview', (data = new PureView(this, options)));
-    }
-
-    if (typeof option == 'string') {
-      data[option]();
-    }
-  });
-}
-
-$.fn.pureview = Plugin;
+UI.plugin('pureview', PureView);
 
 // Init code
 UI.ready(function(context) {
   $('[data-am-pureview]', context).pureview();
 });
-
-$.AMUI.pureview = PureView;
 
 module.exports = PureView;
 
@@ -7181,12 +7275,10 @@ module.exports = PureView;
 //       3. 选项
 //       4. 图片高度问题：由于 PinchZoom 的原因，过高的图片如果设置看了滚动，则放大以后显示不全
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"14":14,"2":2,"30":30}],18:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 
 /**
@@ -7271,43 +7363,19 @@ ScrollSpy.prototype.check = function() {
 };
 
 // Sticky Plugin
-function Plugin(option) {
-  return this.each(function() {
-    var $this = $(this);
-    var data = $this.data('am.scrollspy');
-    var options = typeof option == 'object' && option;
-
-    if (!data) {
-      $this.data('am.scrollspy', (data = new ScrollSpy(this, options)));
-    }
-
-    if (typeof option == 'string') {
-      data[option]();
-    }
-  });
-}
-
-$.fn.scrollspy = Plugin;
+UI.plugin('scrollspy', ScrollSpy);
 
 // Init code
 UI.ready(function(context) {
-  $('[data-am-scrollspy]', context).each(function() {
-    var $this = $(this);
-    var options = UI.utils.options($this.data('amScrollspy'));
-    $this.scrollspy(options);
-  });
+  $('[data-am-scrollspy]', context).scrollspy();
 });
-
-$.AMUI.scrollspy = ScrollSpy;
 
 module.exports = ScrollSpy;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],19:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 _dereq_(22);
 
@@ -7396,7 +7464,7 @@ ScrollSpyNav.prototype.scrollProcess = function() {
   var options = this.options;
 
   // smoothScroll
-  if (options.smooth) {
+  if (options.smooth && $.fn.smoothScroll) {
     $links.on('click', function(e) {
       e.preventDefault();
 
@@ -7416,35 +7484,12 @@ ScrollSpyNav.prototype.scrollProcess = function() {
 };
 
 // ScrollSpyNav Plugin
-function Plugin(option) {
-  return this.each(function() {
-    var $this = $(this);
-    var data = $this.data('amui.scrollspynav');
-    var options = typeof option == 'object' && option;
-
-    if (!data) {
-      $this.data('amui.scrollspynav', (data = new ScrollSpyNav(this, options)));
-    }
-
-    if (typeof option == 'string') {
-      data[option]();
-    }
-  });
-}
-
-$.fn.scrollspynav = Plugin;
+UI.plugin('scrollspynav', ScrollSpyNav);
 
 // Init code
 UI.ready(function(context) {
-  $('[data-am-scrollspy-nav]', context).each(function() {
-    var $this = $(this);
-    var options = UI.utils.options($this.data('amScrollspyNav'));
-
-    Plugin.call($this, options);
-  });
+  $('[data-am-scrollspy-nav]', context).scrollspynav();
 });
-
-$.AMUI.scrollspynav = ScrollSpyNav;
 
 module.exports = ScrollSpyNav;
 
@@ -7452,12 +7497,10 @@ module.exports = ScrollSpyNav;
 //       2. 多级菜单支持
 //       3. smooth scroll pushState
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2,"22":22}],20:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 
 // Make jQuery :contains Case-Insensitive
@@ -7482,6 +7525,7 @@ var Selected = function(element, options) {
   this.$originalOptions = this.$element.find('option');
   this.multiple = element.multiple;
   this.$selector = null;
+  this.initialized = false;
   this.init();
 };
 
@@ -7491,7 +7535,7 @@ Selected.DEFAULTS = {
   btnStyle: 'default',
   dropUp: 0,
   maxHeight: null,
-  noSelectedText: '点击选择...',
+  placeholder: '点击选择...',
   selectedClass: 'am-checked',
   disabledClass: 'am-disabled',
   searchBox: false,
@@ -7507,7 +7551,7 @@ Selected.DEFAULTS = {
   '<span class="am-icon-chevron-left">返回</span></h2>' +
   '   <% if (searchBox) { %>' +
   '   <div class="am-selected-search">' +
-  '     <input type="text" autocomplete="off" class="am-form-field" />' +
+  '     <input autocomplete="off" class="am-form-field am-input-sm" />' +
   '   </div>' +
   '   <% } %>' +
   '    <ul class="am-selected-list">' +
@@ -7557,17 +7601,19 @@ Selected.prototype.init = function() {
     multiple: this.multiple,
     options: [],
     searchBox: options.searchBox,
-    dropUp: options.dropUp
+    dropUp: options.dropUp,
+    placeholder: options.placeholder
   };
 
   this.$selector = $(UI.template(this.options.tpl, data));
+  // set select button styles
+  this.$selector.css({width: this.options.btnWidth});
+
   this.$list = this.$selector.find('.am-selected-list');
   this.$searchField = this.$selector.find('.am-selected-search input');
   this.$hint = this.$selector.find('.am-selected-hint');
 
-  // set select button styles
-  var $selectorBtn = this.$selector.find('.am-selected-btn').
-    css({width: this.options.btnWidth});
+  var $selectorBtn = this.$selector.find('.am-selected-btn');
   var btnClassNames = [];
 
   options.btnSize && btnClassNames.push('am-btn-' + options.btnSize);
@@ -7613,6 +7659,7 @@ Selected.prototype.init = function() {
   // #try to fixes #476
   setTimeout(function() {
     _this.syncData();
+    _this.initialized = true;
   }, 0);
 
   this.bindEvents();
@@ -7628,7 +7675,8 @@ Selected.prototype.renderOptions = function() {
   // 单选框使用 JS 禁用已经选择的 option 以后，
   // 浏览器会重新选定第一个 option，但有一定延迟，致使 JS 获取 value 时返回 null
   if (!this.multiple && ($element.val() === null)) {
-    this.$originalOptions.get(0).selected = true;
+    this.$originalOptions.length &&
+    (this.$originalOptions.get(0).selected = true);
   }
 
   function pushOption(index, item, group) {
@@ -7699,6 +7747,7 @@ Selected.prototype.syncData = function(item) {
   var options = this.options;
   var status = [];
   var $checked = $([]);
+
   this.$shadowOptions.filter('.' + options.selectedClass).each(function() {
     var $this = $(this);
     status.push($this.find('.am-selected-text').text());
@@ -7720,11 +7769,13 @@ Selected.prototype.syncData = function(item) {
 
   // nothing selected
   if (!this.$element.val()) {
-    status = [options.noSelectedText];
+    status = [options.placeholder];
   }
 
   this.$status.text(status.join(', '));
-  this.$element.trigger('change');
+
+  // Do not trigger change event on initializing
+  this.initialized && this.$element.trigger('change');
 };
 
 Selected.prototype.bindEvents = function() {
@@ -7776,48 +7827,24 @@ Selected.prototype.destroy = function() {
   this.$selector.remove();
 };
 
-function Plugin(option) {
-  return this.each(function() {
-    var $this = $(this);
-    var data = $this.data('amui.selected');
-    var options = $.extend({}, UI.utils.parseOptions($this.data('amSelected')),
-      UI.utils.parseOptions($this.data('amSelectit')),
-      typeof option === 'object' && option);
-
-    if (!data && option === 'destroy') {
-      return;
-    }
-
-    if (!data) {
-      $this.data('amui.selected', (data = new Selected(this, options)));
-    }
-
-    if (typeof option == 'string') {
-      data[option] && data[option]();
-    }
-  });
-}
+UI.plugin('selected', Selected);
 
 // Conflict with jQuery form
 // https://github.com/malsup/form/blob/6bf24a5f6d8be65f4e5491863180c09356d9dadd/jquery.form.js#L1240-L1258
 // https://github.com/allmobilize/amazeui/issues/379
-$.fn.selected = $.fn.selectIt = Plugin;
+// $.fn.selected = $.fn.selectIt = Plugin;
 
 UI.ready(function(context) {
-  $('[data-am-selected]', context).selectIt();
+  $('[data-am-selected]', context).selected();
 });
-
-$.AMUI.selected = Selected;
 
 module.exports = Selected;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],21:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
 _dereq_(12);
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 var QRCode = _dereq_(31);
 var doc = document;
@@ -8165,16 +8192,12 @@ $doc.on('click.share.amui.data-api', '[data-am-toggle="share"]', function(e) {
   share.toggle();
 });
 
-$.AMUI.share = share;
+module.exports = UI.share = share;
 
-module.exports = share;
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"12":12,"2":2,"31":31}],22:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 var rAF = UI.utils.rAF;
 var cAF = UI.utils.cancelAF;
@@ -8304,12 +8327,10 @@ $(document).on('click.smoothScroll.amui.data-api', '[data-am-smooth-scroll]',
 
 module.exports = SmoothScroll;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],23:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 
 /**
@@ -8319,7 +8340,7 @@ var UI = _dereq_(2);
 
 // Sticky Class
 var Sticky = function(element, options) {
-  var me = this;
+  var _this = this;
 
   this.options = $.extend({}, Sticky.DEFAULTS, options);
   this.$element = $(element);
@@ -8332,8 +8353,8 @@ var Sticky = function(element, options) {
     UI.utils.debounce($.proxy(this.checkPosition, this), 10)).
     on('resize.sticky.amui orientationchange.sticky.amui',
     UI.utils.debounce(function() {
-      me.reset(true, function() {
-        me.checkPosition();
+      _this.reset(true, function() {
+        _this.checkPosition();
       });
     }, 50)).
     on('load.sticky.amui', $.proxy(this.checkPosition, this));
@@ -8375,7 +8396,7 @@ Sticky.prototype.init = function() {
     });
 
   var $holder = $('<div class="am-sticky-placeholder"></div>').css({
-    height: $element.css('position') != 'absolute' ?
+    height: $element.css('position') !== 'absolute' ?
       $element.outerHeight() : '',
     float: $element.css('float') != 'none' ? $element.css('float') : '',
     margin: $elementMargin
@@ -8463,7 +8484,7 @@ Sticky.prototype.checkPosition = function() {
   var offsetBottom = options.bottom;
   var $element = this.$element;
   var animation = (options.animation) ?
-  ' am-animation-' + options.animation : '';
+    ' am-animation-' + options.animation : '';
   var className = [options.className.sticky, animation].join(' ');
 
   if (typeof offsetBottom == 'function') {
@@ -8478,7 +8499,10 @@ Sticky.prototype.checkPosition = function() {
     this.reset();
   }
 
-  this.$holder.height($element.is(':visible') ? $element.height() : 0);
+  this.$holder.css({
+    height: $element.is(':visible') && $element.css('position') !== 'absolute' ?
+      $element.outerHeight() : ''
+  });
 
   if (checkResult) {
     $element.css({
@@ -8505,44 +8529,19 @@ Sticky.prototype.checkPosition = function() {
 };
 
 // Sticky Plugin
-function Plugin(option) {
-  return this.each(function() {
-    var $this = $(this);
-    var data = $this.data('amui.sticky');
-    var options = typeof option == 'object' && option;
-
-    if (!data) {
-      $this.data('amui.sticky', (data = new Sticky(this, options)));
-    }
-
-    if (typeof option == 'string') {
-      data[option]();
-    }
-  });
-}
-
-$.fn.sticky = Plugin;
+UI.plugin('sticky', Sticky);
 
 // Init code
 $(window).on('load', function() {
-  $('[data-am-sticky]').each(function() {
-    var $this = $(this);
-    var options = UI.utils.options($this.attr('data-am-sticky'));
-
-    Plugin.call($this, options);
-  });
+  $('[data-am-sticky]').sticky();
 });
-
-$.AMUI.sticky = Sticky;
 
 module.exports = Sticky;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],24:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 var Hammer = _dereq_(30);
 var supportTransition = UI.support.transition;
@@ -8554,18 +8553,18 @@ var animation = UI.support.animation;
  * @license MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  */
 
+/**
+ * Tabs
+ * @param {HTMLElement} element
+ * @param {Object} options
+ * @constructor
+ */
 var Tabs = function(element, options) {
   this.$element = $(element);
   this.options = $.extend({}, Tabs.DEFAULTS, options || {});
+  this.transitioning = this.activeIndex = null;
 
-  this.$tabNav = this.$element.find(this.options.selector.nav);
-  this.$navs = this.$tabNav.find('a');
-
-  this.$content = this.$element.find(this.options.selector.content);
-  this.$tabPanels = this.$content.find(this.options.selector.panel);
-
-  this.transitioning = null;
-
+  this.refresh();
   this.init();
 };
 
@@ -8575,8 +8574,25 @@ Tabs.DEFAULTS = {
     content: '> .am-tabs-bd',
     panel: '> .am-tab-panel'
   },
-  className: {
-    active: 'am-active'
+  activeClass: 'am-active'
+};
+
+Tabs.prototype.refresh = function() {
+  var selector = this.options.selector;
+
+  this.$tabNav = this.$element.find(selector.nav);
+  this.$navs = this.$tabNav.find('a');
+
+  this.$content = this.$element.find(selector.content);
+  this.$tabPanels = this.$content.find(selector.panel);
+
+  var $active = this.$tabNav.find('> .' + this.options.activeClass);
+
+  // Activate the first Tab when no active Tab or multiple active Tabs
+  if ($active.length !== 1) {
+    this.open(0);
+  } else {
+    this.activeIndex = this.$navs.index($active.children('a'));
   }
 };
 
@@ -8584,14 +8600,7 @@ Tabs.prototype.init = function() {
   var _this = this;
   var options = this.options;
 
-  // Activate the first Tab when no active Tab or multiple active Tabs
-  if (this.$tabNav.find('> .am-active').length !== 1) {
-    var $tabNav = this.$tabNav;
-    this.activate($tabNav.children('li').first(), $tabNav);
-    this.activate(this.$tabPanels.first(), this.$content);
-  }
-
-  this.$navs.on('click.tabs.amui', function(e) {
+  this.$element.on('click.tabs.amui', options.selector.nav + ' a', function(e) {
     e.preventDefault();
     _this.open($(this));
   });
@@ -8602,58 +8611,52 @@ Tabs.prototype.init = function() {
       return this;
     }
 
-    var hammer = new Hammer(this.$content[0]);
-
-    hammer.get('pan').set({
-      direction: Hammer.DIRECTION_HORIZONTAL,
-      threshold: 120
+    var hammer = new Hammer.Manager(this.$content[0]);
+    var swipe = new Hammer.Swipe({
+      direction: Hammer.DIRECTION_HORIZONTAL
+      // threshold: 40
     });
 
-    hammer.on('panleft', UI.utils.debounce(function(e) {
+    hammer.add(swipe);
+
+    hammer.on('swipeleft', UI.utils.debounce(function(e) {
       e.preventDefault();
-      var $target = $(e.target);
-
-      if (!$target.is(options.selector.panel)) {
-        $target = $target.closest(options.selector.panel);
-      }
-
-      $target.focus();
-
-      var $nav = _this.getNextNav($target);
-      $nav && _this.open($nav);
+      _this.goTo('next');
     }, 100));
 
-    hammer.on('panright', UI.utils.debounce(function(e) {
+    hammer.on('swiperight', UI.utils.debounce(function(e) {
       e.preventDefault();
-
-      var $target = $(e.target);
-
-      if (!$target.is(options.selector.panel)) {
-        $target = $target.closest(options.selector.panel);
-      }
-
-      var $nav = _this.getPrevNav($target);
-
-      $nav && _this.open($nav);
+      _this.goTo('prev');
     }, 100));
+
+    this._hammer = hammer;
   }
 };
 
+/**
+ * Open $nav tab
+ * @param {jQuery|HTMLElement|Number} $nav
+ * @returns {Tabs}
+ */
 Tabs.prototype.open = function($nav) {
+  var activeClass = this.options.activeClass;
+  var activeIndex = typeof $nav === 'number' ? $nav : this.$navs.index($($nav));
+
+  $nav = typeof $nav === 'number' ? this.$navs.eq(activeIndex) : $($nav);
+
   if (!$nav ||
+    !$nav.length ||
     this.transitioning ||
-    $nav.parent('li').hasClass('am-active')) {
+    $nav.parent('li').hasClass(activeClass)) {
     return;
   }
 
   var $tabNav = this.$tabNav;
-  var $navs = this.$navs;
-  var $tabContent = this.$content;
   var href = $nav.attr('href');
   var regexHash = /^#.+$/;
   var $target = regexHash.test(href) && this.$content.find(href) ||
-    this.$tabPanels.eq($navs.index($nav));
-  var previous = $tabNav.find('.am-active a')[0];
+    this.$tabPanels.eq(activeIndex);
+  var previous = $tabNav.find('.' + activeClass + ' a')[0];
   var e = $.Event('open.tabs.amui', {
     relatedTarget: previous
   });
@@ -8668,23 +8671,26 @@ Tabs.prototype.open = function($nav) {
   this.activate($nav.closest('li'), $tabNav);
 
   // activate Tab content
-  this.activate($target, $tabContent, function() {
+  this.activate($target, this.$content, function() {
     $nav.trigger({
       type: 'opened.tabs.amui',
       relatedTarget: previous
     });
   });
+
+  this.activeIndex = activeIndex;
 };
 
 Tabs.prototype.activate = function($element, $container, callback) {
   this.transitioning = true;
 
-  var $active = $container.find('> .am-active');
+  var activeClass = this.options.activeClass;
+  var $active = $container.find('> .' + activeClass);
   var transition = callback && supportTransition && !!$active.length;
 
-  $active.removeClass('am-active am-in');
+  $active.removeClass(activeClass + ' am-in');
 
-  $element.addClass('am-active');
+  $element.addClass(activeClass);
 
   if (transition) {
     $element.redraw(); // reflow for transition
@@ -8693,62 +8699,70 @@ Tabs.prototype.activate = function($element, $container, callback) {
     $element.removeClass('am-fade');
   }
 
-  function complete() {
+  var complete = $.proxy(function complete() {
     callback && callback();
     this.transitioning = false;
-  }
+  }, this);
 
-  transition ?
-    $active.one(supportTransition.end, $.proxy(complete, this)) :
-    $.proxy(complete, this)();
-
+  transition ? $active.one(supportTransition.end, complete) : complete();
 };
 
-Tabs.prototype.getNextNav = function($panel) {
-  var navIndex = this.$tabPanels.index($panel);
-  var rightSpring = 'am-animation-right-spring';
+/**
+ * Go to `next` or `prev` tab
+ * @param {String} direction - `next` or `prev`
+ */
+Tabs.prototype.goTo = function(direction) {
+  var navIndex = this.activeIndex;
+  var isNext = direction === 'next';
+  var spring = isNext ? 'am-animation-right-spring' :
+    'am-animation-left-spring';
 
-  if (navIndex + 1 >= this.$navs.length) { // last one
-    animation && $panel.addClass(rightSpring).on(animation.end, function() {
-      $panel.removeClass(rightSpring);
+  if ((isNext && navIndex + 1 >= this.$navs.length) || // last one
+    (!isNext && navIndex === 0)) { // first one
+    var $panel = this.$tabPanels.eq(navIndex);
+
+    animation && $panel.addClass(spring).on(animation.end, function() {
+      $panel.removeClass(spring);
     });
-    return null;
   } else {
-    return this.$navs.eq(navIndex + 1);
+    this.open(isNext ? navIndex + 1 : navIndex - 1);
   }
 };
 
-Tabs.prototype.getPrevNav = function($panel) {
-  var navIndex = this.$tabPanels.index($panel);
-  var leftSpring = 'am-animation-left-spring';
-
-  if (navIndex === 0) { // first one
-    animation && $panel.addClass(leftSpring).on(animation.end, function() {
-      $panel.removeClass(leftSpring);
-    });
-    return null;
-  } else {
-    return this.$navs.eq(navIndex - 1);
-  }
+Tabs.prototype.destroy = function() {
+  this.$element.off('.tabs.amui');
+  Hammer.off(this.$content[0], 'swipeleft swiperight');
+  this._hammer && this._hammer.destroy();
+  $.removeData(this.$element, 'amui.tabs');
 };
 
 // Plugin
 function Plugin(option) {
-  return this.each(function() {
+  var args = Array.prototype.slice.call(arguments, 1);
+  var methodReturn;
+
+  this.each(function() {
     var $this = $(this);
     var $tabs = $this.is('.am-tabs') && $this || $this.closest('.am-tabs');
     var data = $tabs.data('amui.tabs');
-    var options = $.extend({}, $.isPlainObject(option) ? option : {},
-      UI.utils.parseOptions($this.data('amTabs')));
+    var options = $.extend({}, UI.utils.parseOptions($this.data('amTabs')),
+      $.isPlainObject(option) && option);
 
     if (!data) {
       $tabs.data('amui.tabs', (data = new Tabs($tabs[0], options)));
     }
 
-    if (typeof option == 'string' && $this.is('.am-tabs-nav a')) {
-      data[option]($this);
+    if (typeof option === 'string') {
+      if (option === 'open' && $this.is('.am-tabs-nav a')) {
+        data.open($this);
+      } else {
+        methodReturn = typeof data[option] === 'function' ?
+          data[option].apply(data, args) : data[option];
+      }
     }
   });
+
+  return methodReturn === undefined ? this : methodReturn;
 }
 
 $.fn.tabs = Plugin;
@@ -8758,28 +8772,29 @@ UI.ready(function(context) {
   $('[data-am-tabs]', context).tabs();
 });
 
-$.AMUI.tabs = Tabs;
+$(document).on('click.tabs.amui.data-api', '[data-am-tabs] .am-tabs-nav a',
+  function(e) {
+  e.preventDefault();
+  Plugin.call($(this), 'open');
+});
 
-module.exports = Tabs;
+module.exports = UI.tabs = Tabs;
 
 // TODO: 1. Ajax 支持
 //       2. touch 事件处理逻辑优化
-//       3. 暴露方法 API
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2,"30":30}],25:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 
 /**
  * UCheck
  * @via https://github.com/designmodo/Flat-UI/blob/8ef98df23ba7f5033e596a9bd05b53b535a9fe99/js/radiocheck.js
  * @license CC BY 3.0 & MIT
- * @param element
- * @param options
+ * @param {HTMLElement} element
+ * @param {object} options
  * @constructor
  */
 
@@ -8805,31 +8820,42 @@ UCheck.prototype.init = function() {
   var options = this.options;
 
   if (element.type === 'checkbox') {
-    $element.addClass(options.checkboxClass).after(options.checkboxTpl);
+    $element.addClass(options.checkboxClass)
+      .after(options.checkboxTpl);
   } else if (element.type === 'radio') {
-    $element.addClass(options.radioClass).after(options.radioTpl);
+    $element.addClass(options.radioClass)
+      .after(options.radioTpl);
   }
 };
 
 UCheck.prototype.check = function() {
-  this.$element.prop('checked', true)
-    .trigger('change.ucheck.amui').trigger('checked.ucheck.amui');
+  this.$element
+    .prop('checked', true)
+    .trigger('change.ucheck.amui')
+    .trigger('checked.ucheck.amui');
 },
 
 UCheck.prototype.uncheck = function() {
-  this.$element.prop('checked', false)
-    .trigger('change.ucheck.amui').trigger('unchecked.ucheck.amui');
+  this.$element
+    .prop('checked', false)
+    .trigger('change.ucheck.amui')
+    .trigger('unchecked.ucheck.amui');
 },
 
 UCheck.prototype.toggle = function() {
-  this.$element.prop('checked', function(i, value) {
-    return !value;
-  }).trigger('change.ucheck.amui').trigger('toggled.ucheck.amui');
+  this.$element.
+    prop('checked', function(i, value) {
+      return !value;
+    })
+    .trigger('change.ucheck.amui')
+    .trigger('toggled.ucheck.amui');
 },
 
 UCheck.prototype.disable = function() {
-  this.$element.prop('disabled', true).
-    trigger('change.ucheck.amui').trigger('disabled.ucheck.amui');
+  this.$element
+    .prop('disabled', true)
+    .trigger('change.ucheck.amui')
+    .trigger('disabled.ucheck.amui');
 },
 
 UCheck.prototype.enable = function() {
@@ -8838,60 +8864,40 @@ UCheck.prototype.enable = function() {
 },
 
 UCheck.prototype.destroy = function() {
-  this.$element.removeData('amui.ucheck').
-    removeClass(this.options.checkboxClass + ' ' + this.options.radioClass).
-    next('.am-ucheck-icons').remove().
-    end().trigger('destroyed.ucheck.amui');
+  this.$element
+    .removeData('amui.ucheck')
+    .removeClass(this.options.checkboxClass + ' ' + this.options.radioClass)
+    .next('.am-ucheck-icons')
+    .remove()
+  .end()
+    .trigger('destroyed.ucheck.amui');
 };
 
-function Plugin(option) {
-  return this.each(function() {
-    var $this = $(this);
-    var data = $this.data('amui.ucheck');
-    var options = $.extend({}, UI.utils.parseOptions($this.data('amUcheck')),
-      typeof option === 'object' && option);
-
-    if (!data && option === 'destroy') {
-      return;
-    }
-
-    if (!data) {
-      $this.data('amui.ucheck', (data = new UCheck(this, options)));
-    }
-
-    if (typeof option == 'string') {
-      data[option] && data[option]();
-    }
-
+UI.plugin('uCheck', UCheck, {
+  after: function() {
     // Adding 'am-nohover' class for touch devices
     if (UI.support.touch) {
-      $this.parent().hover(function() {
-        $this.addClass('am-nohover');
+      this.parent().hover(function() {
+        this.addClass('am-nohover');
       }, function() {
-        $this.removeClass('am-nohover');
+        this.removeClass('am-nohover');
       });
     }
-  });
-}
-
-$.fn.uCheck = Plugin;
+  }
+});
 
 UI.ready(function(context) {
   $('[data-am-ucheck]', context).uCheck();
 });
 
-$.AMUI.uCheck = UCheck;
-
 module.exports = UCheck;
 
 // TODO: 与表单验证结合使用的情况
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],26:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 
 var Validator = function(element, options) {
@@ -8974,7 +8980,7 @@ Validator.DEFAULTS = {
   submit: null
 };
 
-Validator.VERSION = '2.0.0';
+Validator.VERSION = '2.4.1';
 
 /* jshint -W101 */
 Validator.patterns = {
@@ -9126,6 +9132,7 @@ Validator.prototype.isValid = function(field) {
   if ($field.data('validity') === undefined) {
     this.validate(field);
   }
+
   return $field.data('validity') && $field.data('validity').valid;
 };
 
@@ -9243,6 +9250,8 @@ Validator.prototype.validate = function(field) {
         _this.markField(validity);
       });
     }
+
+    return validity;
   };
 
   // Run custom validate
@@ -9433,41 +9442,25 @@ Validator.prototype.getValidationMessage = function(validity) {
   return message;
 };
 
-function Plugin(option) {
-  return this.each(function() {
-    var $this = $(this);
-    var data = $this.data('amui.validator');
-    var options = $.extend({}, UI.utils.parseOptions($this.data('amValidator')),
-      typeof option === 'object' && option);
+// remove valid mark
+Validator.prototype.removeMark = function() {
+  this.$element.find('.am-form-success, .am-form-error, .am-field-error')
+    .removeClass('am-form-success am-form-error am-field-error');
+};
 
-    if (!data) {
-      $this.data('amui.validator', (data = new Validator(this, options)));
-    }
-
-    if (typeof option === 'string') {
-      data[option] && data[option]();
-    }
-  });
-}
-
-$.fn.validator = Plugin;
+UI.plugin('validator', Validator);
 
 // init code
 UI.ready(function(context) {
   $('[data-am-validator]', context).validator();
 });
 
-$.AMUI.validator = Validator;
-
 module.exports = Validator;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],27:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-_dereq_(2);
+var UI = _dereq_(2);
 
 var cookie = {
   get: function(name) {
@@ -9516,162 +9509,151 @@ var cookie = {
   }
 };
 
-$.AMUI.utils.cookie = cookie;
+UI.utils = UI.utils || {};
 
-module.exports = cookie;
+module.exports = UI.utils.cookie = cookie;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],28:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
 var UI = _dereq_(2);
+var screenfull = (function() {
+  var keyboardAllowed = typeof Element !== 'undefined' &&
+    'ALLOW_KEYBOARD_INPUT' in Element;
 
-/**
- * @via https://github.com/sindresorhus/screenfull.js
- * @license MIT © Sindre Sorhus
- * @version 2.0.0
- */
+  var fn = (function() {
+    var val;
+    var valLength;
 
-var keyboardAllowed = typeof Element !== 'undefined' &&
-  'ALLOW_KEYBOARD_INPUT' in Element;
+    var fnMap = [
+      [
+        'requestFullscreen',
+        'exitFullscreen',
+        'fullscreenElement',
+        'fullscreenEnabled',
+        'fullscreenchange',
+        'fullscreenerror'
+      ],
+      // new WebKit
+      [
+        'webkitRequestFullscreen',
+        'webkitExitFullscreen',
+        'webkitFullscreenElement',
+        'webkitFullscreenEnabled',
+        'webkitfullscreenchange',
+        'webkitfullscreenerror'
 
-var fn = (function () {
-  var val;
-  var valLength;
+      ],
+      // old WebKit (Safari 5.1)
+      [
+        'webkitRequestFullScreen',
+        'webkitCancelFullScreen',
+        'webkitCurrentFullScreenElement',
+        'webkitCancelFullScreen',
+        'webkitfullscreenchange',
+        'webkitfullscreenerror'
 
-  var fnMap = [
-    [
-      'requestFullscreen',
-      'exitFullscreen',
-      'fullscreenElement',
-      'fullscreenEnabled',
-      'fullscreenchange',
-      'fullscreenerror'
-    ],
-    // new WebKit
-    [
-      'webkitRequestFullscreen',
-      'webkitExitFullscreen',
-      'webkitFullscreenElement',
-      'webkitFullscreenEnabled',
-      'webkitfullscreenchange',
-      'webkitfullscreenerror'
+      ],
+      [
+        'mozRequestFullScreen',
+        'mozCancelFullScreen',
+        'mozFullScreenElement',
+        'mozFullScreenEnabled',
+        'mozfullscreenchange',
+        'mozfullscreenerror'
+      ],
+      [
+        'msRequestFullscreen',
+        'msExitFullscreen',
+        'msFullscreenElement',
+        'msFullscreenEnabled',
+        'MSFullscreenChange',
+        'MSFullscreenError'
+      ]
+    ];
 
-    ],
-    // old WebKit (Safari 5.1)
-    [
-      'webkitRequestFullScreen',
-      'webkitCancelFullScreen',
-      'webkitCurrentFullScreenElement',
-      'webkitCancelFullScreen',
-      'webkitfullscreenchange',
-      'webkitfullscreenerror'
+    var i = 0;
+    var l = fnMap.length;
+    var ret = {};
 
-    ],
-    [
-      'mozRequestFullScreen',
-      'mozCancelFullScreen',
-      'mozFullScreenElement',
-      'mozFullScreenEnabled',
-      'mozfullscreenchange',
-      'mozfullscreenerror'
-    ],
-    [
-      'msRequestFullscreen',
-      'msExitFullscreen',
-      'msFullscreenElement',
-      'msFullscreenEnabled',
-      'MSFullscreenChange',
-      'MSFullscreenError'
-    ]
-  ];
-
-  var i = 0;
-  var l = fnMap.length;
-  var ret = {};
-
-  for (; i < l; i++) {
-    val = fnMap[i];
-    if (val && val[1] in document) {
-      for (i = 0, valLength = val.length; i < valLength; i++) {
-        ret[fnMap[0][i]] = val[i];
+    for (; i < l; i++) {
+      val = fnMap[i];
+      if (val && val[1] in document) {
+        for (i = 0, valLength = val.length; i < valLength; i++) {
+          ret[fnMap[0][i]] = val[i];
+        }
+        return ret;
       }
-      return ret;
     }
+
+    return false;
+  })();
+
+  var screenfull = {
+    request: function(elem) {
+      var request = fn.requestFullscreen;
+
+      elem = elem || document.documentElement;
+
+      // Work around Safari 5.1 bug: reports support for
+      // keyboard in fullscreen even though it doesn't.
+      // Browser sniffing, since the alternative with
+      // setTimeout is even worse.
+      if (/5\.1[\.\d]* Safari/.test(navigator.userAgent)) {
+        elem[request]();
+      } else {
+        elem[request](keyboardAllowed && Element.ALLOW_KEYBOARD_INPUT);
+      }
+    },
+    exit: function() {
+      document[fn.exitFullscreen]();
+    },
+    toggle: function(elem) {
+      if (this.isFullscreen) {
+        this.exit();
+      } else {
+        this.request(elem);
+      }
+    },
+    raw: fn
+  };
+
+  if (!fn) {
+    return false;
   }
 
-  return false;
+  Object.defineProperties(screenfull, {
+    isFullscreen: {
+      get: function() {
+        return !!document[fn.fullscreenElement];
+      }
+    },
+    element: {
+      enumerable: true,
+      get: function() {
+        return document[fn.fullscreenElement];
+      }
+    },
+    enabled: {
+      enumerable: true,
+      get: function() {
+        // Coerce to boolean in case of old WebKit
+        return !!document[fn.fullscreenEnabled];
+      }
+    }
+  });
+
+  screenfull.VERSION = '2.0.0';
+
+  return screenfull;
 })();
 
-var screenfull = {
-  request: function (elem) {
-    var request = fn.requestFullscreen;
+module.exports = UI.fullscreen = screenfull;
 
-    elem = elem || document.documentElement;
-
-    // Work around Safari 5.1 bug: reports support for
-    // keyboard in fullscreen even though it doesn't.
-    // Browser sniffing, since the alternative with
-    // setTimeout is even worse.
-    if (/5\.1[\.\d]* Safari/.test(navigator.userAgent)) {
-      elem[request]();
-    } else {
-      elem[request](keyboardAllowed && Element.ALLOW_KEYBOARD_INPUT);
-    }
-  },
-  exit: function () {
-    document[fn.exitFullscreen]();
-  },
-  toggle: function (elem) {
-    if (this.isFullscreen) {
-      this.exit();
-    } else {
-      this.request(elem);
-    }
-  },
-  raw: fn
-};
-
-if (!fn) {
-  module.exports = false;
-  return;
-}
-
-Object.defineProperties(screenfull, {
-  isFullscreen: {
-    get: function () {
-      return !!document[fn.fullscreenElement];
-    }
-  },
-  element: {
-    enumerable: true,
-    get: function () {
-      return document[fn.fullscreenElement];
-    }
-  },
-  enabled: {
-    enumerable: true,
-    get: function () {
-      // Coerce to boolean in case of old WebKit
-      return !!document[fn.fullscreenEnabled];
-    }
-  }
-});
-
-screenfull.VERSION = '2.0.0';
-
-$.AMUI.fullscreen = screenfull;
-
-module.exports = screenfull;
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],29:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 UI.support.geolocation = window.navigator && window.navigator.geolocation;
 
@@ -9741,13 +9723,9 @@ Geolocation.prototype.clearWatch = function() {
   this.watchID = null;
 };
 
-$.AMUI.Geolocation = Geolocation;
+module.exports = UI.Geolocation = Geolocation;
 
-module.exports = Geolocation;
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],30:[function(_dereq_,module,exports){
-(function (global){
 /*! Hammer.JS - v2.0.4 - 2014-09-28
  * http://hammerjs.github.io/
  *
@@ -9756,7 +9734,7 @@ module.exports = Geolocation;
 
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 
 var VENDOR_PREFIXES = ['', 'webkit', 'moz', 'MS', 'ms', 'o'];
@@ -12240,15 +12218,11 @@ extend(Hammer, {
   })(Hammer.Manager.prototype.emit);
 })($, Hammer);
 
-$.AMUI.Hammer = Hammer;
+module.exports = UI.Hammer = Hammer;
 
-module.exports = Hammer;
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],31:[function(_dereq_,module,exports){
-(function (global){
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-_dereq_(2);
+var $ = (window.jQuery);
+var UI = _dereq_(2);
 
 /**
  * @ver 1.1.0
@@ -12260,16 +12234,17 @@ var qrcodeAlgObjCache = [];
 
 /**
  * 二维码构造函数，主要用于绘制
- * @param  {参数列表} opt 传递参数
- * @return {}
+ * @param  {Object} opt 传递参数
+ * @return {String} qrcode
+ * @constructor
  */
-var qrcode = function(opt) {
+var QRCode = function(opt) {
   if (typeof opt === 'string') { // 只编码ASCII字符串
     opt = {
       text: opt
     };
   }
-  //设置默认参数
+  // 设置默认参数
   this.options = $.extend({}, {
     text: "",
     render: "",
@@ -12280,7 +12255,7 @@ var qrcode = function(opt) {
     foreground: "#000000"
   }, opt);
 
-  //使用QRCodeAlg创建二维码结构
+  // 使用QRCodeAlg创建二维码结构
   var qrCodeAlg = null;
   for (var i = 0, l = qrcodeAlgObjCache.length; i < l; i++) {
     if (qrcodeAlgObjCache[i].text == this.options.text && qrcodeAlgObjCache[i].text.correctLevel == this.options.correctLevel) {
@@ -12316,7 +12291,7 @@ var qrcode = function(opt) {
  * @return {}
  */
 
-qrcode.prototype.createDefault = function(qrCodeAlg) {
+QRCode.prototype.createDefault = function(qrCodeAlg) {
   var canvas = document.createElement('canvas');
   if (canvas.getContext)
     return this.createCanvas(qrCodeAlg);
@@ -12324,7 +12299,7 @@ qrcode.prototype.createDefault = function(qrCodeAlg) {
     return this.createSVG(qrCodeAlg);
   return this.createTable(qrCodeAlg);
 };
-qrcode.prototype.createCanvas = function(qrCodeAlg) {
+QRCode.prototype.createCanvas = function(qrCodeAlg) {
   //创建canvas节点
   var canvas = document.createElement('canvas');
   canvas.width = this.options.width;
@@ -12351,7 +12326,7 @@ qrcode.prototype.createCanvas = function(qrCodeAlg) {
  * 使用table来绘制二维码
  * @return {}
  */
-qrcode.prototype.createTable = function(qrCodeAlg) {
+QRCode.prototype.createTable = function(qrCodeAlg) {
   //创建table节点
   var s = [];
   s.push('<table style="border:0px; margin:0px; padding:0px; border-collapse:collapse; background-color: ' +
@@ -12399,7 +12374,7 @@ qrcode.prototype.createTable = function(qrCodeAlg) {
  * 使用SVG开绘制二维码
  * @return {}
  */
-qrcode.prototype.createSVG = function(qrCodeAlg) {
+QRCode.prototype.createSVG = function(qrCodeAlg) {
   var x, dx, y, dy,
     moduleCount = qrCodeAlg.getModuleCount(),
     scale = this.options.height / this.options.width,
@@ -12483,13 +12458,13 @@ function getUTF8Bytes(string) {
  * @param {num} errorCorrectLevel 纠错等级
  */
 function QRCodeAlg(data, errorCorrectLevel) {
-  this.typeNumber = -1; //版本
+  this.typeNumber = -1; // 版本
   this.errorCorrectLevel = errorCorrectLevel;
-  this.modules = null;  //二维矩阵，存放最终结果
-  this.moduleCount = 0; //矩阵大小
-  this.dataCache = null; //数据缓存
-  this.rsBlocks = null; //版本数据信息
-  this.totalDataCount = -1; //可使用的数据量
+  this.modules = null;  // 二维矩阵，存放最终结果
+  this.moduleCount = 0; // 矩阵大小
+  this.dataCache = null; // 数据缓存
+  this.rsBlocks = null; // 版本数据信息
+  this.totalDataCount = -1; // 可使用的数据量
   this.data = data;
   this.utf8bytes = getUTF8Bytes(data);
   this.make();
@@ -14696,7 +14671,7 @@ QRCodeAlg.prototype.getRightType = function() {
   for (var typeNumber = 1; typeNumber < 41; typeNumber++) {
     var rsBlock = RS_BLOCK_TABLE[(typeNumber - 1) * 4 + this.errorCorrectLevel];
     if (rsBlock == undefined) {
-      throw new Error("bad rs block @ typeNumber:" + typeNumber + "/errorCorrectLevel:" + this.errorCorrectLevel);
+      throw new Error('bad rs block @ typeNumber:' + typeNumber + '/errorCorrectLevel:' + this.errorCorrectLevel);
     }
     var length = rsBlock.length / 3;
     var totalDataCount = 0;
@@ -14716,9 +14691,9 @@ QRCodeAlg.prototype.getRightType = function() {
   }
 };
 
-//---------------------------------------------------------------------
+// ---------------------------------------------------------------------
 // QRBitBuffer
-//---------------------------------------------------------------------
+// ---------------------------------------------------------------------
 
 function QRBitBuffer() {
   this.buffer = new Array();
@@ -14726,7 +14701,6 @@ function QRBitBuffer() {
 }
 
 QRBitBuffer.prototype = {
-
   get: function(index) {
     var bufIndex = Math.floor(index / 8);
     return ((this.buffer[bufIndex] >>> (7 - index % 8)) & 1);
@@ -14753,17 +14727,18 @@ QRBitBuffer.prototype = {
   }
 };
 
-$.AMUI.qrcode = qrcode;
+$.fn.qrcode = function QRCodePlugin(option) {
+  return this.each(function() {
+    $(this).append(new QRCode(option));
+  });
+};
 
-module.exports = qrcode;
+module.exports = UI.qrcode = QRCode;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],32:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-_dereq_(2);
+var UI = _dereq_(2);
 
 /**
  * store.js
@@ -14897,21 +14872,14 @@ try {
 
 store.enabled = !store.disabled;
 
-$.AMUI = $.AMUI || {};
+module.exports = UI.store = store;
 
-$.AMUI.store = store;
-
-module.exports = store;
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],33:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-_dereq_(2);
+var $ = (window.jQuery);
+var UI = _dereq_(2);
 _dereq_(6);
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-var UI = $.AMUI;
 
 function accordionInit() {
   var $accordion = $('[data-am-widget="accordion"]');
@@ -14954,12 +14922,11 @@ function accordionInit() {
 // Init on DOM ready
 $(accordionInit);
 
-module.exports = $.AMUI.accordion = {
+module.exports = UI.accordion = {
   VERSION: '2.1.0',
   init: accordionInit
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2,"6":6}],34:[function(_dereq_,module,exports){
 'use strict';
 
@@ -14968,11 +14935,10 @@ module.exports = {
 };
 
 },{}],35:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-_dereq_(2);
+var $ = (window.jQuery);
+var UI = _dereq_(2);
 
 function duoshuoInit() {
   var $dsThread = $('.ds-thread');
@@ -15006,20 +14972,17 @@ function duoshuoInit() {
 
 $(window).on('load', duoshuoInit);
 
-module.exports = $.AMUI.duoshuo = {
+module.exports = UI.duoshuo = {
   VERSION: '2.0.1',
   init: duoshuoInit
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],36:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-_dereq_(2);
+var $ = (window.jQuery);
+var UI = _dereq_(2);
 _dereq_(17);
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-var UI = $.AMUI;
 
 /**
  * Is Images zoomable
@@ -15065,17 +15028,15 @@ function figureInit() {
 
 $(window).on('load', figureInit);
 
-module.exports = $.AMUI.figure = {
+module.exports = UI.figure = {
   VERSION: '2.0.3',
   init: figureInit
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"17":17,"2":2}],37:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 _dereq_(12);
 var addToHS = _dereq_(3);
@@ -15105,20 +15066,17 @@ function footerInit() {
 
 $(footerInit);
 
-module.exports = $.AMUI.footer = {
+module.exports = UI.footer = {
   VERSION: '3.1.2',
   init: footerInit
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"12":12,"2":2,"27":27,"3":3}],38:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-_dereq_(2);
+var $ = (window.jQuery);
+var UI = _dereq_(2);
 _dereq_(17);
-var UI = $.AMUI;
 
 function galleryInit() {
   var $gallery = $('[data-am-widget="gallery"]');
@@ -15135,18 +15093,16 @@ function galleryInit() {
 
 $(galleryInit);
 
-module.exports = $.AMUI.gallery = {
+module.exports = UI.gallery = {
   VERSION: '3.0.0',
   init: galleryInit
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"17":17,"2":2}],39:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-_dereq_(2);
+var $ = (window.jQuery);
+var UI = _dereq_(2);
 _dereq_(22);
 
 function goTopInit() {
@@ -15169,25 +15125,23 @@ function goTopInit() {
 
   checkPosition();
 
-  $win.on('scroll.gotop.amui', $.AMUI.utils.debounce(checkPosition, 100));
+  $win.on('scroll.gotop.amui', UI.utils.debounce(checkPosition, 100));
 
   $goTop.data('init', true);
 }
 
 $(goTopInit);
 
-module.exports = $.AMUI.gotop = {
+module.exports = UI.gotop = {
   VERSION: '4.0.2',
   init: goTopInit
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2,"22":22}],40:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-_dereq_(2);
+var $ = (window.jQuery);
+var UI = _dereq_(2);
 
 function headerInit() {
   $('[data-am-widget="header"]').each(function() {
@@ -15200,45 +15154,37 @@ function headerInit() {
 
 $(headerInit);
 
-module.exports = $.AMUI.header = {
+module.exports = UI.header = {
   VERSION: '2.0.0',
   init: headerInit
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],41:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-_dereq_(2);
+var UI = _dereq_(2);
 
-module.exports = $.AMUI.intro = {
+module.exports = UI.intro = {
   VERSION: '4.0.2',
   init: function() {}
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],42:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-_dereq_(2);
+var UI = _dereq_(2);
 
-module.exports = $.AMUI.listNews = {
+module.exports = UI.listNews = {
   VERSION: '4.0.0',
   init: function() {}
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],43:[function(_dereq_,module,exports){
-(function (global){
 /* jshint strict: false, maxlen: 200 */
 /* global BMap */
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-_dereq_(2);
+var $ = (window.jQuery);
+var UI = _dereq_(2);
 
 function addMapApi(callback) {
   var $mapApi0 = $('<script />', {
@@ -15353,18 +15299,16 @@ var mapInit = function() {
 
 $(mapInit);
 
-module.exports = $.AMUI.map = {
+module.exports = UI.map = {
   VERSION: '2.0.2',
   init: mapInit
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],44:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-_dereq_(2);
+var $ = (window.jQuery);
+var UI = _dereq_(2);
 
 function mechatInit() {
   if (!$('#mechat').length) {
@@ -15384,21 +15328,19 @@ function mechatInit() {
 // Lazy load
 $(window).on('load', mechatInit);
 
-module.exports = $.AMUI.mechat = {
+module.exports = UI.mechat = {
   VERSION: '2.0.1',
   init: mechatInit
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],45:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-_dereq_(2);
+var $ = (window.jQuery);
+var UI = _dereq_(2);
+var IScroll = _dereq_(11);
 _dereq_(13);
 _dereq_(6);
-var IScroll = _dereq_(11);
 
 var menuInit = function() {
   var $menus = $('[data-am-widget="menu"]');
@@ -15539,22 +15481,19 @@ var menuInit = function() {
 
 $(menuInit);
 
-module.exports = $.AMUI.menu = {
+module.exports = UI.menu = {
   VERSION: '4.0.3',
   init: menuInit
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"11":11,"13":13,"2":2,"6":6}],46:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-_dereq_(2);
-_dereq_(12);
+var $ = (window.jQuery);
+var UI = _dereq_(2);
 var share = _dereq_(21);
 var QRCode = _dereq_(31);
-var UI = $.AMUI;
+_dereq_(12);
 
 function navbarInit() {
   var $navBar = $('[data-am-widget="navbar"]');
@@ -15706,33 +15645,27 @@ function navbarInit() {
 // DOMContent ready
 $(navbarInit);
 
-module.exports = $.AMUI.navbar = {
+module.exports = UI.navbar = {
   VERSION: '2.0.2',
   init: navbarInit
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"12":12,"2":2,"21":21,"31":31}],47:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-_dereq_(2);
+var UI = _dereq_(2);
 
-module.exports = $.AMUI.pagination = {
+module.exports = UI.pagination = {
   VERSION: '3.0.1'
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],48:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-_dereq_(2);
-_dereq_(17);
+var $ = (window.jQuery);
+var UI = _dereq_(2);
 var IScroll = _dereq_(11);
-var UI = $.AMUI;
+_dereq_(17);
 
 /**
  * 表格滚动
@@ -15782,20 +15715,17 @@ function paragraphInit() {
 
 $(window).on('load', paragraphInit);
 
-module.exports = $.AMUI.paragraph = {
+module.exports = UI.paragraph = {
   VERSION: '2.0.1',
   init: paragraphInit
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"11":11,"17":17,"2":2}],49:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-_dereq_(2);
+var $ = (window.jQuery);
+var UI = _dereq_(2);
 _dereq_(10);
-var UI = $.AMUI;
 
 function sliderInit() {
   var $sliders = $('[data-am-widget="slider"]');
@@ -15807,18 +15737,16 @@ function sliderInit() {
 
 $(sliderInit);
 
-module.exports = $.AMUI.slider = {
+module.exports = UI.slider = {
   VERSION: '3.0.1',
   init: sliderInit
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"10":10,"2":2}],50:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-_dereq_(2);
+var $ = (window.jQuery);
+var UI = _dereq_(2);
 _dereq_(24);
 
 function tabsInit() {
@@ -15830,32 +15758,29 @@ function tabsInit() {
 
 $(tabsInit);
 
-module.exports = $.AMUI.tab = {
+module.exports = UI.tab = {
   VERSION: '4.0.1',
   init: tabsInit
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2,"24":24}],51:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-_dereq_(2);
+var UI = _dereq_(2);
 
-module.exports = $.AMUI.titlebar = {
+module.exports = UI.titlebar = {
   VERSION: '4.0.1'
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}],52:[function(_dereq_,module,exports){
-(function (global){
 'use strict';
 
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (window.jQuery);
 var UI = _dereq_(2);
 
 var isWeChat = window.navigator.userAgent.indexOf('MicroMessenger') > -1;
+
+/* global wx,alert */
 
 function appendWeChatSDK(callback) {
   var $weChatSDK = $('<script/>', {
@@ -15908,11 +15833,10 @@ var payInit = payHandler;
 // Init on DOM ready
 $(payInit);
 
-module.exports = $.AMUI.pay = {
+module.exports = UI.pay = {
   VERSION: '1.0.0',
   init: payInit
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"2":2}]},{},[1])(1)
 });

@@ -117,7 +117,7 @@ ul.timeline p{
 	<div class="am-panel am-panel-default">
 	  <div class="am-panel-hd">用户信息</div>
 	  <div class="am-panel-bd" style="padding:0">
-	  <ul class="timeline">
+	    <ul class="timeline">
 		<if condition="($user['uid'] eq session('uid')) or session('?admin')">
 		<li><b></b>报修用户<p>{$user.uid}</p></li>
 		<li><b></b>联系电话<p>{$user.tel}</p></li>
@@ -127,6 +127,14 @@ ul.timeline p{
 		</ul>	
 	  </div>
 	</div>
+	<div class="am-panel am-panel-default">
+	  <div class="am-panel-hd">便捷工具</div>
+	  <div class="am-panel-bd" style="padding:0">
+	    <ul class="timeline">
+		<li><b></b>扫描下方二维码在移动设备上查看<p id="qrcode"></p></li>
+		</ul>	
+	  </div>
+	</div>	
 </div>
 </div>
 
@@ -284,5 +292,5 @@ ul.timeline p{
   });
 </script>
 </if>
-<script>$('#qrcode').qrcode(location.href);</script>
+<script>$('#qrcode').qrcode({text:location.href,width:96,height:96,correctLevel:1});</script>
 <include file="Public/footer" />
