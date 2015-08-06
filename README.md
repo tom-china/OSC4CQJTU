@@ -12,10 +12,11 @@
 
 ## 注意事项
 - phpversion() >= 5.5
-- 应用目录、配置目录、上传目录确定可写
+- Application应用目录、Common/Conf配置目录、Uploads上传目录确定可写
 
 ## 参阅
 - [thinkphp](https://github.com/liu21st/thinkphp)
 - [amazeui](https://github.com/allmobilize/amazeui)
 - [jquery-ui](https://github.com/jquery/jquery-ui)
 - [ueditor](https://github.com/fex-team/ueditor)
+- [UcForTp3.2](http://git.oschina.net/zstxt1989/UcForTp3.2)

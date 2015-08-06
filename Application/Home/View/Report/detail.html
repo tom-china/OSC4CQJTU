@@ -130,15 +130,14 @@ ul.timeline p{
 </div>
 </div>
 
-<if condition="$allowrank eq 'true'">
-<notempty name="detail.donetime">
+<if condition="$allowrank eq 'true' and !empty($detail[donetime])">
 <div class="am-panel am-panel-default">
   <div class="am-panel-hd">用户评价</div>
   <div class="am-panel-bd">
-	<if condition="$user['uid'] eq session('uid')">
-	<if condition="time()-$detail['donetime'] gt 3600*24*3">
+	<if condition="$user['uid'] eq session('uid') and time()-$detail['donetime'] gt 3600*24*3">
 	<p class="am-text-center">工单已完成超过三日，评价关闭。</p>
-	<else/>
+	<hr data-am-widget="divider" style="" class="am-divider am-divider-dashed"/>
+	<elseif condition="$user['uid'] eq session('uid') and time()-$detail['donetime'] lt 3600*24*3"/>
 	<form action="{:U('Report/rank',array('order'=>I('get.order'),'type'=>0))}" method="post" class="am-form am-form-horizontal">
 	  <fieldset>
 		<div class="am-input-group">
@@ -149,11 +148,14 @@ ul.timeline p{
 		</div>
 	  </fieldset>
 	</form>	
-	</if>
 	<hr data-am-widget="divider" style="" class="am-divider am-divider-dashed"/>
 	</if>
 	<ul class="am-comments-list">
-	<if condition="empty($rank[user]) and empty($rank[admin])"><p class="am-text-center">暂无评价</p></if>
+	
+	<if condition="empty($rank[user]) and empty($rank[admin])">
+	<p class="am-text-center">暂无评价</p>
+	</if>
+	
 	<notempty name="rank.user">
 	 <li class="am-comment">
       <img class="am-comment-avatar" src="{:U('Report/avatar',array('data'=>sha1($user['uid'])))}">
@@ -173,6 +175,7 @@ ul.timeline p{
 	  </div>
 	 </li>
 	 </notempty>
+	 
 	 <notempty name="rank.admin">
 	 <li class="am-comment am-comment-flip">  
       <img class="am-comment-avatar" src="{:U('Report/avatar',array('data'=>sha1($rank[admin][user])))}">	 
@@ -192,12 +195,13 @@ ul.timeline p{
 	  </div>  
 	 </li> 
 	 </notempty>
+	 
 	</ul>
-	<if condition="session('?admin')">
+	<if condition="session('?admin') and time()-$detail['donetime'] gt 3600*24*3">
 	<hr data-am-widget="divider" style="" class="am-divider am-divider-dashed"/>
-	<if condition="time()-$detail['donetime'] gt 3600*24*3">
 	<p class="am-text-center">工单已完成超过三日，评价关闭。</p>
-	<else/>	
+	<elseif condition="session('?admin') and time()-$detail['donetime'] lt 3600*24*3"/>	
+	<hr data-am-widget="divider" style="" class="am-divider am-divider-dashed"/>
 	<form action="{:U('Report/rank',array('order'=>I('get.order'),'type'=>1))}" method="post"  class="am-form am-form-horizontal">
 	  <fieldset>
 		<div class="am-input-group">
@@ -209,10 +213,8 @@ ul.timeline p{
 	  </fieldset>
 	</form>	
 	</if>
-	</if>
   </div>
 </div>
-</notempty>
 
 </div>
 
@@ -282,4 +284,5 @@ ul.timeline p{
   });
 </script>
 </if>
+<script>$('#qrcode').qrcode(location.href);</script>
 <include file="Public/footer" />
