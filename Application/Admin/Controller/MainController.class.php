@@ -157,7 +157,8 @@ class MainController extends SimpleController {
 			$this->display('admin-setting');			
 		}
     }
-
+	
+	//全局设置
     public function setGlobal(){
     	if(!session('?admin'))$this->redirect('Main/index');
     	if(session('right')!=1)$this->error('访问无权限');
@@ -183,6 +184,7 @@ class MainController extends SimpleController {
         }
     }    
 
+	//提示设置
     public function setTips(){
     	if(!session('?admin'))$this->redirect('Main/index');
     	if(session('right')!=1)$this->error('访问无权限');
@@ -205,6 +207,7 @@ class MainController extends SimpleController {
     	}
     }
 
+	//版权设置
     public function setCopyright(){
     	if(!session('?admin'))$this->redirect('Main/index');
     	if(session('right')!=1)$this->error('访问无权限');
@@ -233,10 +236,10 @@ class MainController extends SimpleController {
     	$this->redirect('Main/index');
     }
 
-    //中文验证码
+    //验证码
     public function v(){
 		$Verify =     new \Think\Verify();
-		// 验证码字体使用 ThinkPHP/Library/Think/Verify/ttfs/5.ttf
+		//中文验证码字体使用 ThinkPHP/Library/Think/Verify/ttfs/5.ttf
 		//$Verify->useZh = true; 
 		$Verify->entry();    	
     }

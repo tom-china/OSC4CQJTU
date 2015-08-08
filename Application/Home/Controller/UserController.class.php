@@ -27,14 +27,15 @@ class UserController extends SimpleController {
             } 
 			
 			if($global['quickreport']=='false' && $global['uclogin']=='normal'){
+				//UC登陆
 				$uc = new \Ucenter\Client\Client();
-				$name = mb_convert_encoding(I('post.username'),'gbk','utf-8');
-				$password = mb_convert_encoding(I('post.password'),'gbk','utf-8');
-				list($uid, $username, $uc_password, $email) = $uc -> uc_user_login($name, $password);
-				$_GET['uid'] = mb_convert_encoding($uid,'utf-8','gbk');
-				$_GET['username'] = mb_convert_encoding($username,'utf-8','gbk');
-				$_GET['password'] = mb_convert_encoding($uc_password,'utf-8','gbk');
-				//$email = mb_convert_encoding($email,'utf-8','gbk');
+				require_cache(MODULE_PATH."Conf/uc.php");
+				$name = UC_DBCHARSET=='gbk'?mb_convert_encoding(I('post.username'),'gbk','utf-8'):I('post.username');
+				$password = UC_DBCHARSET=='gbk'?mb_convert_encoding(I('post.password'),'gbk','utf-8'):I('post.password');
+				list($uid, $username, $uc_password, $email) = $uc -> uc_user_login($name, $password):$name;
+				$_GET['uid'] = UC_DBCHARSET=='gbk'?mb_convert_encoding($uid,'utf-8','gbk'):$uid;
+				$_GET['username'] = UC_DBCHARSET=='gbk'?mb_convert_encoding($username,'utf-8','gbk'):$username;
+				$_GET['password'] = UC_DBCHARSET=='gbk'?mb_convert_encoding($uc_password,'utf-8','gbk'):$uc_password;
 			}
 
     		$user = $database->where('uid = :uid')->bind(array(':uid'=>I('post.uid')))->find();
@@ -112,6 +113,7 @@ class UserController extends SimpleController {
         $this->assign('quickreport',$global['quickreport']);
 
         if($global['allowregister']=='false')$this->error('站点已关闭注册');  	
+		
     	if(IS_POST){
     		$database = M('user');          
             if(!D("User")->create()){
@@ -173,13 +175,11 @@ class UserController extends SimpleController {
     	//获取站点配置
         $global = M('setting')->where("`key`='global'")->find();
         $global = json_decode($global['value'],true); 
-        //是否开启快速报修
-        $this->assign('quickreport',$global['quickreport']);    	
+        $this->assign('quickreport',$global['quickreport']);//快速报修
+		
     	$database = M('user');
     	if(IS_POST){   
-            if (!$database->autoCheckToken($_POST)){
-                $this->error('令牌验证错误');
-            }                 
+            if(!$database->autoCheckToken($_POST))$this->error('令牌验证错误');               
     		$data['area'] = I('post.area/d');
             if(!selectCheck($data['area']))$this->error('参数非法');
     		$data['building'] = I('post.building/d');

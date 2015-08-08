@@ -2,6 +2,7 @@
 namespace Admin\Controller;
 use Think\Controller;
 class ArticleController extends SimpleController {
+	//公告列表
     public function index(){
     	if(!session('?admin'))$this->redirect('Main/index');
     	$database = M('article');
@@ -13,7 +14,8 @@ class ArticleController extends SimpleController {
 		$this->assign('page',$page);
         $this->display('admin-table');
     }	
-
+	
+	//添加公告
     public function add(){
     	if(!session('?admin'))$this->redirect('Main/index');
     	if(IS_POST){
@@ -36,7 +38,8 @@ class ArticleController extends SimpleController {
             $this->display('admin-add');
     	}
     }
-
+	
+	//公告编辑
     public function edit(){
     	if(!session('?admin'))$this->redirect('Main/index');
     	if(IS_POST){
@@ -59,12 +62,14 @@ class ArticleController extends SimpleController {
     	}
     }
     
+	//ueditor 加载百度编辑器
     public function ueditor(){
     	if(!session('?admin'))$this->redirect('Main/index');
         $data = new \Org\Util\Ueditor();
         echo $data->output();
     }
 
+	//公告删除
     public function del(){
         if(!session('?admin'))$this->redirect('Main/index');
     	$database = M('article');

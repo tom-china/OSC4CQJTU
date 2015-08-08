@@ -27,21 +27,22 @@ class SimpleController extends Controller {
         elseif(!empty($admin['area']))$map['area'] = array('in',$admin['area']);
         elseif(!empty($admin['building']))$map['building'] = array('in',$admin['building']);
 
-        $map['status'] = 0;
-        $count = $database->cache(true,60)->where($map)->count();
+        $map['status'] = 0;//待处理
+        $count = $database->cache(true,10)->where($map)->count();
         $this->assign('countTodo',$count); 
 
-        $map['status'] = 1;
-        $count = $database->cache(true,60)->where($map)->count();
+        $map['status'] = 1;//处理中
+        $count = $database->cache(true,10)->where($map)->count();
         $this->assign('countDoing',$count); 
 
-        $map['status'] = 2;
-        $count = $database->cache(true,60)->where($map)->count();
+        $map['status'] = 2;//已处理
+        $count = $database->cache(true,15)->where($map)->count();
         $this->assign('countDone',$count);
-
+		
+		//今日有效报修
         $map['time'] = array('gt',strtotime(date('Y-m-d')));
         $map['status'] = array('neq',-1);//隐藏已取消报修的
-        $count = $database->cache(true,60)->where($map)->count();
+        $count = $database->cache(true,30)->where($map)->count();
         $this->assign('countToday',$count);                      
         }
     }

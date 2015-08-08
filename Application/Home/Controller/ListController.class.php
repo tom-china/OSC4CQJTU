@@ -2,6 +2,7 @@
 namespace Home\Controller;
 use Think\Controller;
 class ListController extends SimpleController {
+	//报修列表
     public function index(){
     	$database = M('order');
         $status = I('get.status');
@@ -16,6 +17,7 @@ class ListController extends SimpleController {
         $this->display('list');
     }	
 
+	//工单搜索
     public function search(){
     	$database = M('order');
         $status = I('get.status');
