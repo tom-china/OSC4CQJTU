@@ -10,8 +10,7 @@ class TaskController extends SimpleController {
     public function index(){
     	$this->redirect('Main/dashboard');
     }	
-	
-	//待处理
+
     public function todo(){
     	$database = M('order');
     	if(IS_AJAX && IS_POST){
@@ -98,8 +97,7 @@ class TaskController extends SimpleController {
 	    	$this->display('admin-table-todo');
     	}
     }
-	
-	//处理中
+
     public function doing(){
     	$database = M('order');
     	if(IS_AJAX && IS_POST){
@@ -191,7 +189,6 @@ class TaskController extends SimpleController {
   		}
     }
 
-	//已处理
     public function done(){
     	$database = M('order');
     	if(IS_AJAX && IS_POST){
@@ -281,8 +278,7 @@ class TaskController extends SimpleController {
 	    	$this->display('admin-table-done');
     	}
     }     
-	
-	//数据删除
+
     public function del(){
     	$database = M('order');
     	if(IS_AJAX && IS_POST){

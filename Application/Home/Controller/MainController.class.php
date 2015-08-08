@@ -2,7 +2,6 @@
 namespace Home\Controller;
 use Think\Controller;
 class MainController extends SimpleController {
-	//首页
     public function index(){
     	//公告
     	$notice = M('article')->order('acid desc')->limit(5)->select();
@@ -14,13 +13,12 @@ class MainController extends SimpleController {
     	$stat['done'] = M('order')->cache(true,60)->where('status=2')->count();
         $this->assign('stat',$stat);
     	//最新报修
-        //$map['status'] = array('neq',-1);//不显示已取消工单
+        //$map['status'] = array('neq',-1);//是否显示已取消工单
     	$list = M('order')->where($map)->order('time desc')->limit(25)->select();
         $this->assign('list',$list);
         $this->display('main');
     }
 
-	//自动刷新
     public function refresh(){
     	$list = M('order')->order('time desc')->limit(25)->select();
     	$html = '';
