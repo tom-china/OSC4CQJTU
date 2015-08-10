@@ -19,9 +19,9 @@ class ArticleController extends SimpleController {
     public function add(){
     	if(!session('?admin'))$this->redirect('Main/index');
     	if(IS_POST){
-            $database = M('article');
-            if (!$database->autoCheckToken($_POST)){
-                $this->error('令牌验证错误');
+            $database = D('article');
+            if (!$database->create()){
+                $this->error($database->getError());
             }            
             $data['title'] = I('post.title');
             $data['content'] = I('post.content');
@@ -43,9 +43,9 @@ class ArticleController extends SimpleController {
     public function edit(){
     	if(!session('?admin'))$this->redirect('Main/index');
     	if(IS_POST){
-            $database = M('article');
-            if (!$database->autoCheckToken($_POST)){
-                $this->error('令牌验证错误');
+            $database = D('article');
+            if (!$database->create()){
+                $this->error($database->getError());
             }             
     		$data['title'] = I('post.title');
     		$data['content'] = I('post.content');
@@ -62,7 +62,7 @@ class ArticleController extends SimpleController {
     	}
     }
     
-	//ueditor 加载百度编辑器
+	//ueditor
     public function ueditor(){
     	if(!session('?admin'))$this->redirect('Main/index');
         $data = new \Org\Util\Ueditor();

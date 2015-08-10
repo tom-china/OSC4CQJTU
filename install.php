@@ -118,24 +118,7 @@ include './Application/Common/Common/function.php';
 			    'DB_CHARSET'            =>  'utf8',	
 				);
 			$c = array_merge($config,$conf);
-			$settingstr = "<?php \n return array(\n";
-			foreach($c as $key=>$v){
-				if($i == count($c)-1){
-					if(is_array($v)){
-						$settingstr .= "\t'".$key."'=>array('".implode("','",$v)."')";
-					}else{
-						$settingstr .= "\t'".$key."'=>'".$v."'";
-					}
-				}else{
-					if(is_array($v)){
-						$settingstr .= "\t'".$key."'=>array('".implode("','",$v)."'),\n";
-					}else{
-						$settingstr .= "\t'".$key."'=>'".$v."',\n";
-					}					
-				}	
-				$i++;
-			}
-			$settingstr .= "\n);\n?>";	
+			$settingstr = "<?php \n return ".var_export($c ,TRUE).";\n?>";
 			file_put_contents('./Application/Common/Conf/config.php',$settingstr);
 			header('location: ./install.php?step=2');		
 		}		

@@ -1,5 +1,6 @@
-## 简介
+## 简介/Introduce
 基于ThinkPHP+AmazeUI的简单后勤在线报修系统
+A simple Online Repair System based on ThinkPHP+AmazeUI
 
 ## 包含功能
 - 用户报修、进度跟踪、工单管理、公告发布
@@ -7,7 +8,7 @@
 - 工单分派、UCenter对接、工单评价
 
 ## 安装使用
-- 运行install.php，按提示操作即可
+- 运行install.php，按提示操作
 - 默认后台http://your_website/admin
 
 ## 注意事项

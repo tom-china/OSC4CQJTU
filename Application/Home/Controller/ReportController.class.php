@@ -13,16 +13,16 @@ class ReportController extends SimpleController {
  			$user = $database->where('uid = :uid')->bind(':uid',session('uid'))->find(); 
  			$this->assign('user',$user);
     	}else{
-    		$this->redirect('User/login',array('returnURL'=>base64_decode(base64_encode(__SELF__))));
+    		$this->redirect('User/login',array('returnURL'=>base64_encode(base64_encode(__SELF__))));
     	}
     	if(IS_POST){
-    		$database = M('order');
-            if (!$database->autoCheckToken($_POST)){
-                $this->error('令牌验证错误');
-            }        
+    		$database = D('order');
+            if (!$database->create()){
+                $this->error($database->getError());
+            }
             if(!empty(I('post.tel'))){
             	M('user')->where('uid=:uid')->bind(':uid',session('uid'))->save(array('tel'=>I('post.tel')));
-            }      
+            }
     		$data['area'] = I('post.area/d');//校区
     		if(!selectCheck($data['area']))$this->error('参数非法');
 			$data['building'] = I('post.building/d');//楼栋
@@ -42,9 +42,7 @@ class ReportController extends SimpleController {
     			$this->error('报修提交失败');
     		}
     	}else{
-            $tips = M('setting')->where("`key`='tips'")->find();
-            $tips = json_decode($tips['value'],true); 
-            $this->assign('tips',$tips['report']);             
+            $this->assign('tips',F('settings')['tips']['report']);             
             $data = menu();
             $this->assign('data',json_encode($data));
     		$this->display('report');
@@ -58,13 +56,13 @@ class ReportController extends SimpleController {
  			$user = $database->where('uid = :uid')->bind(':uid',session('uid'))->find(); 
  			$this->assign('user',$user); 
     	}else{
-    		$this->redirect('User/login',array('returnURL'=>base64_decode(base64_encode(__SELF__))));
+    		$this->redirect('User/login',array('returnURL'=>base64_encode(base64_encode(__SELF__))));
     	}	
     	if(IS_POST){
-    		$database = M('order');
-            if (!$database->autoCheckToken($_POST)){
-                $this->error('令牌验证错误');
-            } 
+    		$database = D('order');
+            if (!$database->create()){
+                $this->error($database->getError());
+            }
             if(!empty(I('post.tel'))){
             	M('user')->where('uid=:uid')->bind(':uid',session('uid'))->save(array('tel'=>I('post.tel')));
             }                        
@@ -84,9 +82,7 @@ class ReportController extends SimpleController {
     			$this->error('报修提交失败');
     		}
     	}else{
-            $tips = M('setting')->where("`key`='tips'")->find();
-            $tips = json_decode($tips['value'],true); 
-            $this->assign('tips',$tips['emerg']);             
+            $this->assign('tips',F('settings')['tips']['emerg']);             
             $data = menu();
             $this->assign('data',json_encode($data));            
     		$this->display('emerg');
@@ -99,22 +95,19 @@ class ReportController extends SimpleController {
     	if(empty($detail)){
     		$this->error('该工单不存在');
     	}else{
-			//是否开启用户评价
-			$global = M('setting')->where("`key`='global'")->find();
-			$global = json_decode($global['value'],true);		
-			$this->assign('allowrank',$global['allowrank']); 
- 			
-            $tips = M('setting')->where("`key`='tips'")->find();
-            $tips = json_decode($tips['value'],true); 
-            $this->assign('tips',$tips['detail']);             
+			//是否开启用户评价	
+			$this->assign('allowrank',F('settings')['global']['allowrank']); 
+
+            $this->assign('tips',F('settings')['tips']['detail']);  
+			
             $user = M('user')->where('uid = :uid')->bind(':uid',$detail['user'])->find(); 
-			//用户最新评价
-			$rank['user'] = M('rank')->where("`order` = :order and `type`='0'")->bind(':order',I('get.order'))->order('time desc')->find();
-			//管理最新回复
-			$rank['admin'] = M('rank')->where("`order` = :order and `type`='1'")->bind(':order',I('get.order'))->order('time desc')->find();
-            $this->assign('user',$user); 
-    		$this->assign('detail',$detail);
+			$this->assign('user',$user); 
+						
+			$rank['user'] = M('rank')->where("`order` = :order and `type`='0'")->bind(':order',I('get.order'))->order('time desc')->find();//用户最新评价
+			$rank['admin'] = M('rank')->where("`order` = :order and `type`='1'")->bind(':order',I('get.order'))->order('time desc')->find();//管理最新回复
 			$this->assign('rank',$rank);
+
+			$this->assign('detail',$detail); 
     		$this->display('detail');
     	}
     }
@@ -123,12 +116,13 @@ class ReportController extends SimpleController {
 	public function rank(){
 		if(!session('?admin') and !session('?uid'))$this->error('非法访问');
 		
-		//是否开启用户评价
-        $global = M('setting')->where("`key`='global'")->find();
-        $global = json_decode($global['value'],true);		
-		if($global['allowrank']=='false')$this->error('用户评价未开启');
+		//是否开启用户评价	
+		if(F('settings')['global']['allowrank']=='false')$this->error('用户评价未开启');
 		
 		if(IS_POST){
+            if (!D('rank')->create()){
+                $this->error(D('rank')->getError());
+            }
 			$data['order'] = I('get.order');
 			$order = M('order')->where($data)->find();
 			if(time()-$order['time']>3600*24*3)$this->error('评价超时');
@@ -158,10 +152,8 @@ class ReportController extends SimpleController {
 	public function rankDel(){
 		if(!session('?admin') and !session('?uid'))$this->error('非法访问');
 		
-		//是否开启用户评价
-        $global = M('setting')->where("`key`='global'")->find();
-        $global = json_decode($global['value'],true);		
-		if($global['allowrank']=='false')$this->error('用户评价未开启');	
+		//是否开启用户评价		
+		if(F('settings')['global']['allowrank']=='false')$this->error('用户评价未开启');	
 	
 		if(IS_POST && IS_AJAX){
 			$data['order'] = I('post.order');

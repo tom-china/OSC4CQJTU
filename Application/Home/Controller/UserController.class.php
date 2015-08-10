@@ -10,12 +10,9 @@ class UserController extends SimpleController {
     public function login(){
     	if(session('?uid'))$this->redirect('order');
 
-    	//获取站点配置
-        $global = M('setting')->where("`key`='global'")->find();
-        $global = json_decode($global['value'],true); 
         //是否允许注册
-        $this->assign('allowregister',$global['allowregister']);
-        $this->assign('quickreport',$global['quickreport']);
+        $this->assign('allowregister',F('settings')['global']['allowregister']);
+        $this->assign('quickreport',F('settings')['global']['quickreport']);
 
     	if(IS_POST){
             $database = M('user');  
@@ -26,13 +23,13 @@ class UserController extends SimpleController {
                 $this->error('验证码错误',U('User/login'));
             } 
 			
-			if($global['quickreport']=='false' && $global['uclogin']=='normal'){
+			if(F('settings')['global']['quickreport']=='false' && F('settings')['global']['uclogin']=='normal'){
 				//UC登陆
 				$uc = new \Ucenter\Client\Client();
 				require_cache(MODULE_PATH."Conf/uc.php");
 				$name = UC_DBCHARSET=='gbk'?mb_convert_encoding(I('post.username'),'gbk','utf-8'):I('post.username');
 				$password = UC_DBCHARSET=='gbk'?mb_convert_encoding(I('post.password'),'gbk','utf-8'):I('post.password');
-				list($uid, $username, $uc_password, $email) = $uc -> uc_user_login($name, $password):$name;
+				list($uid, $username, $uc_password, $email) = $uc -> uc_user_login($name, $password);
 				$_GET['uid'] = UC_DBCHARSET=='gbk'?mb_convert_encoding($uid,'utf-8','gbk'):$uid;
 				$_GET['username'] = UC_DBCHARSET=='gbk'?mb_convert_encoding($username,'utf-8','gbk'):$username;
 				$_GET['password'] = UC_DBCHARSET=='gbk'?mb_convert_encoding($uc_password,'utf-8','gbk'):$uc_password;
@@ -43,7 +40,7 @@ class UserController extends SimpleController {
 				$oauth = A('Oauth','Event');
 				
 				//UC登陆
-				if($global['quickreport']=='false' && $global['uclogin']=='normal'){
+				if(F('settings')['global']['quickreport']=='false' && F('settings')['global']['uclogin']=='normal'){
 
 					if(I('post.uid') > 0) {
 						$_POST['username'] = strtolower(I('post.username'));
@@ -59,7 +56,7 @@ class UserController extends SimpleController {
 				}
 				
 				/* UC自定义表验证登陆 */
-				if($global['quickreport']=='true'  && $global['uclogin']=='diy'){
+				if(F('settings')['global']['quickreport']=='true'  && F('settings')['global']['uclogin']=='diy'){
 					//$oauth->tablename = '';
 					//$oauth->map = array('id'=>':id');
 					//$oauth->bind = array(':id'=>I('post.id'));
@@ -79,7 +76,7 @@ class UserController extends SimpleController {
             }
 
             //姓名+识别码
-            if($global['quickreport']=='true'){
+            if(F('settings')['global']['quickreport']=='true'){
 	            $user = $database->where('uid = :uid and username = :username')->bind(array(':uid'=>I('post.uid'),':username'=>I('post.username')))->find();
 	    		if(empty($user))$this->error('信息不匹配',U('User/login'));
             }else{//识别码+密码
@@ -95,9 +92,7 @@ class UserController extends SimpleController {
 			if(!empty(I('get.returnURL')))redirect(base64_decode(base64_decode(I('get.returnURL'))));
 			$this->redirect('Main/index');
     	}else{
-	        $tips = M('setting')->where("`key`='tips'")->find();
-	        $tips = json_decode($tips['value'],true); 
-	        $this->assign('tips',$tips['login']);     		
+	        $this->assign('tips',F('settings')['tips']['login']);     		
     		$this->display('login');
     	}
     }
@@ -105,14 +100,12 @@ class UserController extends SimpleController {
     //用户注册
     public function register(){
     	if(session('?uid'))$this->redirect('order');
-        //获取站点配置
-        $global = M('setting')->where("`key`='global'")->find();
-        $global = json_decode($global['value'],true); 
-        //是否允许注册
-        $this->assign('allowregister',$global['allowregister']);
-        $this->assign('quickreport',$global['quickreport']);
 
-        if($global['allowregister']=='false')$this->error('站点已关闭注册');  	
+        //是否允许注册
+        $this->assign('allowregister',F('settings')['global']['allowregister']);
+        $this->assign('quickreport',F('settings')['global']['quickreport']);
+
+        if(F('settings')['global']['allowregister']=='false')$this->error('站点已关闭注册');  	
 		
     	if(IS_POST){
     		$database = M('user');          
@@ -124,7 +117,7 @@ class UserController extends SimpleController {
             }
             $data['uid'] = I('post.uid');
 			if($database->where($map)->find())$this->error('用户已存在',U('User/register'));
-            if($global['quickreport']=='false'){
+            if(F('settings')['global']['quickreport']=='false'){
                 $salt = salt();
                 $data['salt'] = $salt;
                 $data['password'] = sha1(C('DB_PREFIX').I('post.password').'_'.$salt);               
@@ -139,9 +132,7 @@ class UserController extends SimpleController {
             	$this->error('注册失败');
             }
     	}else{
-	        $tips = M('setting')->where("`key`='tips'")->find();
-	        $tips = json_decode($tips['value'],true); 
-	        $this->assign('tips',$tips['register']);    		
+	        $this->assign('tips',F('settings')['tips']['register']);    		
     		$this->display('register');
     	}
     }
@@ -172,10 +163,8 @@ class UserController extends SimpleController {
     //个人信息设置
     public function setting(){
     	if(!session('?uid'))$this->redirect('login');
-    	//获取站点配置
-        $global = M('setting')->where("`key`='global'")->find();
-        $global = json_decode($global['value'],true); 
-        $this->assign('quickreport',$global['quickreport']);//快速报修
+
+        $this->assign('quickreport',F('settings')['global']['quickreport']);//快速报修
 		
     	$database = M('user');
     	if(IS_POST){   
