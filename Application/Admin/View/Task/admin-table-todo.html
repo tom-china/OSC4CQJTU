@@ -18,7 +18,7 @@
       <div class="am-u-sm-12 am-u-md-6">
         <div class="am-btn-toolbar">
           <div class="am-btn-group am-btn-group-xs">
-            <button id="markDoing" type="button" class="am-btn am-btn-default"><span class="am-icon-save"></span> 标记为处理中</button>
+            <button id="markDoing" type="button" class="am-btn am-btn-success"><span class="am-icon-save"></span> 标记为处理中</button>
             <button id="markDone" type="button" class="am-btn am-btn-default"><span class="am-icon-archive"></span> 标记为已处理</button>
             <button id="markDel" type="button" class="am-btn am-btn-default"><span class="am-icon-trash-o"></span> 删除</button>
             <a class="am-btn am-btn-default" href="__SELF__?action=export" target="_blank"><span class="am-icon-file-excel-o"></span> 导出</a>
@@ -61,12 +61,24 @@
     </div>
 
   <div class="am-g">
-    <div class="am-u-sm-6">
-      <button type="button" class="am-btn am-btn-default am-margin-right" id="my-start">开始日期</button><span id="my-startDate">{:empty(I('get.startDate'))?date('Y-m-d',strtotime('-1 month')):I('get.startDate')}</span>
+    <div class="am-u-sm-4">
+	 <div class="am-btn-group am-btn-group-xs">
+      <button type="button" class="am-btn am-btn-default am-margin-right" id="my-start">开始日期</button><span id="my-startDate">{:empty(I('get.startDate'))?'不限':I('get.startDate')}</span>
+	 </div>
     </div>
-    <div class="am-u-sm-6">
-      <button type="button" class="am-btn am-btn-default am-margin-right" id="my-end">结束日期</button><span id="my-endDate">{:empty(I('get.endDate'))?date('Y-m-d'):I('get.endDate')}</span>
+    <div class="am-u-sm-4">
+	 <div class="am-btn-group am-btn-group-xs">	
+      <button type="button" class="am-btn am-btn-default am-margin-right" id="my-end">结束日期</button><span id="my-endDate">{:empty(I('get.endDate'))?'至今':I('get.endDate')}</span>
+	 </div>	  
     </div>
+    <div class="am-u-sm-4">
+	  <div class="am-input-group am-input-group-sm">
+	    <span class="am-input-group-label"><input type="checkbox" id="refresh_ckb"></span>
+	    <span class="am-input-group-label">每</span>
+	    <input type="number" id="refresh_time" class="am-form-field">
+	    <span class="am-input-group-label">秒自动刷新一次</span>
+	  </div>	
+    </div>	
   </div>  
 
     <div class="am-g">
@@ -222,6 +234,37 @@
     modal_confirm(string,config);
   });
 
-  })
+  var time; 
+  $('#refresh_ckb').click(function(){
+	if($('#refresh_time').val()>0){
+		if($(this).is(':checked')){
+			time = $('#refresh_time').val();
+			if(time>0){
+				$.AMUI.utils.cookie.set('refresh',time);
+				$('#refresh_time').attr("disabled","disabled");
+				var interval = setInterval(function(){
+					time--;
+					if(time <= 0) {
+						window.location.reload();
+						clearInterval(interval);
+					};
+				}, 1000);
+			}
+		}else{
+			$.AMUI.utils.cookie.unset('refresh');
+			$('#refresh_time').removeAttr("disabled");
+			clearInterval(interval);
+		}	
+	}else{
+		modal_alert('参数必须大于0');
+		return false;
+	}
+  });
+  if(parseInt($.AMUI.utils.cookie.get('refresh'))>0){
+	$('#refresh_time').val(parseInt($.AMUI.utils.cookie.get('refresh'))).attr("disabled","disabled");
+	$('#refresh_ckb').click();
+  }  
+ 
+  });
 </script>
 <include file="Public/footer" />

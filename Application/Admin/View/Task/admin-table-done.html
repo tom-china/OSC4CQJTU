@@ -61,10 +61,14 @@
 
 	<div class="am-g">
 	  <div class="am-u-sm-6">
-	    <button type="button" class="am-btn am-btn-default am-margin-right" id="my-start">开始日期</button><span id="my-startDate">{:empty(I('get.startDate'))?date('Y-m-d',strtotime('-1 month')):I('get.startDate')}</span>
+	   <div class="am-btn-group am-btn-group-xs">		  
+	    <button type="button" class="am-btn am-btn-default am-margin-right" id="my-start">开始日期</button><span id="my-startDate">{:empty(I('get.startDate'))?'不限':I('get.startDate')}</span>
+	   </div>		
 	  </div>
 	  <div class="am-u-sm-6">
-	    <button type="button" class="am-btn am-btn-default am-margin-right" id="my-end">结束日期</button><span id="my-endDate">{:empty(I('get.endDate'))?date('Y-m-d'):I('get.endDate')}</span>
+	   <div class="am-btn-group am-btn-group-xs">		  
+	    <button type="button" class="am-btn am-btn-default am-margin-right" id="my-end">结束日期</button><span id="my-endDate">{:empty(I('get.endDate'))?'至今':I('get.endDate')}</span>
+	   </div>		
 	  </div>
 	</div>    
 

@@ -1,5 +1,6 @@
-## 简介/Introduce
+## 简介 Introduce
 基于ThinkPHP+AmazeUI的简单后勤在线报修系统
+
 A simple Online Repair System based on ThinkPHP+AmazeUI
 
 ## 包含功能
