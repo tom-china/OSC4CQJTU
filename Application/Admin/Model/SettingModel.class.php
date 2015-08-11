@@ -1,7 +1,7 @@
 <?php
 namespace Home\Model;
 use Think\Model;
-class UserModel extends Model{
+class SettingModel extends Model{
 
    protected $_validate = array(
      array('key','require','键名必须'),

@@ -1,7 +1,7 @@
 <?php
 namespace Home\Model;
 use Think\Model;
-class UserModel extends Model{
+class RankModel extends Model{
 
    protected $_validate = array(
      array('order','require','工单号必须'),

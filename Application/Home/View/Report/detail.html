@@ -149,7 +149,7 @@ ul.timeline p{
 	<form action="{:U('Report/rank',array('order'=>I('get.order'),'type'=>0))}" method="post" class="am-form am-form-horizontal">
 	  <fieldset>
 		<div class="am-input-group">
-		  <input type="text" class="am-form-field" name="rankc" placeholder="说点什么...">
+		  <input type="text" class="am-form-field" name="content" placeholder="说点什么...">
 		  <span class="am-input-group-btn">
 			<button class="am-btn am-btn-default" type="submit">用户评价</button>
 		  </span>
@@ -213,7 +213,7 @@ ul.timeline p{
 	<form action="{:U('Report/rank',array('order'=>I('get.order'),'type'=>1))}" method="post"  class="am-form am-form-horizontal">
 	  <fieldset>
 		<div class="am-input-group">
-		  <input type="text" class="am-form-field" name="rankc" placeholder="说点什么...">
+		  <input type="text" class="am-form-field" name="content" placeholder="说点什么...">
 		  <span class="am-input-group-btn">
 			<button class="am-btn am-btn-default" type="submit">管理员回复</button>
 		  </span>
@@ -290,6 +290,18 @@ ul.timeline p{
     };
     modal_confirm(string,config);
   });
+  
+	<if condition="!empty(cookie('think_last_rank'))">
+	var time = 60;
+	var interval = setInterval(function(){
+		time--;
+		$("button[type=submit]").attr('disabled','disabled').text(time);
+		if(time <= 0) {
+			$("button[type=submit]").removeAttr('disabled').text('提 交');
+			clearInterval(interval);
+		};
+	}, 1000);	
+	</if>  
 </script>
 </if>
 <script>$('#qrcode').qrcode({text:location.href,width:96,height:96,correctLevel:1});</script>

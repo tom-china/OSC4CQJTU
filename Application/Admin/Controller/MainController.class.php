@@ -6,13 +6,13 @@ class MainController extends SimpleController {
     public function index(){
         if(session('?admin'))$this->redirect('Main/dashboard');
     	if(IS_POST){
-    		$database = M('admin');
-            if(!D("admin")->create()){
-                $this->error(D("admin")->getError(),U('Main/index')); 
+    		$database = D('admin');
+            if(!$database->create()){
+                $this->error($database->getError(),U('Main/index')); 
             } 	
 			if(!$this->checkVerify(I('post.verify'))){
 				$this->error('验证码错误',U('Main/index'));
-			}  
+			}
             $bind[':username'] = I('post.username'); 
             $admin = $database->where('username=:username')->bind($bind)->find();             		
     		if(empty($admin))$this->error('用户不存在',U('Main/index'));

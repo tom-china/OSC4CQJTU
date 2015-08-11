@@ -37,6 +37,7 @@ class ReportController extends SimpleController {
     		$data['emerg'] = 0;//是否紧急 普通0 紧急1
     		$add = $database->strict(true)->data($data)->filter('strip_tags')->add();
     		if($add){
+				cookie('last_report',time(),array('expire'=>60,'prefix'=>'think_'));
     			$this->success('报修提交成功',U('User/order'));
     		}else{
     			$this->error('报修提交失败');
@@ -77,6 +78,7 @@ class ReportController extends SimpleController {
     		$data['emerg'] = 1;//是否紧急 普通0 紧急1
     		$add = $database->strict(true)->data($data)->filter('strip_tags')->add();
     		if($add){
+				cookie('last_report',time(),array('expire'=>60,'prefix'=>'think_'));
     			$this->success('报修提交成功',U('User/order'));
     		}else{
     			$this->error('报修提交失败');
@@ -120,8 +122,9 @@ class ReportController extends SimpleController {
 		if(F('settings')['global']['allowrank']=='false')$this->error('用户评价未开启');
 		
 		if(IS_POST){
-            if (!D('rank')->create()){
-                $this->error(D('rank')->getError());
+			$database = D('rank');
+            if (!$database->create()){
+                $this->error($database->getError());
             }
 			$data['order'] = I('get.order');
 			$order = M('order')->where($data)->find();
@@ -138,9 +141,10 @@ class ReportController extends SimpleController {
 			else{
 				$this->error('参数错误');
 			}
-			$data['content'] = I('post.rankc');
+			$data['content'] = I('post.content');
 			$data['time'] = time();
-			if(M('rank')->data($data)->filter('strip_tags')->add()){
+			if($database->data($data)->filter('strip_tags')->add()){
+				cookie('last_rank',time(),array('expire'=>60,'prefix'=>'think_'));
 				$this->success('操作成功');
 			}else{
 				$this->error('操作失败');
