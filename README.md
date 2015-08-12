@@ -3,6 +3,8 @@
 
 A simple Online Repair System based on ThinkPHP+AmazeUI
 
+- [在线演示 ONLINE DEMO](http://osc4cqjtu.sinaapp.com)
+
 ## 包含功能
 - 用户报修、进度跟踪、工单管理、公告发布
 - 用户批量导入、后台数据导出、前后台用户管理
