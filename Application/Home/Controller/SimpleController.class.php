@@ -32,15 +32,6 @@ class SimpleController extends Controller {
     //站点信息
     public function __construct(){
         parent::__construct();
-<<<<<<< HEAD
-        $database = M('setting');
-        $global = $database->where("`key`='global'")->find();
-        $global = json_decode($global['value'],true);
-        if($global['isopen']=='false')$this->error('站点已经关闭，请稍后访问~');
-        $copyright = $database->where("`key`='copyright'")->find();
-        $copyright = json_decode($copyright['value'],true);
-        $this->assign('copyright',$copyright);   
-=======
 
 		//站点信息		
 		if(empty(F('settings'))){
@@ -55,6 +46,6 @@ class SimpleController extends Controller {
 		 
 		//加载版权信息
         $this->assign('copyright',F('settings')['copyright']);   
->>>>>>> origin/beta
+
     }        
 }

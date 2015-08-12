@@ -42,17 +42,6 @@ class UserController extends SimpleController {
                 $this->error('验证码错误',U('User/login'));
             } 
 			
-<<<<<<< HEAD
-			if($global['quickreport']=='false' && $global['uclogin']=='normal'){
-				$uc = new \Ucenter\Client\Client();
-				$name = mb_convert_encoding(I('post.username'),'gbk','utf-8');
-				$password = mb_convert_encoding(I('post.password'),'gbk','utf-8');
-				list($uid, $username, $uc_password, $email) = $uc -> uc_user_login($name, $password);
-				$_GET['uid'] = mb_convert_encoding($uid,'utf-8','gbk');
-				$_GET['username'] = mb_convert_encoding($username,'utf-8','gbk');
-				$_GET['password'] = mb_convert_encoding($uc_password,'utf-8','gbk');
-				//$email = mb_convert_encoding($email,'utf-8','gbk');
-=======
 			if(F('settings')['global']['quickreport']=='false' && F('settings')['global']['uclogin']=='normal'){
 				//UC登陆
 				$uc = new \Ucenter\Client\Client();
@@ -63,7 +52,7 @@ class UserController extends SimpleController {
 				$_GET['uid'] = UC_DBCHARSET=='gbk'?mb_convert_encoding($uid,'utf-8','gbk'):$uid;
 				$_GET['username'] = UC_DBCHARSET=='gbk'?mb_convert_encoding($username,'utf-8','gbk'):$username;
 				$_GET['password'] = UC_DBCHARSET=='gbk'?mb_convert_encoding($uc_password,'utf-8','gbk'):$uc_password;
->>>>>>> origin/beta
+
 			}
 
     		$user = $database->where('uid = :uid')->bind(array(':uid'=>I('post.uid')))->find();
@@ -136,12 +125,8 @@ class UserController extends SimpleController {
         $this->assign('allowregister',F('settings')['global']['allowregister']);
         $this->assign('quickreport',F('settings')['global']['quickreport']);
 
-<<<<<<< HEAD
-        if($global['allowregister']=='false')$this->error('站点已关闭注册');  	
-=======
         if(F('settings')['global']['allowregister']=='false')$this->error('站点已关闭注册');  	
 		
->>>>>>> origin/beta
     	if(IS_POST){
     		$database = M('user');          
             if(!D("User")->create()){
@@ -198,17 +183,9 @@ class UserController extends SimpleController {
     //个人信息设置
     public function setting(){
     	if(!session('?uid'))$this->redirect('login');
-<<<<<<< HEAD
-    	//获取站点配置
-        $global = M('setting')->where("`key`='global'")->find();
-        $global = json_decode($global['value'],true); 
-        //是否开启快速报修
-        $this->assign('quickreport',$global['quickreport']);    	
-=======
 
         $this->assign('quickreport',F('settings')['global']['quickreport']);//快速报修
-		
->>>>>>> origin/beta
+
     	$database = M('user');
     	if(IS_POST){   
             if (!$database->autoCheckToken($_POST)){
