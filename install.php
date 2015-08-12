@@ -118,24 +118,7 @@ include './Application/Common/Common/function.php';
 			    'DB_CHARSET'            =>  'utf8',	
 				);
 			$c = array_merge($config,$conf);
-			$settingstr = "<?php \n return array(\n";
-			foreach($c as $key=>$v){
-				if($i == count($c)-1){
-					if(is_array($v)){
-						$settingstr .= "\t'".$key."'=>array('".implode("','",$v)."')";
-					}else{
-						$settingstr .= "\t'".$key."'=>'".$v."'";
-					}
-				}else{
-					if(is_array($v)){
-						$settingstr .= "\t'".$key."'=>array('".implode("','",$v)."'),\n";
-					}else{
-						$settingstr .= "\t'".$key."'=>'".$v."',\n";
-					}					
-				}	
-				$i++;
-			}
-			$settingstr .= "\n);\n?>";	
+			$settingstr = "<?php \n return ".var_export($c ,TRUE).";\n?>";	
 			file_put_contents('./Application/Common/Conf/config.php',$settingstr);
 			header('location: ./install.php?step=2');		
 		}		
@@ -213,7 +196,7 @@ include './Application/Common/Common/function.php';
 		mysql_query("INSERT INTO `{$config['DB_PREFIX']}setting` VALUES ('area', '[\"\\\\u5357\\\\u5cb8\\\\u6821\\\\u533a\",\"\\\\u53cc\\\\u798f\\\\u6821\\\\u533a\"]');");
 		mysql_query("INSERT INTO `{$config['DB_PREFIX']}setting` VALUES ('building', '[{\"28\":{\"name\":\"\\\\u5357\\\\u5cb8\\\\u5b66\\\\u751f\\\\u5bbf\\\\u820d\",\"key\":\"11\"},\"29\":{\"name\":\"\\\\u5357\\\\u5cb8\\\\u6559\\\\u5ba4\",\"key\":\"12\"},\"30\":{\"name\":\"\\\\u5357\\\\u5cb8\\\\u529e\\\\u516c\\\\u697c\",\"key\":\"13\"},\"31\":{\"name\":\"\\\\u5357\\\\u5cb8\\\\u5916\\\\u73af\\\\u5883\",\"key\":\"14\"},\"32\":{\"name\":\"\\\\u5357\\\\u5cb8\\\\u5176\\\\u4ed6\",\"key\":\"15\"}},{\"13\":{\"name\":\"\\\\u53cc\\\\u798f\\\\u5b66\\\\u751f\\\\u5bbf\\\\u820d\",\"key\":\"21\"},\"14\":{\"name\":\"\\\\u53cc\\\\u798f\\\\u6559\\\\u5ba4\",\"key\":\"22\"},\"15\":{\"name\":\"\\\\u53cc\\\\u798f\\\\u529e\\\\u516c\\\\u697c\",\"key\":\"23\"},\"16\":{\"name\":\"\\\\u53cc\\\\u798f\\\\u5916\\\\u73af\\\\u5883\",\"key\":\"24\"},\"17\":{\"name\":\"\\\\u53cc\\\\u798f\\\\u5176\\\\u4ed6\",\"key\":\"25\"}}]');");
 		mysql_query("INSERT INTO `{$config['DB_PREFIX']}setting` VALUES ('copyright', '{\"buttom\":\"\",\"aboutus\":\"\",\"link\":\"\"}');");
-		mysql_query("INSERT INTO `{$config['DB_PREFIX']}setting` VALUES ('global', '{\"isopen\":\"true\",\"allowregister\":\"false\",\"quickreport\":\"true\"}',\"uclogin\":\"\",\"allowrank\":\"true\");");
+		mysql_query("INSERT INTO `{$config['DB_PREFIX']}setting` VALUES ('global', '{\"isopen\":\"true\",\"allowregister\":\"false\",\"quickreport\":\"true\",\"uclogin\":\"false\",\"allowrank\":\"true\")}';");
 		mysql_query("INSERT INTO `{$config['DB_PREFIX']}setting` VALUES ('tips', '{\"login\":\"\",\"register\":\"\",\"report\":\"\",\"emerg\":\"\",\"detail\":\"\"}');");
 		touch('./Application/install.lock');
 		header('location: ./index.php');
