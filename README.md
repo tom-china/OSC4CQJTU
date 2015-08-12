@@ -3,7 +3,7 @@
 
 A simple Online Repair System based on ThinkPHP+AmazeUI
 
-- [在线演示 ONLINE DEMO](http://osc4cqjtu.sinaapp.com)
+[在线演示 ONLINE DEMO](http://osc.freyo.xyz)
 
 ## 包含功能
 - 用户报修、进度跟踪、工单管理、公告发布

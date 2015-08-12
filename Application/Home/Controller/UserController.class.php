@@ -135,7 +135,7 @@ class UserController extends SimpleController {
                 $this->error('验证码错误',U('User/register'));
             }
             $data['uid'] = I('post.uid');
-			if($database->where($map)->find())$this->error('用户已存在',U('User/register'));
+			if($database->where($data)->find())$this->error('用户已存在',U('User/register'));
             if(F('settings')['global']['quickreport']=='false'){
                 $salt = salt();
                 $data['salt'] = $salt;
