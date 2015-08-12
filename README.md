@@ -23,4 +23,4 @@ A simple Online Repair System based on ThinkPHP+AmazeUI
 - [amazeui](https://github.com/allmobilize/amazeui)
 - [jquery-ui](https://github.com/jquery/jquery-ui)
 - [ueditor](https://github.com/fex-team/ueditor)
-- [UcForTp3.2](http://git.oschina.net/zstxt1989/UcForTp3.2)
+- [UcForTp3.2](https://git.oschina.net/zstxt1989/UcForTp3.2)
