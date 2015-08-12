@@ -86,5 +86,17 @@ $(function () {
     }  
     clearInterval(timer);
   },100);
+  
+	<if condition="!empty(cookie('think_last_report'))">
+	var time = 60;
+	var interval = setInterval(function(){
+		time--;
+		$("fieldset>button[type=submit]").attr('disabled','disabled').text(time);
+		if(time <= 0) {
+			$("fieldset>button[type=submit]").removeAttr('disabled').text('提 交');
+			clearInterval(interval);
+		};
+	}, 1000);	
+	</if>  
 </script>
 <include file="Public/footer" />

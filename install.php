@@ -1,9 +1,33 @@
 <?php
+/*
+*    Online Service Center for Chongqing Jiaotong University 
+*    Copyright (C) 2015 freyhsiao@gmail.com
+*
+*    This program is free software; you can redistribute it and/or modify
+*    it under the terms of the GNU General Public License as published by
+*    the Free Software Foundation; either version 2 of the License, or
+*    (at your option) any later version.
+*
+*    This program is distributed in the hope that it will be useful,
+*    but WITHOUT ANY WARRANTY; without even the implied warranty of
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*    GNU General Public License for more details.
+*
+*    You should have received a copy of the GNU General Public License along
+*    with this program; if not, write to the Free Software Foundation, Inc.,
+*    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. 	
+*/
+
+// Disable error reporting.
 error_reporting(0);
+
+// Check install status.
 if(file_exists('./Application/install.lock')){
 	header('location: ./index.php');
 	exit;	
 }
+
+// Include common functions.
 include './Application/Common/Common/function.php';
 ?>
 <!doctype html>
@@ -118,7 +142,11 @@ include './Application/Common/Common/function.php';
 			    'DB_CHARSET'            =>  'utf8',	
 				);
 			$c = array_merge($config,$conf);
+<<<<<<< HEAD
 			$settingstr = "<?php \n return ".var_export($c ,TRUE).";\n?>";	
+=======
+			$settingstr = "<?php \n return ".var_export($c ,TRUE).";\n?>";
+>>>>>>> origin/beta
 			file_put_contents('./Application/Common/Conf/config.php',$settingstr);
 			header('location: ./install.php?step=2');		
 		}		
@@ -196,7 +224,11 @@ include './Application/Common/Common/function.php';
 		mysql_query("INSERT INTO `{$config['DB_PREFIX']}setting` VALUES ('area', '[\"\\\\u5357\\\\u5cb8\\\\u6821\\\\u533a\",\"\\\\u53cc\\\\u798f\\\\u6821\\\\u533a\"]');");
 		mysql_query("INSERT INTO `{$config['DB_PREFIX']}setting` VALUES ('building', '[{\"28\":{\"name\":\"\\\\u5357\\\\u5cb8\\\\u5b66\\\\u751f\\\\u5bbf\\\\u820d\",\"key\":\"11\"},\"29\":{\"name\":\"\\\\u5357\\\\u5cb8\\\\u6559\\\\u5ba4\",\"key\":\"12\"},\"30\":{\"name\":\"\\\\u5357\\\\u5cb8\\\\u529e\\\\u516c\\\\u697c\",\"key\":\"13\"},\"31\":{\"name\":\"\\\\u5357\\\\u5cb8\\\\u5916\\\\u73af\\\\u5883\",\"key\":\"14\"},\"32\":{\"name\":\"\\\\u5357\\\\u5cb8\\\\u5176\\\\u4ed6\",\"key\":\"15\"}},{\"13\":{\"name\":\"\\\\u53cc\\\\u798f\\\\u5b66\\\\u751f\\\\u5bbf\\\\u820d\",\"key\":\"21\"},\"14\":{\"name\":\"\\\\u53cc\\\\u798f\\\\u6559\\\\u5ba4\",\"key\":\"22\"},\"15\":{\"name\":\"\\\\u53cc\\\\u798f\\\\u529e\\\\u516c\\\\u697c\",\"key\":\"23\"},\"16\":{\"name\":\"\\\\u53cc\\\\u798f\\\\u5916\\\\u73af\\\\u5883\",\"key\":\"24\"},\"17\":{\"name\":\"\\\\u53cc\\\\u798f\\\\u5176\\\\u4ed6\",\"key\":\"25\"}}]');");
 		mysql_query("INSERT INTO `{$config['DB_PREFIX']}setting` VALUES ('copyright', '{\"buttom\":\"\",\"aboutus\":\"\",\"link\":\"\"}');");
+<<<<<<< HEAD
 		mysql_query("INSERT INTO `{$config['DB_PREFIX']}setting` VALUES ('global', '{\"isopen\":\"true\",\"allowregister\":\"false\",\"quickreport\":\"true\",\"uclogin\":\"false\",\"allowrank\":\"true\")}';");
+=======
+		mysql_query("INSERT INTO `{$config['DB_PREFIX']}setting` VALUES ('global', '{\"isopen\":\"true\",\"allowregister\":\"true\",\"quickreport\":\"false\",\"uclogin\":\"false\",\"allowrank\":\"true\"}');");
+>>>>>>> origin/beta
 		mysql_query("INSERT INTO `{$config['DB_PREFIX']}setting` VALUES ('tips', '{\"login\":\"\",\"register\":\"\",\"report\":\"\",\"emerg\":\"\",\"detail\":\"\"}');");
 		touch('./Application/install.lock');
 		header('location: ./index.php');

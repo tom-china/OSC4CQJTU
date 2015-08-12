@@ -1,4 +1,23 @@
 <?php
+/*
+*    Online Service Center for Chongqing Jiaotong University 
+*    Copyright (C) 2015 freyhsiao@gmail.com
+*
+*    This program is free software; you can redistribute it and/or modify
+*    it under the terms of the GNU General Public License as published by
+*    the Free Software Foundation; either version 2 of the License, or
+*    (at your option) any later version.
+*
+*    This program is distributed in the hope that it will be useful,
+*    but WITHOUT ANY WARRANTY; without even the implied warranty of
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*    GNU General Public License for more details.
+*
+*    You should have received a copy of the GNU General Public License along
+*    with this program; if not, write to the Free Software Foundation, Inc.,
+*    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. 	
+*/
+
 namespace Admin\Controller;
 use Think\Controller;
 class MainController extends SimpleController {
@@ -6,13 +25,13 @@ class MainController extends SimpleController {
     public function index(){
         if(session('?admin'))$this->redirect('Main/dashboard');
     	if(IS_POST){
-    		$database = M('admin');
-            if(!D("admin")->create()){
-                $this->error(D("admin")->getError(),U('Main/index')); 
+    		$database = D('admin');
+            if(!$database->create()){
+                $this->error($database->getError(),U('Main/index')); 
             } 	
 			if(!$this->checkVerify(I('post.verify'))){
 				$this->error('验证码错误',U('Main/index'));
-			}  
+			}
             $bind[':username'] = I('post.username'); 
             $admin = $database->where('username=:username')->bind($bind)->find();             		
     		if(empty($admin))$this->error('用户不存在',U('Main/index'));
@@ -26,6 +45,7 @@ class MainController extends SimpleController {
                 $data['lastip'] = get_client_ip();
                 $data['lasttime'] = time();
                 $database->where('username=:username and password=:password')->bind($bind)->save($data);
+				session('security',sha1($data['lastip'].$_SERVER['HTTP_USER_AGENT']));
 	    		$this->redirect('dashboard');
     		}
     	}else{
@@ -51,7 +71,7 @@ class MainController extends SimpleController {
             M('order')->cache(true,60)->where('status=0 and time>'.strtotime('-3 days').' and time<'.strtotime('-2 days'))->count(),
             M('order')->cache(true,60)->where('status=0 and time>'.strtotime('-2 days').' and time<'.strtotime('-1 days'))->count(),
             M('order')->cache(true,60)->where('status=0 and time>'.strtotime('-1 days').' and time<'.strtotime(date('y-m-d')))->count(),
-            M('order')->cache(true,60)->where('status=0 and time>'.strtotime(date('y-m-d')))->count()));
+            M('order')->where('status=0 and time>'.strtotime(date('y-m-d')))->count()));
         $stat['doing'] = json_encode(array(
             M('order')->cache(true,60)->where('status=1 and time>'.strtotime('-6 days').' and time<'.strtotime('-5 days'))->count(),
             M('order')->cache(true,60)->where('status=1 and time>'.strtotime('-5 days').' and time<'.strtotime('-4 days'))->count(),
@@ -59,7 +79,7 @@ class MainController extends SimpleController {
             M('order')->cache(true,60)->where('status=1 and time>'.strtotime('-3 days').' and time<'.strtotime('-2 days'))->count(),
             M('order')->cache(true,60)->where('status=1 and time>'.strtotime('-2 days').' and time<'.strtotime('-1 days'))->count(),
             M('order')->cache(true,60)->where('status=1 and time>'.strtotime('-1 days').' and time<'.strtotime(date('y-m-d')))->count(),
-            M('order')->cache(true,60)->where('status=1 and time>'.strtotime(date('y-m-d')))->count()));
+            M('order')->where('status=1 and time>'.strtotime(date('y-m-d')))->count()));
         $stat['done'] = json_encode(array(
             M('order')->cache(true,60)->where('status=2 and time>'.strtotime('-6 days').' and time<'.strtotime('-5 days'))->count(),
             M('order')->cache(true,60)->where('status=2 and time>'.strtotime('-5 days').' and time<'.strtotime('-4 days'))->count(),
@@ -67,7 +87,7 @@ class MainController extends SimpleController {
             M('order')->cache(true,60)->where('status=2 and time>'.strtotime('-3 days').' and time<'.strtotime('-2 days'))->count(),
             M('order')->cache(true,60)->where('status=2 and time>'.strtotime('-2 days').' and time<'.strtotime('-1 days'))->count(),
             M('order')->cache(true,60)->where('status=2 and time>'.strtotime('-1 days').' and time<'.strtotime(date('y-m-d')))->count(),
-            M('order')->cache(true,60)->where('status=2 and time>'.strtotime(date('y-m-d')))->count()));
+            M('order')->where('status=2 and time>'.strtotime(date('y-m-d')))->count()));
         $this->assign('stat',$stat);
 
         //仅显示范围内的紧急报修
@@ -115,11 +135,12 @@ class MainController extends SimpleController {
     public function setting(){
         if(!session('?admin'))$this->redirect('Main/index');
         if(session('right')!=1)$this->error('访问无权限');
-        $database = M('setting');
+        $database = D('setting');
         if(IS_POST){         
-    		if (!$database->autoCheckToken($_POST)){
-    			$this->error('令牌验证错误',U('Main/setting'));
-    		}        	
+    		$database = M('setting');
+            if (!$database->autoCheckToken($_POST)){
+                $this->error('令牌验证错误');
+            } 
             $menu = I('post.config');
             $menu = $menu['menu']['button'];
             foreach($menu as $k=>$v){
@@ -132,6 +153,7 @@ class MainController extends SimpleController {
             $data['key'] = 'building';
             $data['value'] = json_encode($building);
 			if(!$database->add($data,array(),true))$this->error('设置（二级地点）保存失败');
+			if(!empty(F('settings')))F('settings',NULL);
 			$this->success('设置保存成功');
         }else{
 			$global = $database->where("`key`='global'")->find();
@@ -163,9 +185,9 @@ class MainController extends SimpleController {
     	if(session('right')!=1)$this->error('访问无权限');
         if(IS_POST){
         	$database = M('setting');
-	        if (!$database->autoCheckToken($_POST)){
-	            $this->error('令牌验证错误',U('Main/setting'));
-	        } 
+            if (!$database->autoCheckToken($_POST)){
+                $this->error('令牌验证错误');
+            } 
 	    	$global = I('post.global');
 	    	if(!in_array($global['isopen'],array(true,false)))$this->error('参数非法');
 	    	if(!in_array($global['allowregister'],array(true,false)))$this->error('参数非法');   
@@ -174,6 +196,7 @@ class MainController extends SimpleController {
 	    	$data['value'] = json_encode($global);
 	    	$add = $database->add($data,array(),true);
 	    	if($add){
+				if(!empty(F('settings')))F('settings',NULL);
 	    		$this->success('设置保存成功');
 	    	}else{
 	    		$this->error('设置保存失败');
@@ -188,14 +211,15 @@ class MainController extends SimpleController {
     	if(session('right')!=1)$this->error('访问无权限');
     	if(IS_POST){
     		$database = M('setting');
-	        if (!$database->autoCheckToken($_POST)){
-	            $this->error('令牌验证错误',U('Main/setting'));
-	        }     		
+            if (!$database->autoCheckToken($_POST)){
+                $this->error('令牌验证错误');
+            }     		
     		$tips = I('post.tips');
     		$data['key'] = 'tips';
     		$data['value'] = json_encode($tips);
     		$add = $database->data($data)->filter('strip_tags')->add($data,array(),true);
 	    	if($add){
+				if(!empty(F('settings')))F('settings',NULL);
 	    		$this->success('设置保存成功');
 	    	}else{
 	    		$this->error('设置保存失败');
@@ -210,14 +234,15 @@ class MainController extends SimpleController {
     	if(session('right')!=1)$this->error('访问无权限');
     	if(IS_POST){
     		$database = M('setting');
-	        if (!$database->autoCheckToken($_POST)){
-	            $this->error('令牌验证错误',U('Main/setting'));
-	        }     		
+            if (!$database->autoCheckToken($_POST)){
+                $this->error('令牌验证错误');
+            }     		
     		$copyright = I('post.copyright');
     		$data['key'] = 'copyright';
     		$data['value'] = json_encode($copyright);
     		$add = $database->data($data)->filter('strip_tags')->add($data,array(),true);
 	    	if($add){
+				if(!empty(F('settings')))F('settings',NULL);
 	    		$this->success('设置保存成功');
 	    	}else{
 	    		$this->error('设置保存失败');

@@ -1,4 +1,23 @@
 <?php
+/*
+*    Online Service Center for Chongqing Jiaotong University 
+*    Copyright (C) 2015 freyhsiao@gmail.com
+*
+*    This program is free software; you can redistribute it and/or modify
+*    it under the terms of the GNU General Public License as published by
+*    the Free Software Foundation; either version 2 of the License, or
+*    (at your option) any later version.
+*
+*    This program is distributed in the hope that it will be useful,
+*    but WITHOUT ANY WARRANTY; without even the implied warranty of
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*    GNU General Public License for more details.
+*
+*    You should have received a copy of the GNU General Public License along
+*    with this program; if not, write to the Free Software Foundation, Inc.,
+*    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. 	
+*/
+
 namespace Admin\Controller;
 use Think\Controller;
 class ArticleController extends SimpleController {
@@ -17,9 +36,9 @@ class ArticleController extends SimpleController {
     public function add(){
     	if(!session('?admin'))$this->redirect('Main/index');
     	if(IS_POST){
-            $database = M('article');
-            if (!$database->autoCheckToken($_POST)){
-                $this->error('令牌验证错误');
+            $database = D('article');
+            if (!$database->create()){
+                $this->error($database->getError());
             }            
             $data['title'] = I('post.title');
             $data['content'] = I('post.content');
@@ -40,9 +59,9 @@ class ArticleController extends SimpleController {
     public function edit(){
     	if(!session('?admin'))$this->redirect('Main/index');
     	if(IS_POST){
-            $database = M('article');
-            if (!$database->autoCheckToken($_POST)){
-                $this->error('令牌验证错误');
+            $database = D('article');
+            if (!$database->create()){
+                $this->error($database->getError());
             }             
     		$data['title'] = I('post.title');
     		$data['content'] = I('post.content');
@@ -59,6 +78,10 @@ class ArticleController extends SimpleController {
     	}
     }
     
+<<<<<<< HEAD
+=======
+	//ueditor
+>>>>>>> origin/beta
     public function ueditor(){
     	if(!session('?admin'))$this->redirect('Main/index');
         $data = new \Org\Util\Ueditor();

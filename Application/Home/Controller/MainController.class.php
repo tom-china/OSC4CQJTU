@@ -1,4 +1,23 @@
 <?php
+/*
+*    Online Service Center for Chongqing Jiaotong University 
+*    Copyright (C) 2015 freyhsiao@gmail.com
+*
+*    This program is free software; you can redistribute it and/or modify
+*    it under the terms of the GNU General Public License as published by
+*    the Free Software Foundation; either version 2 of the License, or
+*    (at your option) any later version.
+*
+*    This program is distributed in the hope that it will be useful,
+*    but WITHOUT ANY WARRANTY; without even the implied warranty of
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*    GNU General Public License for more details.
+*
+*    You should have received a copy of the GNU General Public License along
+*    with this program; if not, write to the Free Software Foundation, Inc.,
+*    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. 	
+*/
+
 namespace Home\Controller;
 use Think\Controller;
 class MainController extends SimpleController {
@@ -7,20 +26,25 @@ class MainController extends SimpleController {
     	$notice = M('article')->order('acid desc')->limit(5)->select();
         $this->assign('notice',$notice);
     	//统计
-    	$stat['today'] = M('order')->cache(true,60)->where('time>:time')->bind(':time',strtotime(date("Y-m-d")))->count();
-		$stat['todo'] = M('order')->cache(true,60)->where('status=0')->count();
-    	$stat['doing'] = M('order')->cache(true,60)->where('status=1')->count();
-    	$stat['done'] = M('order')->cache(true,60)->where('status=2')->count();
+    	$stat['today'] = M('order')->cache(true,5)->where('time>:time')->bind(':time',strtotime(date("Y-m-d")))->count();
+		$stat['todo'] = M('order')->cache(true,5)->where('status=0')->count();
+    	$stat['doing'] = M('order')->cache(true,5)->where('status=1')->count();
+    	$stat['done'] = M('order')->cache(true,5)->where('status=2')->count();
         $this->assign('stat',$stat);
     	//最新报修
+<<<<<<< HEAD
         //$map['status'] = array('neq',-1);//是否显示已取消工单
     	$list = M('order')->where($map)->order('time desc')->limit(25)->select();
+=======
+        //$map['status'] = array('neq',-1);//不显示已取消工单
+    	$list = M('order')->cache(true,5)->where($map)->order('time desc')->limit(25)->select();
+>>>>>>> origin/beta
         $this->assign('list',$list);
         $this->display('main');
     }
 
     public function refresh(){
-    	$list = M('order')->order('time desc')->limit(25)->select();
+    	$list = M('order')->cache(true,5)->order('time desc')->limit(25)->select();
     	$html = '';
     	foreach($list as $k=>$v){
             $html .= ($v['emerg']==1)?'<tr class="am-active">':'<tr>';
@@ -35,6 +59,5 @@ class MainController extends SimpleController {
     	}
     	echo $html;
     }
-
 
 }

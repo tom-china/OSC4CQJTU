@@ -18,10 +18,13 @@
 *    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. 	
 */
 
-namespace Home\Controller;
-use Think\Controller;
-class EmptyController extends SimpleController{
-    public function index(){
-        $this->redirect('Main/index');
-    }
+namespace Home\Model;
+use Think\Model;
+class OrderModel extends Model{
+
+   protected $_validate = array(
+     array('area','require','参数非法'),
+	 array('location','require','参数非法')
+   );
+   
 }
