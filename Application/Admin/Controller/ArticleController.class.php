@@ -78,10 +78,9 @@ class ArticleController extends SimpleController {
     	}
     }
     
-<<<<<<< HEAD
-=======
+
 	//ueditor
->>>>>>> origin/beta
+
     public function ueditor(){
     	if(!session('?admin'))$this->redirect('Main/index');
         $data = new \Org\Util\Ueditor();
