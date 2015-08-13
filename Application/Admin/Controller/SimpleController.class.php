@@ -42,24 +42,7 @@ class SimpleController extends Controller {
 
 			$database = M('order');
 
-<<<<<<< HEAD
-        $map['status'] = 0;
-        $count = $database->cache(true,60)->where($map)->count();
-        $this->assign('countTodo',$count); 
 
-        $map['status'] = 1;
-        $count = $database->cache(true,60)->where($map)->count();
-        $this->assign('countDoing',$count); 
-
-        $map['status'] = 2;
-        $count = $database->cache(true,60)->where($map)->count();
-        $this->assign('countDone',$count);
-
-        $map['time'] = array('gt',strtotime(date('Y-m-d')));
-        $map['status'] = array('neq',-1);//隐藏已取消报修的
-        $count = $database->cache(true,60)->where($map)->count();
-        $this->assign('countToday',$count);                      
-=======
 			$admin = M('admin')->where('username=:username')->bind(':username',session('admin'))->find();
 			$admin = json_decode($admin['location'],true);
 			if(!empty($admin['area']) && !empty($admin['building'])){
@@ -88,7 +71,7 @@ class SimpleController extends Controller {
 			$map['status'] = array('neq',-1);//隐藏已取消报修的
 			$count = $database->where($map)->count();
 			$this->assign('countToday',$count);                      
->>>>>>> origin/beta
+
         }
 		
     }
