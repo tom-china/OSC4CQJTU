@@ -98,7 +98,7 @@ ul.timeline p{
 		<li><b></b>报修类型<p>普通</p></li>
 		<li><b></b>报修区域<p>{:area($detail['area'])}</p></li>
 		<li><b></b>报修楼栋<p>{:building($detail['area'],$detail['building'])}</p></li>
-		<li><b></b>报修寝室<p>{$detail.location}</p></li>
+		<li><b></b>报修地点<p>{$detail.location}</p></li>
 		<li><b></b>报修物品<p>{$detail.good}</p></li>
 		<li><b></b>故障描述<p>{:empty($detail[description])?'无':$detail[description]}</p></li>
 		</case>
