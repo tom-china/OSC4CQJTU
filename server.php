@@ -28,7 +28,7 @@ if (!in_array(@$_SERVER['REMOTE_ADDR'], ['127.0.0.1', '::1'])) {
 
 // Check install status.
 if(!file_exists('./Application/install.lock')){
-	header('location: /install.php');
+	header('location: ./Website/install.php');
 	exit;	
 }
 
