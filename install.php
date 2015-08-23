@@ -205,15 +205,15 @@ include './Application/Common/Common/function.php';
 		mysql_select_db($config['DB_NAME']);
 		mysql_query("SET character_set_connection=utf8, character_set_results=utf8, character_set_client=binary");
 		mysql_query("SET sql_mode=''");		
-		$sql[]='CREATE TABLE `osc_admin` (`uid` int(11) unsigned NOT NULL AUTO_INCREMENT,`username` varchar(25) NOT NULL,`password` varchar(55) NOT NULL,`salt` varchar(25) NOT NULL,`lastip` varchar(25) DEFAULT NULL,`lasttime` int(11) DEFAULT NULL,`right` int(1) DEFAULT \'0\',`location` varchar(255) DEFAULT NULL,PRIMARY KEY (`uid`)) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;';
-		$sql[]='CREATE TABLE `osc_article` (`acid` int(11) unsigned NOT NULL AUTO_INCREMENT,`title` varchar(55) NOT NULL,`content` text NOT NULL,`time` int(11) NOT NULL,`author` varchar(20) NOT NULL,`view` int(11) DEFAULT \'0\',PRIMARY KEY (`acid`)) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;';
-		$sql[]='CREATE TABLE `osc_order` (`order` varchar(25) NOT NULL,`area` int(11) unsigned NOT NULL,`building` int(11) unsigned DEFAULT NULL,`location` varchar(25) NOT NULL,`good` varchar(25) DEFAULT NULL,`description` varchar(255) NOT NULL,`user` varchar(25) NOT NULL,`time` int(11) unsigned NOT NULL,`dotime` int(11) unsigned DEFAULT NULL,`donetime` int(11) unsigned DEFAULT NULL,`canceltime` int(11) unsigned DEFAULT NULL,`status` int(11) DEFAULT \'0\',`emerg` int(11) NOT NULL DEFAULT \'0\',`doctor` varchar(25) DEFAULT NULL,`repairer` varchar(25) DEFAULT NULL,PRIMARY KEY (`order`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
-		$sql[]='CREATE TABLE `osc_setting` (`key` varchar(25) NOT NULL,`value` text NOT NULL,PRIMARY KEY (`key`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
-		$sql[]='CREATE TABLE `osc_user` (`uid` varchar(25) NOT NULL,`username` varchar(25) DEFAULT NULL,`password` varchar(55) DEFAULT NULL,`area` int(11) DEFAULT NULL,`building` int(11) DEFAULT NULL,`location` varchar(25) DEFAULT NULL,`tel` varchar(25) DEFAULT NULL,`lastip` varchar(25) DEFAULT NULL,`lasttime` int(11) DEFAULT NULL,`salt` varchar(25) DEFAULT NULL,PRIMARY KEY (`uid`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
-		$sql[]='CREATE TABLE `osc_rank` (  `order` varchar(25) NOT NULL,  `content` varchar(255) NOT NULL,  `time` int(11) NOT NULL,  `type` int(1) NOT NULL,  `user` varchar(25) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
+		$sql[]='CREATE TABLE `osc_admin` (`uid` int(11) unsigned NOT NULL AUTO_INCREMENT,`username` varchar(25) NOT NULL,`password` varchar(55) NOT NULL,`salt` varchar(25) NOT NULL,`lastip` varchar(25) DEFAULT NULL,`lasttime` int(11) DEFAULT NULL,`right` int(1) DEFAULT \'0\',`location` varchar(255) DEFAULT NULL,PRIMARY KEY (`uid`),UNIQUE KEY `username` (`username`) USING BTREE) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;';
+		$sql[]='CREATE TABLE `osc_article` (`acid` int(11) unsigned NOT NULL AUTO_INCREMENT,`title` varchar(55) NOT NULL,`content` text NOT NULL,`time` int(11) NOT NULL,`author` varchar(20) NOT NULL,`view` int(11) DEFAULT \'0\',PRIMARY KEY (`acid`),KEY `acid` (`acid`) USING BTREE) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;';
+		$sql[]='CREATE TABLE `osc_order` (`order` varchar(25) NOT NULL,`area` int(11) unsigned NOT NULL,`building` int(11) unsigned DEFAULT NULL,`location` varchar(25) NOT NULL,`good` varchar(25) DEFAULT NULL,`description` varchar(255) NOT NULL,`user` varchar(25) NOT NULL,`time` int(11) unsigned NOT NULL,`dotime` int(11) unsigned DEFAULT NULL,`donetime` int(11) unsigned DEFAULT NULL,`canceltime` int(11) unsigned DEFAULT NULL,`status` int(11) DEFAULT \'0\',`emerg` int(11) NOT NULL DEFAULT \'0\',`doctor` varchar(25) DEFAULT NULL,`repairer` varchar(25) DEFAULT NULL,PRIMARY KEY (`order`),UNIQUE KEY `order` (`order`) USING BTREE) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
+		$sql[]='CREATE TABLE `osc_setting` (`key` varchar(25) NOT NULL,`value` text NOT NULL,PRIMARY KEY (`key`),KEY `key` (`key`) USING BTREE) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
+		$sql[]='CREATE TABLE `osc_user` (`uid` varchar(25) NOT NULL,`username` varchar(25) DEFAULT NULL,`password` varchar(55) DEFAULT NULL,`area` int(11) DEFAULT NULL,`building` int(11) DEFAULT NULL,`location` varchar(25) DEFAULT NULL,`tel` varchar(25) DEFAULT NULL,`lastip` varchar(25) DEFAULT NULL,`lasttime` int(11) DEFAULT NULL,`salt` varchar(25) DEFAULT NULL,PRIMARY KEY (`uid`),UNIQUE KEY `uid` (`uid`) USING BTREE) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
+		$sql[]='CREATE TABLE `osc_rank` (  `order` varchar(25) NOT NULL,  `content` varchar(255) NOT NULL,  `time` int(11) NOT NULL,  `type` int(1) NOT NULL,  `user` varchar(25) NOT NULL,KEY `order` (`order`),CONSTRAINT `osc_rank_ibfk_1` FOREIGN KEY (`order`) REFERENCES `osc_order` (`order`) ON DELETE CASCADE ON UPDATE CASCADE) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
 		foreach($sql as $k=>$v){
 			$v = str_replace('osc_', $config['DB_PREFIX'], $v);
-			mysql_query($v);
+			if(!mysql_query($v))showMsg(mysql_errno() . ": " . mysql_error());
 		}
 		mysql_query("INSERT INTO `{$config['DB_PREFIX']}admin` (`username`, `password`, `salt`, `right`) VALUES('{$user['username']}', '{$password}', '{$salt}', '1')");
 		//默认数据
@@ -286,11 +286,6 @@ $('button').click(function () {
     setTimeout(function(){
       $btn.button('reset');
   }, 5000);
-});
-</script>
-<script type="text/javascript">
-$(function() {
-	$(".am-topbar-nav").find("a[href='{:U()}']").parent().addClass('am-active');
 });
 </script>
 </body>
