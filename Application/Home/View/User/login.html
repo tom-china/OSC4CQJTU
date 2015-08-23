@@ -25,8 +25,8 @@
       <br>
       </if>
       <label for="verify">验证码:</label>
-      <img src="{:U('User/v')}" onclick="$(this).attr('src','{:U('User/v')}'+'?random='+Math.random())" class="am-img-responsive">
-      <input type="text" name="verify" id="verify" maxlength="5" placeholder="请输入验证码" required>
+      <img data-src="{:U('User/showVerify')}" onclick="$(this).attr('src','{:U('User/showVerify')}'+'?random='+Math.random())" class="am-img-responsive">
+      <input type="text" name="verify" id="verify" maxlength="5" placeholder="请输入验证码" onfocus="$(this).prev().attr('src',$(this).prev().data('src'))" required>
       <br>    
       <div class="am-btn-group am-btn-group-justify am-cf">
         <input type="submit" value="登 录" class="am-btn am-btn-primary am-radius am-fl">

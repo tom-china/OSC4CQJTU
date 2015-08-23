@@ -42,7 +42,6 @@ class SimpleController extends Controller {
 
 			$database = M('order');
 
-
 			$admin = M('admin')->where('username=:username')->bind(':username',session('admin'))->find();
 			$admin = json_decode($admin['location'],true);
 			if(!empty($admin['area']) && !empty($admin['building'])){
@@ -71,7 +70,6 @@ class SimpleController extends Controller {
 			$map['status'] = array('neq',-1);//隐藏已取消报修的
 			$count = $database->where($map)->count();
 			$this->assign('countToday',$count);                      
-
         }
 		
     }

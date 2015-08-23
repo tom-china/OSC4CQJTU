@@ -11,12 +11,19 @@ A simple Online Repair System based on ThinkPHP+AmazeUI
 - 工单分派、UCenter对接、工单评价
 
 ## 安装使用
+- 设置website为网站根目录
 - 运行install.php，按提示操作
 - 默认后台http://your_website/admin
 
 ## 注意事项
 - phpversion() >= 5.5
 - Application应用目录、Common/Conf配置目录、Uploads上传目录确定可写
+- 如需更改后台访问地址，可以设置模块映射，原模块名将不能访问
+```php
+'MODULE_ALLOW_LIST'    =>    array('Home','Test','User'),
+'DEFAULT_MODULE'       =>    'Home',
+'URL_MODULE_MAP'       =>    array('test'=>'admin'),
+```
 
 ## 参阅
 - [thinkphp](https://github.com/liu21st/thinkphp)

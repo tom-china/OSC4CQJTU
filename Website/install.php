@@ -21,14 +21,17 @@
 // Disable error reporting.
 error_reporting(0);
 
+// Check PHP version.
+if(version_compare(PHP_VERSION,'5.5.0','<'))  die('require PHP > 5.5.0 !');
+
 // Check install status.
-if(file_exists('./Application/install.lock')){
+if(file_exists('../Application/install.lock')){
 	header('location: ./index.php');
 	exit;	
 }
 
 // Include common functions.
-include './Application/Common/Common/function.php';
+include '../Application/Common/Common/function.php';
 ?>
 <!doctype html>
 <html class="no-js">
@@ -82,7 +85,7 @@ include './Application/Common/Common/function.php';
 	    <li>SSL（HTTPS）支持：<?=extension_loaded('openssl')?$success:$error?></li>
 	    <li>GD库支持：<?=extension_loaded('gd')?$success:$error?></li>
 	    <li>文件上传支持：<?=ini_get('file_uploads')?$success:$error?></li>
-	    <li>配置文件写入支持：<?=is_writeable('./Application/Common/Conf/config.php')?$success:$error?></li>
+	    <li>配置文件写入支持：<?=is_writeable('../Application/Common/Conf/config.php')?$success:$error?></li>
 	    <li>上传目录写入支持：<?=is_writeable('./Uploads')?$success:$error?></li>
 	    </ul>
 	    <p class="am-text-center">以上检测配置通过后即可进行下一步</p>	    
@@ -130,7 +133,7 @@ include './Application/Common/Common/function.php';
 					showMsg('您的数据库不为空，请重新建立数据库或是清空该数据库或更改表前缀！');
 				}
 			}
-			$config = include './Application/Common/Conf/config.php';		
+			$config = include '../Application/Common/Conf/config.php';		
 			$conf = array(
 			    'DB_TYPE'               =>  'mysql',
 			    'DB_HOST'               =>  $db['server'],
@@ -142,10 +145,8 @@ include './Application/Common/Common/function.php';
 			    'DB_CHARSET'            =>  'utf8',	
 				);
 			$c = array_merge($config,$conf);
-
 			$settingstr = "<?php \n return ".var_export($c ,TRUE).";\n?>";
-
-			file_put_contents('./Application/Common/Conf/config.php',$settingstr);
+			file_put_contents('../Application/Common/Conf/config.php',$settingstr);
 			header('location: ./install.php?step=2');		
 		}		
 		die;
@@ -199,7 +200,7 @@ include './Application/Common/Common/function.php';
 	<?php elseif($_GET['step']==2): ?>
 	<?php
 	if($_POST){
-		$config = include './Application/Common/Conf/config.php';
+		$config = include '../Application/Common/Conf/config.php';
 		$user = $_POST['user'];
 		$salt = salt();	
 		$password = sha1($config['DB_PREFIX'].$user['password'].'_'.$salt);
@@ -207,26 +208,24 @@ include './Application/Common/Common/function.php';
 		mysql_select_db($config['DB_NAME']);
 		mysql_query("SET character_set_connection=utf8, character_set_results=utf8, character_set_client=binary");
 		mysql_query("SET sql_mode=''");		
-		$sql[]='CREATE TABLE `osc_admin` (`uid` int(11) unsigned NOT NULL AUTO_INCREMENT,`username` varchar(25) NOT NULL,`password` varchar(55) NOT NULL,`salt` varchar(25) NOT NULL,`lastip` varchar(25) DEFAULT NULL,`lasttime` int(11) DEFAULT NULL,`right` int(1) DEFAULT \'0\',`location` varchar(255) DEFAULT NULL,PRIMARY KEY (`uid`)) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;';
-		$sql[]='CREATE TABLE `osc_article` (`acid` int(11) unsigned NOT NULL AUTO_INCREMENT,`title` varchar(55) NOT NULL,`content` text NOT NULL,`time` int(11) NOT NULL,`author` varchar(20) NOT NULL,`view` int(11) DEFAULT \'0\',PRIMARY KEY (`acid`)) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;';
-		$sql[]='CREATE TABLE `osc_order` (`order` varchar(25) NOT NULL,`area` int(11) unsigned NOT NULL,`building` int(11) unsigned DEFAULT NULL,`location` varchar(25) NOT NULL,`good` varchar(25) DEFAULT NULL,`description` varchar(255) NOT NULL,`user` varchar(25) NOT NULL,`time` int(11) unsigned NOT NULL,`dotime` int(11) unsigned DEFAULT NULL,`donetime` int(11) unsigned DEFAULT NULL,`canceltime` int(11) unsigned DEFAULT NULL,`status` int(11) DEFAULT \'0\',`emerg` int(11) NOT NULL DEFAULT \'0\',`doctor` varchar(25) DEFAULT NULL,`repairer` varchar(25) DEFAULT NULL,PRIMARY KEY (`order`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
-		$sql[]='CREATE TABLE `osc_setting` (`key` varchar(25) NOT NULL,`value` text NOT NULL,PRIMARY KEY (`key`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
-		$sql[]='CREATE TABLE `osc_user` (`uid` varchar(25) NOT NULL,`username` varchar(25) DEFAULT NULL,`password` varchar(55) DEFAULT NULL,`area` int(11) DEFAULT NULL,`building` int(11) DEFAULT NULL,`location` varchar(25) DEFAULT NULL,`tel` varchar(25) DEFAULT NULL,`lastip` varchar(25) DEFAULT NULL,`lasttime` int(11) DEFAULT NULL,`salt` varchar(25) DEFAULT NULL,PRIMARY KEY (`uid`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
-		$sql[]='CREATE TABLE `osc_rank` (  `order` varchar(25) NOT NULL,  `content` varchar(255) NOT NULL,  `time` int(11) NOT NULL,  `type` int(1) NOT NULL,  `user` varchar(25) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
+		$sql[]='CREATE TABLE `osc_admin` (`uid` int(11) unsigned NOT NULL AUTO_INCREMENT,`username` varchar(25) NOT NULL,`password` varchar(55) NOT NULL,`salt` varchar(25) NOT NULL,`lastip` varchar(25) DEFAULT NULL,`lasttime` int(11) DEFAULT NULL,`right` int(1) DEFAULT \'0\',`location` varchar(255) DEFAULT NULL,PRIMARY KEY (`uid`),UNIQUE KEY `username` (`username`) USING BTREE) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;';
+		$sql[]='CREATE TABLE `osc_article` (`acid` int(11) unsigned NOT NULL AUTO_INCREMENT,`title` varchar(55) NOT NULL,`content` text NOT NULL,`time` int(11) NOT NULL,`author` varchar(20) NOT NULL,`view` int(11) DEFAULT \'0\',PRIMARY KEY (`acid`),KEY `acid` (`acid`) USING BTREE) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;';
+		$sql[]='CREATE TABLE `osc_order` (`order` varchar(25) NOT NULL,`area` int(11) unsigned NOT NULL,`building` int(11) unsigned DEFAULT NULL,`location` varchar(25) NOT NULL,`good` varchar(25) DEFAULT NULL,`description` varchar(255) NOT NULL,`user` varchar(25) NOT NULL,`time` int(11) unsigned NOT NULL,`dotime` int(11) unsigned DEFAULT NULL,`donetime` int(11) unsigned DEFAULT NULL,`canceltime` int(11) unsigned DEFAULT NULL,`status` int(11) DEFAULT \'0\',`emerg` int(11) NOT NULL DEFAULT \'0\',`doctor` varchar(25) DEFAULT NULL,`repairer` varchar(25) DEFAULT NULL,PRIMARY KEY (`order`),UNIQUE KEY `order` (`order`) USING BTREE) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
+		$sql[]='CREATE TABLE `osc_setting` (`key` varchar(25) NOT NULL,`value` text NOT NULL,PRIMARY KEY (`key`),KEY `key` (`key`) USING BTREE) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
+		$sql[]='CREATE TABLE `osc_user` (`uid` varchar(25) NOT NULL,`username` varchar(25) DEFAULT NULL,`password` varchar(55) DEFAULT NULL,`area` int(11) DEFAULT NULL,`building` int(11) DEFAULT NULL,`location` varchar(25) DEFAULT NULL,`tel` varchar(25) DEFAULT NULL,`lastip` varchar(25) DEFAULT NULL,`lasttime` int(11) DEFAULT NULL,`salt` varchar(25) DEFAULT NULL,PRIMARY KEY (`uid`),UNIQUE KEY `uid` (`uid`) USING BTREE) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
+		$sql[]='CREATE TABLE `osc_rank` (  `order` varchar(25) NOT NULL,  `content` varchar(255) NOT NULL,  `time` int(11) NOT NULL,  `type` int(1) NOT NULL,  `user` varchar(25) NOT NULL,KEY `order` (`order`),CONSTRAINT `osc_rank_ibfk_1` FOREIGN KEY (`order`) REFERENCES `osc_order` (`order`) ON DELETE CASCADE ON UPDATE CASCADE) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
 		foreach($sql as $k=>$v){
 			$v = str_replace('osc_', $config['DB_PREFIX'], $v);
-			mysql_query($v);
+			if(!mysql_query($v))showMsg(mysql_errno() . ": " . mysql_error());
 		}
 		mysql_query("INSERT INTO `{$config['DB_PREFIX']}admin` (`username`, `password`, `salt`, `right`) VALUES('{$user['username']}', '{$password}', '{$salt}', '1')");
 		//默认数据
 		mysql_query("INSERT INTO `{$config['DB_PREFIX']}setting` VALUES ('area', '[\"\\\\u5357\\\\u5cb8\\\\u6821\\\\u533a\",\"\\\\u53cc\\\\u798f\\\\u6821\\\\u533a\"]');");
 		mysql_query("INSERT INTO `{$config['DB_PREFIX']}setting` VALUES ('building', '[{\"28\":{\"name\":\"\\\\u5357\\\\u5cb8\\\\u5b66\\\\u751f\\\\u5bbf\\\\u820d\",\"key\":\"11\"},\"29\":{\"name\":\"\\\\u5357\\\\u5cb8\\\\u6559\\\\u5ba4\",\"key\":\"12\"},\"30\":{\"name\":\"\\\\u5357\\\\u5cb8\\\\u529e\\\\u516c\\\\u697c\",\"key\":\"13\"},\"31\":{\"name\":\"\\\\u5357\\\\u5cb8\\\\u5916\\\\u73af\\\\u5883\",\"key\":\"14\"},\"32\":{\"name\":\"\\\\u5357\\\\u5cb8\\\\u5176\\\\u4ed6\",\"key\":\"15\"}},{\"13\":{\"name\":\"\\\\u53cc\\\\u798f\\\\u5b66\\\\u751f\\\\u5bbf\\\\u820d\",\"key\":\"21\"},\"14\":{\"name\":\"\\\\u53cc\\\\u798f\\\\u6559\\\\u5ba4\",\"key\":\"22\"},\"15\":{\"name\":\"\\\\u53cc\\\\u798f\\\\u529e\\\\u516c\\\\u697c\",\"key\":\"23\"},\"16\":{\"name\":\"\\\\u53cc\\\\u798f\\\\u5916\\\\u73af\\\\u5883\",\"key\":\"24\"},\"17\":{\"name\":\"\\\\u53cc\\\\u798f\\\\u5176\\\\u4ed6\",\"key\":\"25\"}}]');");
 		mysql_query("INSERT INTO `{$config['DB_PREFIX']}setting` VALUES ('copyright', '{\"buttom\":\"\",\"aboutus\":\"\",\"link\":\"\"}');");
-
 		mysql_query("INSERT INTO `{$config['DB_PREFIX']}setting` VALUES ('global', '{\"isopen\":\"true\",\"allowregister\":\"true\",\"quickreport\":\"false\",\"uclogin\":\"false\",\"allowrank\":\"true\"}');");
-
 		mysql_query("INSERT INTO `{$config['DB_PREFIX']}setting` VALUES ('tips', '{\"login\":\"\",\"register\":\"\",\"report\":\"\",\"emerg\":\"\",\"detail\":\"\"}');");
-		touch('./Application/install.lock');
+		touch('../Application/install.lock');
 		header('location: ./index.php');
 	}
 	?>
@@ -290,11 +289,6 @@ $('button').click(function () {
     setTimeout(function(){
       $btn.button('reset');
   }, 5000);
-});
-</script>
-<script type="text/javascript">
-$(function() {
-	$(".am-topbar-nav").find("a[href='{:U()}']").parent().addClass('am-active');
 });
 </script>
 </body>

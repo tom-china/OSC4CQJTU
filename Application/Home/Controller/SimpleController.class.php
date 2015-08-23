@@ -46,6 +46,5 @@ class SimpleController extends Controller {
 		 
 		//加载版权信息
         $this->assign('copyright',F('settings')['copyright']);   
-
     }        
 }

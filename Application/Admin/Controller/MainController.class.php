@@ -30,15 +30,15 @@ class MainController extends SimpleController {
                 $this->error($database->getError(),U('Main/index')); 
             } 	
 			if(!$this->checkVerify(I('post.verify'))){
-				$this->error('验证码错误',U('Main/index'));
+				$this->error('验证码错误');
 			}
             $bind[':username'] = I('post.username'); 
             $admin = $database->where('username=:username')->bind($bind)->find();             		
-    		if(empty($admin))$this->error('用户不存在',U('Main/index'));
+    		if(empty($admin))$this->error('用户不存在');
     		$bind[':password'] = sha1(C('DB_PREFIX').I('post.password').'_'.$admin['salt']);
     		$admin = $database->where('username=:username and password=:password')->bind($bind)->find();
     		if(empty($admin)){
-    			$this->error('密码错误',U('Main/index'));
+    			$this->error('密码错误');
     		}else{
 	            session('admin',$admin['username']);
                 session('right',$admin['right']);
@@ -114,7 +114,7 @@ class MainController extends SimpleController {
         if(IS_POST){
             $database = M('admin');
             if (!$database->autoCheckToken($_POST)){
-                $this->error('令牌验证错误',U('Main/setting'));
+                $this->error('令牌验证错误');
             }           
             $bind[':username'] = session('admin');
             $admin = $database->where('username=:username')->bind($bind)->find();
@@ -179,7 +179,8 @@ class MainController extends SimpleController {
 			$this->display('admin-setting');			
 		}
     }
-
+	
+	//全局设置
     public function setGlobal(){
     	if(!session('?admin'))$this->redirect('Main/index');
     	if(session('right')!=1)$this->error('访问无权限');
@@ -206,6 +207,7 @@ class MainController extends SimpleController {
         }
     }    
 
+	//提示设置
     public function setTips(){
     	if(!session('?admin'))$this->redirect('Main/index');
     	if(session('right')!=1)$this->error('访问无权限');
@@ -229,6 +231,7 @@ class MainController extends SimpleController {
     	}
     }
 
+	//版权设置
     public function setCopyright(){
     	if(!session('?admin'))$this->redirect('Main/index');
     	if(session('right')!=1)$this->error('访问无权限');
@@ -258,16 +261,16 @@ class MainController extends SimpleController {
     	$this->redirect('Main/index');
     }
 
-    //中文验证码
-    public function v(){
+    //验证码
+    public function showVerify(){
 		$Verify =     new \Think\Verify();
-		// 验证码字体使用 ThinkPHP/Library/Think/Verify/ttfs/5.ttf
+		//中文验证码字体使用 ThinkPHP/Library/Think/Verify/ttfs/5.ttf
 		//$Verify->useZh = true; 
 		$Verify->entry();    	
     }
 
 	// 检测输入的验证码是否正确，$code为用户输入的验证码字符串
-	public function checkVerify($code, $id = ''){
+	private function checkVerify($code, $id = ''){
 		$verify = new \Think\Verify();
 		return $verify->check($code, $id);
 	}

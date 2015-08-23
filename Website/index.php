@@ -18,17 +18,29 @@
 *    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. 	
 */
 
-// Check install status.
-if(!file_exists('./Application/install.lock')){
-	header('location: /install.php');
-	exit;	
-}
-
 // Check PHP version.
 if(version_compare(PHP_VERSION,'5.5.0','<'))  die('require PHP > 5.5.0 !');
 
-// Define debug mode, applicaton path.
-define('APP_DEBUG',false);define('APP_PATH','./Application/');
+// Check install status.
+if(!file_exists('../Application/install.lock')){
+	header('location: ./install.php');
+	exit;	
+}
+
+// Check the runtime lite file status.
+if(!file_exists('../Application/Runtime/lite.php')){
+	
+// Define debug mode, applicaton path and others.
+define('APP_DEBUG',false);define('APP_PATH','../Application/');define('BUILD_LITE_FILE',true);
+define('DIR_SECURE_FILENAME', 'index.html,index.htm');define('DIR_SECURE_CONTENT', 'deny Access!');
 
 // Execute the application.
-require './ThinkPHP/ThinkPHP.php';
+require '../ThinkPHP/ThinkPHP.php';
+
+}else{
+	
+// Execute the runtime lite file.
+require '../Application/Runtime/lite.php';
+	
+}
+

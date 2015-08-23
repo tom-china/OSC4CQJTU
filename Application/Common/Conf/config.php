@@ -12,12 +12,12 @@
 	'DEFAULT_JSONP_HANDLER'=>'jsonpReturn',
 	'DEFAULT_FILTER'=>'htmlspecialchars,trim',
 	'DB_TYPE'=>'mysql',
-	//'DB_HOST'=>'127.0.0.1',
-	//'DB_USER'=>'root',
-	//'DB_PWD'=>'',
-	//'DB_NAME'=>'',
-	//'DB_PORT'=>'3306',
-	//'DB_PREFIX'=>'',
+	'DB_HOST'=>'127.0.0.1',
+	'DB_USER'=>'root',
+	'DB_PWD'=>'',
+	'DB_NAME'=>'',
+	'DB_PORT'=>'3306',
+	'DB_PREFIX'=>'',
 	'DB_CHARSET'=>'utf8',
 	'URL_MODEL'=>'2',
 	'URL_HTML_SUFFIX'=>'html',
@@ -27,11 +27,12 @@
 	'TOKEN_ON'=>'1',
 	'TOKEN_NAME'=>'__hash__',
 	'TOKEN_TYPE'=>'md5',
-	'TOKEN_RESET'=>'1',
+	'TOKEN_RESET'=>'0',
 	'DATA_CACHE_KEY'=>'think',
 	'HTML_CACHE_ON'=>'1',
 	'HTML_CACHE_TIME'=>'60',
 	'HTML_FILE_SUFFIX'=>'.html',
 	'DB_SQL_BUILD_CACHE'=>'1',
-	'DB_SQL_BUILD_LENGTH'=>'20'	
+	'DB_SQL_BUILD_LENGTH'=>'20'
 );
+?>

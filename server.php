@@ -18,26 +18,22 @@
 *    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. 	
 */
 
-namespace Home\Controller;
-use Think\Controller;
-class ArticleController extends SimpleController {
-	//公告列表
-    public function index(){
-    	$database = M('article');
-    	$list = $database->order('time desc')->page(I('get.p').',5')->select();
-    	$count = $database->count();
-    	$page = pagination($count);
-    	$this->assign('page',$page);
-    	$this->assign('list',$list);
-        $this->display('blog');
-    }
-	
-	//公告详情
-    public function show(){
-     	$database = M('article');
-    	$article = $database->where('acid=:acid')->bind(':acid',I('get.acid/d'))->find();
-    	$this->assign('article',$article);
-    	$view = $database->where('acid=:acid')->bind(':acid',I('get.acid/d'))->setInc('view',1,60);
-        $this->display('show');   	
-    }
+// Check PHP version.
+if(version_compare(PHP_VERSION,'5.5.0','<'))  die('require PHP > 5.5.0 !');
+
+// NOTE: Make sure this file is not accessible when deployed to production
+if (!in_array(@$_SERVER['REMOTE_ADDR'], ['127.0.0.1', '::1'])) {
+    die('You are not allowed to access this file.');
 }
+
+// Check install status.
+if(!file_exists('./Application/install.lock')){
+	header('location: /install.php');
+	exit;	
+}
+
+// Define debug mode, applicaton path.
+define('APP_DEBUG',true);define('APP_PATH','./Application/');define('BUILD_LITE_FILE',true);
+
+// Execute the application.
+require './ThinkPHP/ThinkPHP.php';

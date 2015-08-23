@@ -147,7 +147,7 @@ class ReportController extends SimpleController {
             }
 			$data['order'] = I('get.order');
 			$order = M('order')->where($data)->find();
-			if(time()-$order['time']>3600*24*3)$this->error('评价超时');
+			if(time()-$order['time']>3600*24*3)$this->error('评价超时关闭');
 			if(session('?uid') and I('get.type')==0){
 				$data['user']=session('uid');
 				if(session('uid') != $order['user'])$this->error('操作无权限');
@@ -181,6 +181,7 @@ class ReportController extends SimpleController {
 		if(IS_POST && IS_AJAX){
 			$data['order'] = I('post.order');
 			$order = M('order')->where($data)->find();	
+			if(time()-$order['time']>3600*24*3)$this->error('评价超时关闭');
 			if(session('?uid') && session('uid') != $order['user'])$this->error('操作无权限');
 			if(!session('?admin') and I('post.type')==1)$this->error('操作无权限');
 			$data['type'] = I('post.type');
