@@ -87,13 +87,13 @@ class TaskController extends SimpleController {
             }
             //按时间搜索
             if(!empty(I('post.startDate')) && !empty(I('post.endDate'))){
-                $map['time'] = array(array('gte',strtotime(I('post.startDate'))),array('lte',strtotime(I('post.endDate'))));
+                $map['time'] = array(array('egt',strtotime(I('post.startDate'))),array('elt',strtotime(I('post.endDate'.' 23:59:59'))));
             }
             elseif(!empty(I('post.startDate'))){
-                $map['time'] = array('gte',strtotime(I('post.startDate')));
+                $map['time'] = array('egt',strtotime(I('post.startDate')));
             }
             elseif(!empty(I('post.endDate'))){
-                $map['time'] = array('lte',strtotime(I('post.endDate')));
+                $map['time'] = array('elt',strtotime(I('post.endDate'.' 23:59:59')));
             }
             $map['status'] = 0;
             if(!empty(I('get.emerg/d')))$map['emerg'] = I('get.emerg/d');
