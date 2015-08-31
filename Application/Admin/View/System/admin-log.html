@@ -1,0 +1,31 @@
+<include file="Public/header" />
+
+<include file="Public/topbar" />
+
+<div class="am-cf admin-main">
+  <!-- sidebar start -->
+<include file="Public/sidebar" />
+  <!-- sidebar end -->
+
+  <!-- content start -->
+  <div class="admin-content">
+
+    <div class="am-cf am-padding">
+      <div class="am-fl am-cf"><strong class="am-text-primary am-text-lg">错误日志</strong> / <small>Error Log</small></div>
+    </div>
+
+    <div class="am-g error-log">
+      <div class="am-u-sm-12 am-u-sm-centered">
+		<pre class="am-pre-scrollable">
+		{$log|default="系统完美运行中，什么也问题都没有：）"}
+		</pre>
+          <hr />
+          <p>后勤在线服务中心 Online Service Center</p>
+
+      </div>
+
+    </div>
+  </div>
+  <!-- content end -->
+</div>
+<include file="Public/footer" />

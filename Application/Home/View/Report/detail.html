@@ -1,61 +1,6 @@
 <include file="Public/header" />
 <style>
-.scrollspy-nav{
-	top:0;z-index:100;
-	background:#0e90d2;
-	width:100%;
-	padding:0 10px
-}
-.scrollspy-nav ul{
-	margin:0;padding:0
-}
-.scrollspy-nav li{
-	display:inline-block;
-	list-style:none
-}
-.scrollspy-nav a{
-	color:#eee;
-	padding:10px 20px;
-	display:
-	inline-block
-}
-.scrollspy-nav a.am-active{
-	color:#fff;
-	font-weight:700
-}
-.am-panel{
-	margin-top:20px
-}
-ul.timeline {
-	margin-left:25px;
-	border-left:2px solid #ddd;
-	margin-bottom: 0px;
-    padding-top: 25px;
-    padding-bottom: 25px;	
-}
-ul.timeline li{
-	margin-left:-42px;
-	list-style:none;
-}
-ul.timeline b{
-	width:8px;
-	height:8px;
-	background:#fff;
-	border:2px solid #555;
-	margin-left:5px;
-	margin-right:10px;
-	margin-top:10px;
-	border-radius:6px;
-	-webkit-border-radius:6px;
-	-moz-border-radius:6px;
-	overflow:hidden;
-	display:inline-block;
-	float:left;
-}
-ul.timeline p{
-	padding-left:22px;
-	line-height:0px;
-}
+.scrollspy-nav{top:0;z-index:100;background:#0e90d2;width:100%;padding:0 10px}.scrollspy-nav ul{margin:0;padding:0}.scrollspy-nav li{display:inline-block;list-style:none}.scrollspy-nav a{color:#eee;padding:10px 20px;display:inline-block}.scrollspy-nav a.am-active{color:#fff;font-weight:700}.am-panel{margin-top:20px}ul.timeline{margin-left:25px;border-left:2px solid #ddd;margin-bottom:0;padding-top:25px;padding-bottom:25px}ul.timeline li{margin-left:-42px;list-style:none}ul.timeline b{width:8px;height:8px;background:#fff;border:2px solid #555;margin-left:5px;margin-right:10px;margin-top:10px;border-radius:6px;-webkit-border-radius:6px;-moz-border-radius:6px;overflow:hidden;display:inline-block;float:left}ul.timeline p{padding-left:22px;line-height:0}
 </style>
 <include file="Public/nav" />
 
@@ -67,7 +12,7 @@ ul.timeline p{
 </div>
 </notempty>
 <div class="am-panel am-panel-default">
-  <div class="am-panel-hd">工单进度</div>
+  <div class="am-panel-hd">工单进度<span class="am-fr am-icon-copy"> 复制</span></div>
   <div class="am-panel-bd" style="padding:0">
   <ul class="timeline">
   <if condition="!empty($detail['canceltime'])" >
@@ -90,7 +35,7 @@ ul.timeline p{
 <div class="am-g">
 <div class="am-u-md-6">
 	<div class="am-panel am-panel-default">
-	  <div class="am-panel-hd">报修信息</div>
+	  <div class="am-panel-hd">报修信息<span class="am-fr am-icon-copy"> 复制</span></div>
 	  <div class="am-panel-bd" style="padding:0">
 		<ul class="timeline">
 		<switch name="detail.emerg">
@@ -115,7 +60,7 @@ ul.timeline p{
 </div>
 <div class="am-u-md-6">
 	<div class="am-panel am-panel-default">
-	  <div class="am-panel-hd">用户信息</div>
+	  <div class="am-panel-hd">用户信息<span class="am-fr am-icon-copy"> 复制</span></div>
 	  <div class="am-panel-bd" style="padding:0">
 	    <ul class="timeline">
 		<if condition="($user['uid'] eq session('uid')) or session('?admin')">
@@ -149,7 +94,7 @@ ul.timeline p{
 	<form action="{:U('Report/rank',array('order'=>I('get.order'),'type'=>0))}" method="post" class="am-form am-form-horizontal">
 	  <fieldset>
 		<div class="am-input-group">
-		  <input type="text" class="am-form-field" name="content" placeholder="说点什么...">
+		  <input type="text" class="am-form-field" name="content" placeholder="说点什么...（仅显示最新评价）">
 		  <span class="am-input-group-btn">
 			<button class="am-btn am-btn-default" type="submit">用户评价</button>
 		  </span>
@@ -213,7 +158,7 @@ ul.timeline p{
 	<form action="{:U('Report/rank',array('order'=>I('get.order'),'type'=>1))}" method="post"  class="am-form am-form-horizontal">
 	  <fieldset>
 		<div class="am-input-group">
-		  <input type="text" class="am-form-field" name="content" placeholder="说点什么...">
+		  <input type="text" class="am-form-field" name="content" placeholder="说点什么...（仅显示最新回复）">
 		  <span class="am-input-group-btn">
 			<button class="am-btn am-btn-default" type="submit">管理员回复</button>
 		  </span>
@@ -252,57 +197,43 @@ ul.timeline p{
 </div>
 
 <script>
-  function modal_alert(string){
-  	$('#alert').find('.am-modal-bd').text(string);
-    $('#alert').modal();
-  }
-
-  function modal_confirm(string,config){
-   	$('#confirm').find('.am-modal-bd>span').text(string);
-    $('#confirm').modal({
-    	relatedTarget: this,
-    	onConfirm: function(options) {
-		     $.ajax({
-		      'type':'post',
-		      'url':"{:U('"+config.action+"')}",
-		      'data':{order:'{:I('get.order')}',type:config.obj.data('type')},
-		      'dataType':'json',
-		      success:function(res){
-		            modal_alert(res.info);
-		      },
-		      error:function(res){
-		          modal_alert(config.error);
-		      }
-		    });   		
-    	},
-    	onCancel: function() {
-
-    	}	
-    });
-  }
-  
-  $('.am-icon-close').click(function(){
-    var string = '';
-    var config = {
-	  obj:$(this),
-      action:'rankDel',
-      error:'网络错误'
-    };
-    modal_confirm(string,config);
-  });
-  
-	<if condition="!empty(cookie('think_last_rank'))">
-	var time = 60;
-	var interval = setInterval(function(){
-		time--;
-		$("button[type=submit]").attr('disabled','disabled').text(time);
-		if(time <= 0) {
-			$("button[type=submit]").removeAttr('disabled').text('提 交');
-			clearInterval(interval);
-		};
-	}, 1000);	
-	</if>  
+function modal_alert(string){$('#alert').find('.am-modal-bd').text(string);$('#alert').modal()}function modal_confirm(string,config){$('#confirm').find('.am-modal-bd>span').text(string);$('#confirm').modal({relatedTarget:this,onConfirm:function(options){$.ajax({'type':'post','url':"<?=U('"+config.action+"')?>",'data':{order:'<?=I('get.order')?>',type:config.obj.data('type')},'dataType':'json',success:function(res){modal_alert(res.info)},error:function(res){modal_alert(config.error)}})},onCancel:function(){}})}$('.am-icon-close').click(function(){var string='';var config={obj:$(this),action:'rankDel',error:'网络错误'};modal_confirm(string,config)});
+<if condition="!empty(cookie('think_last_rank'))">var time=60;var interval=setInterval(function(){time--;$("button[type=submit]").attr('disabled','disabled').text(time);if(time<=0){$("button[type=submit]").removeAttr('disabled').text('提 交');clearInterval(interval)}},1000);</if>  
 </script>
 </if>
+<script type="text/javascript" src="__PUBLIC__/resource/js/jquery.zclip.min.js"></script>
+<script>
+$('.am-icon-copy').zclip({
+	path: '__PUBLIC__/resource/js/ZeroClipboard.swf',
+	copy: function() {
+		return $.trim($(this).parent().next().text());
+	},
+	afterCopy: function(){
+		var data = new Object(); 
+		data.name = "嗨，骚年!";
+		data.tag = "OSC4CQJTU";
+		data.icon = "__PUBLIC__/resource/images/app-icon72x72@2x.png";
+		data.body = "你要捏信息已经复制到剪贴板，粘去吧 ^_^";
+		showNotification(data);
+	}	
+});
+
+function showNotification(data){
+	Notification.requestPermission(function(perm) {
+		if (perm == "granted") {
+			var notification = new Notification(data.name, {
+				tag: data.tag,
+				icon: data.icon,
+				body: data.body
+			});
+			notification.onshow = function() {
+				setTimeout(function() {
+					notification.close();
+				}, 10000);
+			}
+		}
+	})
+}
+</script>
 <script>$('#qrcode').qrcode({text:location.href,width:96,height:96,correctLevel:1});</script>
 <include file="Public/footer" />

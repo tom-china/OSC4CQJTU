@@ -40,16 +40,24 @@
           <table class="am-table am-table-striped am-table-hover table-main">
             <thead>
               <tr>
-                <th class="table-check"><input type="checkbox" class="check-all" /></th><th class="table-id">ID</th><th class="table-title">标题</th><th class="table-date am-hide-sm-only">修改日期</th><th class="table-set">操作</th>
+                <th class="table-check"><input type="checkbox" class="check-all" /></th>
+				<th class="">ID</th>
+				<th class="table-title">标题</th>
+				<th class="table-author">发布者</th>
+				<th class="table-date am-hide-sm-only">修改日期</th>
+				<th class="">浏览</th>
+				<th class="table-set">操作</th>
               </tr>
           </thead>
           <tbody>
           <foreach name="list" item="vo" key="k" >
             <tr>
-              <td><input type="checkbox" name="id[]" value="{$vo.acid}" class="ids" /></td>
+              <td><input type="checkbox" name="acid[]" value="{$vo.acid}" class="ids" /></td>
               <td>{$vo.acid}</td>
               <td><a target="_blank" href="{:U('Home/Article/show',array('acid'=>$vo['acid']))}">{$vo.title}</a></td>
+			  <td>{$vo.author}</td>
               <td class="am-hide-sm-only">{:date('Y-m-d H:i:s',$vo['time'])}</td>
+			  <td>{$vo.view}</td>
               <td>
                 <div class="am-btn-toolbar">
                   <div class="am-btn-group am-btn-group-xs">
@@ -77,33 +85,32 @@
   <!-- content end -->
 </div>
 <script>
-$(function(){
-  //全选的实现
-  $(".check-all").click(function(){
-    $(".ids").prop("checked", this.checked);
-  });
-  $(".ids").click(function(){
-    var option = $(".ids");
-    option.each(function(i){
-      if(!this.checked){
-        $(".check-all").prop("checked", false);
-        return false;
-      }else{
-        $(".check-all").prop("checked", true);
-      }
-    });
-  });
-  $('.am-table>tbody>tr>td:gt(0)').click(function(){
-    $(this).parent().find('.ids').click();
-  });
-  $('#Del').click(function(){	
-    var string = '';
-    var config = {
-      action:'del',
-      error:'网络错误'
-    };
-    modal_confirm(string,config);	
-  });   
+$(function() {
+	$(".check-all").click(function() {
+		$(".ids").prop("checked", this.checked)
+	});
+	$(".ids").click(function() {
+		var option = $(".ids");
+		option.each(function(i) {
+			if (!this.checked) {
+				$(".check-all").prop("checked", false);
+				return false
+			} else {
+				$(".check-all").prop("checked", true)
+			}
+		})
+	});
+	$('.am-table>tbody>tr>td:gt(0)').click(function() {
+		$(this).parent().find('.ids').click()
+	});
+	$('#Del').click(function() {
+		var string = '';
+		var config = {
+			action: 'del',
+			error: '网络错误'
+		};
+		modal_confirm(string, config)
+	})
 })
 </script>
 <include file="Public/footer" />

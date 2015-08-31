@@ -62,38 +62,35 @@
 <![endif]-->
 <if condition="session('?admin')">
 <script type="text/javascript">
-  $(function() {
-	$("#{:CONTROLLER_NAME}").addClass('am-in');
-  });
+$(function() {
+	$("#<?=CONTROLLER_NAME?>").addClass('am-in')
+});
 
-  function modal_alert(string){
-  	$('#alert').find('.am-modal-bd').text(string);
-    $('#alert').modal();
-  }
-
-  function modal_confirm(string,config){
-   	$('#confirm').find('.am-modal-bd>span').text(string);
-    $('#confirm').modal({
-    	relatedTarget: this,
-    	onConfirm: function(options) {
-		     $.ajax({
-		      'type':'post',
-		      'url':"{:U('"+config.action+"')}",
-		      'data':$('form').serialize(),
-		      'dataType':'json',
-		      success:function(res){
-		          modal_alert(res.info);
-		      },
-		      error:function(res){
-		          modal_alert(config.error);
-		      }
-		    });   		
-    	},
-    	onCancel: function() {
-
-    	}	
-    }); 	
-  }
+function modal_alert(string) {
+	$('#alert').find('.am-modal-bd').text(string);
+	$('#alert').modal()
+}
+function modal_confirm(string, config) {
+	$('#confirm').find('.am-modal-bd>span').text(string);
+	$('#confirm').modal({
+		relatedTarget: this,
+		onConfirm: function(options) {
+			$.ajax({
+				'type': 'post',
+				'url': "<?=U('" + config.action + "')?>",
+				'data': $('form').serialize(),
+				'dataType': 'json',
+				success: function(res) {
+					modal_alert(res.info)
+				},
+				error: function(res) {
+					modal_alert(config.error)
+				}
+			})
+		},
+		onCancel: function() {}
+	})
+}
 </script>
 <script src="__PUBLIC__/assets/js/app.js"></script>
 </if>

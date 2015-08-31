@@ -32,7 +32,7 @@
 
     <div class="am-form-group">
       <label for="tel">联系电话：</label>
-      <input type="text" id="tel" name="tel" placeholder="请输入联系电话" value="{$user['tel']}" required/>
+      <input type="text" id="tel" name="tel" placeholder="请输入11位国内手机电话号码" class="js-pattern-mobile" value="{$user['tel']}" required/>
     </div>    
 
     <div class="am-form-group">
@@ -51,61 +51,57 @@
 </div>
 <script type="text/javascript" src="__PUBLIC__/assets/js/jquery.city.select.js"></script>
 <script type="text/javascript">
-$(function () {
+$(function() {
+	var data = {$data};
+	$('#province, #city').citylist({
+		data: data,
+		id: 'id',
+		children: 'citys',
+		name: 'name',
+		metaTag: 'name'
+	});
 
-    var data = {$data};
-
-    $('#province, #city').citylist({data:data, id:'id', children:'citys',name:'name',metaTag:'name'});
-    window.prettyPrint && prettyPrint();
 });
-
-  if ($.AMUI && $.AMUI.validator) {
-    $.AMUI.validator.patterns.mobile = /^\s*1\d{10}\s*$/;
-  }
-
-  $('form').validator({
-    onValid: function(validity) {
-      $(validity.field).closest('.am-form-group').find('.am-alert').hide();
-    },
-
-    onInValid: function(validity) {
-      var $field = $(validity.field);
-      var $group = $field.closest('.am-form-group');
-      var $alert = $group.find('.am-alert');
-      // 使用自定义的提示信息 或 插件内置的提示信息
-      var msg = $field.data('validationMessage') || this.getValidationMessage(validity);
-
-      if (!$alert.length) {
-        $alert = $('<div class="am-alert am-alert-danger"></div>').hide().
-          appendTo($group);
-      }
-
-      $alert.html(msg).show();
-    }
-  });
-
-  var timer = setInterval(function(){
-    $('#province').find('option[value="{$user['area']}"]').attr('selected',true);
-    if (!$.AMUI.support.mutationobserver) {
-      $('#province').trigger('changed.selected.amui');
-    }
-    $('#city').find('option[value="{$user['building']}"]').attr('selected', true);
-    if (!$.AMUI.support.mutationobserver) {
-      $('#city').trigger('changed.selected.amui');
-    }    
-    clearInterval(timer);
-  },100);
-  
-	<if condition="!empty(cookie('think_last_report'))">
-	var time = 60;
-	var interval = setInterval(function(){
-		time--;
-		$("fieldset>button[type=submit]").attr('disabled','disabled').text(time);
-		if(time <= 0) {
-			$("fieldset>button[type=submit]").removeAttr('disabled').text('提 交');
-			clearInterval(interval);
-		};
-	}, 1000);	
-	</if>
+if ($.AMUI && $.AMUI.validator) {
+	$.AMUI.validator.patterns.mobile = /^1((3|5|8){1}\d{1}|70)\d{8}$/
+}
+$('form').validator({
+	onValid: function(validity) {
+		$(validity.field).closest('.am-form-group').find('.am-alert').hide()
+	},
+	onInValid: function(validity) {
+		var $field = $(validity.field);
+		var $group = $field.closest('.am-form-group');
+		var $alert = $group.find('.am-alert');
+		var msg = $field.data('validationMessage') || this.getValidationMessage(validity);
+		if (!$alert.length) {
+			$alert = $('<div class="am-alert am-alert-danger"></div>').hide().appendTo($group)
+		}
+		$alert.html(msg).show()
+	}
+});
+var timer = setInterval(function() {
+	$('#province').find('option[value="{$user['area']}"]').attr('selected', true);
+	if (!$.AMUI.support.mutationobserver) {
+		$('#province').trigger('changed.selected.amui')
+	}
+	$('#city').find('option[value="{$user['
+	building ']}"]').attr('selected', true);
+	if (!$.AMUI.support.mutationobserver) {
+		$('#city').trigger('changed.selected.amui')
+	}
+	clearInterval(timer)
+}, 100); 
+<if condition="!empty(cookie('think_last_report'))">
+var time = 60;
+var interval = setInterval(function() {
+	time--;
+	$("fieldset>button[type=submit]").attr('disabled', 'disabled').text(time);
+	if (time <= 0) {
+		$("fieldset>button[type=submit]").removeAttr('disabled').text('提 交');
+		clearInterval(interval)
+	}
+}, 1000); 
+</if>
 </script>
 <include file="Public/footer" />

@@ -1,5 +1,5 @@
 <include file="Public/header" />
-
+<link rel="stylesheet" href="__PUBLIC__/assets/css/amazeui.datatables.min.css"/>
 <include file="Public/topbar" />
 
 <div class="am-cf admin-main">
@@ -21,7 +21,7 @@
             <button id="markTodo" type="button" class="am-btn am-btn-default"><span class="am-icon-save"></span> 标记为未处理</button>
             <button id="markDoing" type="button" class="am-btn am-btn-default"><span class="am-icon-archive"></span> 标记为处理中</button>
             <button id="markDel" type="button" class="am-btn am-btn-default"><span class="am-icon-trash-o"></span> 删除</button>
-            <a class="am-btn am-btn-default" href="__SELF__?action=export" target="_blank"><span class="am-icon-file-excel-o"></span> 导出</a>
+            <a class="am-btn am-btn-default" href="<?php $_GET['action']='export';echo '__ACTION__?'.http_build_query($_GET); ?>" target="_blank"><span class="am-icon-file-excel-o"></span> 导出</a>
           </div>
         </div>
       </div>
@@ -48,9 +48,10 @@
 
       <div class="am-u-sm-12 am-u-md-3">
         <div class="am-input-group am-input-group-sm">
-          <input type="text" name="order" placeholder="输入工单号" class="am-form-field">
-          <input type="hidden" name="startDate" id="startDate">
-          <input type="hidden" name="endDate" id="endDate">
+          <input type="text" name="ordersn" placeholder="输入工单号" class="am-form-field">
+          <input type="hidden" name="startDate" id="startDate" value="{:I('get.startDate')}">
+          <input type="hidden" name="endDate" id="endDate" value="{:I('get.endDate')}">
+          <input type="hidden" name="emerg" id="emerg" value="{:I('get.emerg')}">
           <span class="am-input-group-btn">
             <button class="am-btn am-btn-default" type="submit">搜索</button>
           </span>
@@ -60,100 +61,118 @@
     </div>
 
 	<div class="am-g">
-	  <div class="am-u-sm-6">
-	   <div class="am-btn-group am-btn-group-xs">		  
-	    <button type="button" class="am-btn am-btn-default am-margin-right" id="my-start">开始日期</button><span id="my-startDate">{:empty(I('get.startDate'))?'不限':I('get.startDate')}</span>
-	   </div>		
-	  </div>
-	  <div class="am-u-sm-6">
-	   <div class="am-btn-group am-btn-group-xs">		  
-	    <button type="button" class="am-btn am-btn-default am-margin-right" id="my-end">结束日期</button><span id="my-endDate">{:empty(I('get.endDate'))?'至今':I('get.endDate')}</span>
-	   </div>		
-	  </div>
+    <div class="am-u-sm-4">
+	 <div class="am-btn-group am-btn-group-xs">		
+      <button type="button" class="am-btn am-btn-default am-margin-right" id="my-start">开始日期</button><span id="my-startDate">{:empty(I('get.startDate'))?'不限':I('get.startDate')}</span>
+	 </div>		  
+    </div>
+    <div class="am-u-sm-4">
+	 <div class="am-btn-group am-btn-group-xs">		
+      <button type="button" class="am-btn am-btn-default am-margin-right" id="my-end">结束日期</button><span id="my-endDate">{:empty(I('get.endDate'))?'至今':I('get.endDate')}</span>
+	 </div>		  
+    </div>
+    <div class="am-u-sm-4">
+	 <div class="am-btn-group am-btn-group-xs">	
+      <button type="button" class="am-btn am-btn-default <if condition="I('get.emerg')==1">am-active</if>" id="my-emerg">紧急报修</button>
+	 </div>	  
+    </div>
 	</div>    
-
+<style>.am-datatable-hd{display:none}</style>
     <div class="am-g">
       <div class="am-u-sm-12">
         <form class="am-form">
-          <table class="am-table am-table-striped am-table-hover table-main">
-            <thead>
-              <tr>
-                <th class="table-check"><input type="checkbox" class="check-all"/></th>
-                <th class="table-type">工单号</th>
-                <th class="table-title am-hide-sm-only">区域</th>
-                <th class="table-type">楼栋</th>
-                <th class="table-author">地点</th>
-                <th class="table-date am-hide-sm-only">日期</th>
-                <th class="table-author am-hide-sm-only">报修人</th>
-                <th class="table-author">物品</th>
-                <th class="table-id am-hide-sm-only">描述</th>
-                <th class="table-author am-hide-sm-only">维修人</th>
-              </tr>
-          </thead>
-          <tbody>
-          <foreach name="list" item="vo" key="k" >
-            <if condition="$vo.emerg eq 1"><tr class="am-active"><else/><tr></if>
-              <td><input class="ids" type="checkbox" name="order[]" value="{$vo.order}"/></td>
-              <td><a href="{:U('Home/Report/detail',array('order'=>$vo['order']))}" target="_blank">{$vo.order}</a></td>
-              <td class="am-hide-sm-only">{:area($vo['area'])}</td>
-              <td>{:empty($vo['building'])?'-':building($vo['area'],$vo['building'])}</td>
-              <td>{$vo.location}</td>
-              <td class="am-hide-sm-only">{:date('Y年m月d日 h:i:s',$vo['time'])}</td>
-              <td class="am-hide-sm-only">{$vo.user}</td>
-              <td>{:empty($vo['good'])?'-':$vo['good']}</td>      
-              <td class="am-hide-sm-only"><empty name="vo.description">无<else/>有</empty></td>
-              <td class="am-hide-sm-only">{$vo.repairer}</td>
-            </tr>
-            </foreach>
-          </tbody>
-        </table>
-          <div class="am-cf">
-  共 {$count} 条记录
-  <div class="am-fr">
-{$page}
-  </div>
-</div>
+          <table class="am-table am-table-striped am-table-hover table-main" id="table"></table>
           <hr />
-          <p>后勤在线服务中心 Online Service Center</p>
+          <p>后勤在线服务中心 Online Service Center<span class="am-fr">*高亮为紧急报修</span></p>
         </form>
       </div>
-
     </div>
   </div>
   <!-- content end -->
 </div>
+<script src="__PUBLIC__/assets/js/amazeui.datatables.min.js"></script>
+<script src="__PUBLIC__/assets/js/dataTables.responsive.min.js"></script>
 <script>
-  $(function() {
-    var startDate = new Date('{:empty(I('get.startDate'))?date('Y-m-d',strtotime('-1 month')):I('get.startDate')}');
-    var endDate = new Date('{:empty(I('get.endDate'))?date('Y-m-d'):I('get.endDate')}');
-    $('#my-start').datepicker().
-      on('changeDate.datepicker.amui', function(event) {
-        if (event.date.valueOf() > endDate.valueOf()) {
-          modal_alert('开始日期应小于结束日期！');
-        } else {
-          startDate = new Date(event.date);
-          $('#my-startDate').text($('#my-start').data('date'));
-          $('#startDate').val($('#my-start').data('date'));
-        }
-        $(this).datepicker('close');
-      });
-
-    $('#my-end').datepicker().
-      on('changeDate.datepicker.amui', function(event) {
-        if (event.date.valueOf() < startDate.valueOf()) {
-          modal_alert('结束日期应大于开始日期！');
-        } else {
-          endDate = new Date(event.date);
-          $('#my-endDate').text($('#my-end').data('date'));
-          $('#endDate').val($('#my-end').data('date'));
-        }
-        $(this).datepicker('close');
-      });
-  });
+$(function() {
+	var startDate = new Date('{:empty(I('get.startDate'))?date('Y-m-d',strtotime('-1 month')):I('get.startDate')}');
+	var endDate = new Date('{:empty(I('get.endDate '))?date('Y-m-d'):I('get.endDate')}');
+	$('#my-start').datepicker().on('changeDate.datepicker.amui', function(event) {
+		if (event.date.valueOf() > endDate.valueOf()) {
+			modal_alert('开始日期应小于结束日期！')
+		} else {
+			startDate = new Date(event.date);
+			$('#my-startDate').text($('#my-start').data('date'));
+			$('#startDate').val($('#my-start').data('date'))
+		}
+		$(this).datepicker('close')
+	});
+	$('#my-end').datepicker().on('changeDate.datepicker.amui', function(event) {
+		if (event.date.valueOf() < startDate.valueOf()) {
+			modal_alert('结束日期应大于开始日期！')
+		} else {
+			endDate = new Date(event.date);
+			$('#my-endDate').text($('#my-end').data('date'));
+			$('#endDate').val($('#my-end').data('date'))
+		}
+		$(this).datepicker('close')
+	})
+});
 </script>
 <script>
   $(function(){
-  //全选的实现
+  
+jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+  "chinese-string-asc": function(s1, s2) {
+    return s1.localeCompare(s2);
+  },
+
+  "chinese-string-desc": function(s1, s2) {
+    return s2.localeCompare(s1);
+  }
+});
+  
+  $('#table').DataTable({
+	responsive: true,
+	columnDefs:[
+	{targets:[0],orderable:false},
+	{type: 'chinese-string', targets: [2,3,4,5,6,7,8,9,10]}	
+	],
+	order:[[5,'desc']],
+	serverSide: true,
+	processing: true,
+	ajax: {
+		url: "{:U('Task/getTable',array('type'=>2))}",
+		type: "POST",
+		data: function (d){
+			$.each($.parseJSON( '{:json_encode($_GET)}' ), function(idx, obj) {
+				d[idx] = obj;
+			});
+		}
+	},
+	columns:[
+	{title: '<input type="checkbox" class="check-all"/>'},
+	{name: 'order', title:'工单号'},
+	{name: 'area', title:'区域'},
+	{name: 'building', title:'楼栋'},
+	{name: 'location',title:'地点'},
+	{name: 'time', title:'时间'},
+	{name: 'user',title:'用户'},
+	{name: 'good', title:'物品'},
+	{name: 'description', title:'描述'},
+	{name: 'doctor',title:'管理员'},
+	{name: 'repairer', title:'维修工'}
+	],
+	"fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+		if ( aData[3]==null && aData[7]==null ){
+			$(nRow).addClass('am-active');
+		}
+	},
+	initComplete:initComplete
+  });  
+  function initComplete(data){
+
+  }   
+
   $(".check-all").click(function(){
     $(".ids").prop("checked", this.checked);
   });
@@ -209,7 +228,15 @@
     };
     modal_confirm(string,config);
   });
-      
+$('#my-emerg').click(function(){
+	if($(this).hasClass('am-active')){
+		$(this).removeClass('am-active');
+		$('#emerg').val(0);
+	}else{
+		$(this).addClass('am-active');
+		$('#emerg').val(1);
+	}
+})       
   })
 </script>
 <include file="Public/footer" />

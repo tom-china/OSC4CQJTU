@@ -1,0 +1,171 @@
+<include file="Public/header" />
+<link rel="stylesheet" href="__PUBLIC__/assets/css/amazeui.datatables.min.css"/>
+<include file="Public/topbar" />
+
+<div class="am-cf admin-main">
+  <!-- sidebar start -->
+<include file="Public/sidebar" />
+  <!-- sidebar end -->
+
+  <!-- content start -->
+  <div class="admin-content">
+
+    <div class="am-cf am-padding">
+      <div class="am-fl am-cf"><strong class="am-text-primary am-text-lg">统计</strong> / <small>Table</small></div>
+    </div>
+
+    <div class="am-g">
+      <div class="am-u-sm-12 am-u-md-6">
+        <div class="am-btn-toolbar">
+          <div class="am-btn-group am-btn-group-xs">
+            <a class="am-btn am-btn-default" href="<?php $_GET['action']='export';echo '__ACTION__?'.http_build_query($_GET); ?>" target="_blank"><span class="am-icon-file-excel-o"></span> 导出</a>
+          </div>
+        </div>
+      </div>
+
+      <form>
+      <div class="am-u-sm-12 am-u-md-3">
+        <div class="am-form-group">
+        	<notempty name="area">
+			<select name="area[]" multiple data-am-selected="{btnWidth: '100%', btnSize: 'sm', btnStyle: 'secondary'}">
+			  <foreach name="area" item="vo" key="k" >
+			  	<option value="{$vo}" <if condition="in_array($vo,I('get.area'))">selected</if>>{:area($vo)}</option>
+			  </foreach>			  
+			</select> 
+			</notempty>
+
+			<notempty name="building">
+			<select name="building[]" multiple data-am-selected="{btnWidth: '100%', btnSize: 'sm', btnStyle: 'secondary'}">
+			  <foreach name="building" item="vo" key="k" >
+			  	<option value="{$vo}" <if condition="in_array($vo,I('get.building'))">selected</if>>{:buildings($vo)}</option>
+			  </foreach>			  
+			</select>
+			</notempty>			
+        </div>        
+      </div>
+
+      <div class="am-u-sm-12 am-u-md-3">
+        <div class="am-input-group am-input-group-sm">
+          <input type="text" name="repairer" placeholder="输入工人姓名" class="am-form-field">
+          <input type="hidden" name="startDate" id="startDate" value="{:I('get.startDate')}">
+          <input type="hidden" name="endDate" id="endDate" value="{:I('get.endDate')}">
+          <input type="hidden" name="emerg" id="emerg" value="{:I('get.emerg')}">           
+          <span class="am-input-group-btn">
+            <button class="am-btn am-btn-default" type="submit">搜索</button>
+          </span>
+        </div>
+      </div>
+      </form>
+    </div>
+
+  <div class="am-g">
+    <div class="am-u-sm-4">
+	 <div class="am-btn-group am-btn-group-xs">		
+      <button type="button" class="am-btn am-btn-default am-margin-right" id="my-start">开始日期</button><span id="my-startDate">{:empty(I('get.startDate'))?'不限':I('get.startDate')}</span>
+	 </div>		  
+    </div>
+    <div class="am-u-sm-4">
+	 <div class="am-btn-group am-btn-group-xs">		
+      <button type="button" class="am-btn am-btn-default am-margin-right" id="my-end">结束日期</button><span id="my-endDate">{:empty(I('get.endDate'))?'至今':I('get.endDate')}</span>
+	 </div>		  
+    </div>
+    <div class="am-u-sm-4">
+	 <div class="am-btn-group am-btn-group-xs">	
+      <button type="button" class="am-btn am-btn-default <if condition="I('get.emerg')==1">am-active</if>" id="my-emerg">紧急报修</button>
+	 </div>	  
+    </div>
+  </div>   
+<style>.am-datatable-hd{display:none}</style>
+    <div class="am-g">
+      <div class="am-u-sm-12">
+        <form class="am-form">
+          <table class="am-table am-table-striped am-table-hover table-main" id="table"></table>
+          <hr />
+          <p>后勤在线服务中心 Online Service Center</p>
+        </form>
+      </div>
+
+    </div>
+  </div>
+  <!-- content end -->
+</div>
+<script src="__PUBLIC__/assets/js/amazeui.datatables.min.js"></script>
+<script src="__PUBLIC__/assets/js/dataTables.responsive.min.js"></script>
+<script>
+$(function() {
+	var startDate = new Date('<?=empty(I('get.startDate'))?date('Y-m-d',strtotime('-1 month')):I('get.startDate')?>');
+	var endDate = new Date('{:empty(I('get.endDate'))?date('Y-m-d'):I('get.endDate')}');
+	$('#my-start').datepicker().on('changeDate.datepicker.amui', function(event) {
+		if (event.date.valueOf() > endDate.valueOf()) {
+			modal_alert('开始日期应小于结束日期！')
+		} else {
+			startDate = new Date(event.date);
+			$('#my-startDate').text($('#my-start').data('date'));
+			$('#startDate').val($('#my-start').data('date'))
+		}
+		$(this).datepicker('close')
+	});
+	$('#my-end').datepicker().on('changeDate.datepicker.amui', function(event) {
+		if (event.date.valueOf() < startDate.valueOf()) {
+			modal_alert('结束日期应大于开始日期！')
+		} else {
+			endDate = new Date(event.date);
+			$('#my-endDate').text($('#my-end').data('date'));
+			$('#endDate').val($('#my-end').data('date'))
+		}
+		$(this).datepicker('close')
+	});
+	jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+		"chinese-string-asc": function(s1, s2) {
+			return s1.localeCompare(s2)
+		},
+		"chinese-string-desc": function(s1, s2) {
+			return s2.localeCompare(s1)
+		}
+	});
+	$('#table').DataTable({
+		responsive: true,
+		columnDefs: [{
+			type: 'chinese-string',
+			targets: [0]
+		}],
+		order: [
+			[0, 'asc']
+		],
+		serverSide: true,
+		processing: true,
+		ajax: {
+			url: "<?=U('Stat/getTable',array('character'=>'repairer'))?>",
+			type: "POST",
+			data: function(d) {
+				$.each($.parseJSON('<?=json_encode($_GET)?>'), function(idx, obj) {
+					d[idx] = obj
+				})
+			}
+		},
+		columns: [{
+			name: 'repairer',
+			title: '维修工'
+		}, {
+			name: 'todo',
+			title: '未处理'
+		}, {
+			name: 'doing',
+			title: '处理中'
+		}, {
+			name: 'done',
+			title: '已处理'
+		}]
+	});
+	$('#my-emerg').click(function() {
+		if ($(this).hasClass('am-active')) {
+			$(this).removeClass('am-active');
+			$('#emerg').val(0)
+		} else {
+			$(this).addClass('am-active');
+			$('#emerg').val(1)
+		}
+	});
+});
+</script>
+<include file="Public/footer" />

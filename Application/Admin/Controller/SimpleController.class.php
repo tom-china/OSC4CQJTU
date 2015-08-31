@@ -73,4 +73,5 @@ class SimpleController extends Controller {
         }
 		
     }
+
 }

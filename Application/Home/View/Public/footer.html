@@ -25,15 +25,10 @@
 <script src="__PUBLIC__/assets/js/amazeui.legacy.js"></script>
 <![endif]-->
 <script>
-$.AMUI.progress.start();
-$(window).load(function(){
-  $.AMUI.progress.done();
-});
+$.AMUI.progress.start();$(window).load(function(){$.AMUI.progress.done()});
 </script>
 <script type="text/javascript">
-$(function() {
-	$(".am-topbar-nav").find("a[href='{:U()}']").parent().addClass('am-active');
-});
+$(function(){$(".am-topbar-nav").find("a[href='<?=U()?>']").parent().addClass('am-active')});
 </script>
 <script src="http://www.microsofttranslator.com/ajax/v2/toolkit.ashx?mode=manual&toolbar=thin" async="async"></script>
 <style>

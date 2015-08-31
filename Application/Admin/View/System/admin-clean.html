@@ -1,0 +1,49 @@
+<include file="Public/header" />
+
+<include file="Public/topbar" />
+
+<div class="am-cf admin-main">
+  <!-- sidebar start -->
+<include file="Public/sidebar" />
+  <!-- sidebar end -->
+
+  <!-- content start -->
+  <div class="admin-content">
+
+    <div class="am-cf am-padding">
+      <div class="am-fl am-cf"><strong class="am-text-primary am-text-lg">缓存清理</strong> / <small>Cache Clean</small></div>
+    </div>
+
+    <div class="am-g">
+      <div class="am-u-sm-12 am-u-sm-centered">
+		<form method="post">
+		<div class="am-form-group">
+		  <h3>请选择需要清理的项目</h3>
+		  <label class="am-checkbox-inline">
+			<input type="checkbox"  name="type[]" value="cache" data-am-ucheck> 模板缓存（runtime/cache）
+		  </label>
+		  <label class="am-checkbox-inline">
+			<input type="checkbox"  name="type[]" value="log" data-am-ucheck> 应用日志（runtime/log）
+		  </label>
+		  <label class="am-checkbox-inline">
+			<input type="checkbox"  name="type[]" value="temp" data-am-ucheck> 应用缓存（runtime/temp）
+		  </label>
+		  <label class="am-checkbox-inline">
+			<input type="checkbox"  name="type[]" value="data" data-am-ucheck> 应用数据（runtime/data）
+		  </label>	
+		  <label class="am-checkbox-inline">
+			<input type="checkbox"  name="type[]" value="html" data-am-ucheck> 静态缓存（application/html）
+		  </label>		  
+		</div>
+		<button class="am-btn">清 理</button>
+		</form>
+          <hr />
+          <p>后勤在线服务中心 Online Service Center</p>
+
+      </div>
+
+    </div>
+  </div>
+  <!-- content end -->
+</div>
+<include file="Public/footer" />

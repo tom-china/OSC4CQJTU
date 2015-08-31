@@ -135,10 +135,14 @@ class ReportController extends SimpleController {
 	
 	//评价
 	public function rank(){
-		if(!session('?admin') and !session('?uid'))$this->error('非法访问');
+		if(!session('?admin') and !session('?uid')){
+			$this->error('非法访问');
+		}
 		
 		//是否开启用户评价	
-		if(F('settings')['global']['allowrank']=='false')$this->error('用户评价未开启');
+		if(F('settings')['global']['allowrank']=='false'){
+			$this->error('用户评价未开启');
+		}
 		
 		if(IS_POST){
 			$database = D('rank');
@@ -147,7 +151,12 @@ class ReportController extends SimpleController {
             }
 			$data['order'] = I('get.order');
 			$order = M('order')->where($data)->find();
-			if(time()-$order['time']>3600*24*3)$this->error('评价超时关闭');
+			if($order['status']!=2){
+				$this->error('工单未完成');
+			}			
+			if(time()-$order['time']>3600*24*3){
+				$this->error('评价超时关闭');
+			}
 			if(session('?uid') and I('get.type')==0){
 				$data['user']=session('uid');
 				if(session('uid') != $order['user'])$this->error('操作无权限');
@@ -173,17 +182,30 @@ class ReportController extends SimpleController {
 	
 	//评价删除
 	public function rankDel(){
-		if(!session('?admin') and !session('?uid'))$this->error('非法访问');
+		if(!session('?admin') and !session('?uid')){
+			$this->error('非法访问');
+		}
 		
 		//是否开启用户评价		
-		if(F('settings')['global']['allowrank']=='false')$this->error('用户评价未开启');	
+		if(F('settings')['global']['allowrank']=='false'){
+			$this->error('用户评价未开启');	
+		}
 	
 		if(IS_POST && IS_AJAX){
 			$data['order'] = I('post.order');
 			$order = M('order')->where($data)->find();	
-			if(time()-$order['time']>3600*24*3)$this->error('评价超时关闭');
-			if(session('?uid') && session('uid') != $order['user'])$this->error('操作无权限');
-			if(!session('?admin') and I('post.type')==1)$this->error('操作无权限');
+			if($order['status']!=2){
+				$this->error('工单未完成');
+			}
+			if(time()-$order['time']>3600*24*3){
+				$this->error('评价超时关闭');
+			}
+			if(session('?uid') && session('uid') != $order['user']){
+				$this->error('操作无权限');
+			}
+			if(!session('?admin') and I('post.type')==1){
+				$this->error('操作无权限');
+			}
 			$data['type'] = I('post.type');
 			if(M('rank')->where($data)->order('time desc')->limit(1)->delete()){
 				$this->success('操作成功');

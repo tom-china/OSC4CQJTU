@@ -34,14 +34,14 @@ class MainController extends SimpleController {
         $this->assign('stat',$stat);
     	//最新报修
         //$map['status'] = array('neq',-1);//不显示已取消工单
-    	$list = M('order')->cache(true,5)->where($map)->order('time desc')->limit(25)->select();
+    	$list = M('order')->cache(true,5)->where($map)->order('time desc')->limit(5)->select();
         $this->assign('list',$list);
         $this->display('main');
     }
 
 	//自动刷新
     public function refresh(){
-    	$list = M('order')->cache(true,5)->order('time desc')->limit(25)->select();
+    	$list = M('order')->cache(true,5)->order('time desc')->limit(5)->select();
     	$html = '';
     	foreach($list as $k=>$v){
             $html .= ($v['emerg']==1)?'<tr class="am-active">':'<tr>';

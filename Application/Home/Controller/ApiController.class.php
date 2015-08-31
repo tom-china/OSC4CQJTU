@@ -7,4 +7,3 @@ class ApiController extends Uc{
         $this->response();
     }
 }
-?>

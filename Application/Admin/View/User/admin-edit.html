@@ -93,44 +93,42 @@
 <script type="text/javascript" src="__PUBLIC__/assets/js/jquery.city.select.js"></script>
 <script>
 $(function() {
-
-    var data = {$data};
-
-    $('#province, #city').citylist({data:data, id:'id', children:'citys',name:'name',metaTag:'name'});
-    window.prettyPrint && prettyPrint();
-
-  $('#doc-vld-msg').validator({
-    onValid: function(validity) {
-      $(validity.field).closest('.am-form-group').find('.am-alert').hide();
-    },
-
-    onInValid: function(validity) {
-      var $field = $(validity.field);
-      var $group = $field.closest('.am-form-group');
-      var $alert = $group.find('.am-alert');
-      // 使用自定义的提示信息 或 插件内置的提示信息
-      var msg = $field.data('validationMessage') || this.getValidationMessage(validity);
-
-      if (!$alert.length) {
-        $alert = $('<div class="am-alert am-alert-danger"></div>').hide().
-          appendTo($group);
-      }
-
-      $alert.html(msg).show();
-    }
-  });
+	var data = {$data};
+	$('#province, #city').citylist({
+		data: data,
+		id: 'id',
+		children: 'citys',
+		name: 'name',
+		metaTag: 'name'
+	});
+	window.prettyPrint && prettyPrint();
+	$('#doc-vld-msg').validator({
+		onValid: function(validity) {
+			$(validity.field).closest('.am-form-group').find('.am-alert').hide()
+		},
+		onInValid: function(validity) {
+			var $field = $(validity.field);
+			var $group = $field.closest('.am-form-group');
+			var $alert = $group.find('.am-alert');
+			var msg = $field.data('validationMessage') || this.getValidationMessage(validity);
+			if (!$alert.length) {
+				$alert = $('<div class="am-alert am-alert-danger"></div>').hide().appendTo($group)
+			}
+			$alert.html(msg).show()
+		}
+	})
 });
-
-  var timer = setInterval(function(){
-    $('#province').find('option[value="{$user['area']}"]').attr('selected',true);
-    if (!$.AMUI.support.mutationobserver) {
-      $('#province').trigger('changed.selected.amui');
-    }
-    $('#city').find('option[value="{$user['building']}"]').attr('selected', true);
-    if (!$.AMUI.support.mutationobserver) {
-      $('#city').trigger('changed.selected.amui');
-    }    
-    clearInterval(timer);
-  },100);
+var timer = setInterval(function() {
+	$('#province').find('option[value="{$user['area']}"]').attr('selected', true);
+	if (!$.AMUI.support.mutationobserver) {
+		$('#province').trigger('changed.selected.amui')
+	}
+	$('#city').find('option[value="{$user['
+	building ']}"]').attr('selected', true);
+	if (!$.AMUI.support.mutationobserver) {
+		$('#city').trigger('changed.selected.amui')
+	}
+	clearInterval(timer)
+}, 100);
 </script>
 <include file="Public/footer" />

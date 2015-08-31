@@ -21,9 +21,15 @@
 namespace Admin\Controller;
 use Think\Controller;
 class ArticleController extends SimpleController {
+	public function __construct(){
+		parent::__construct();
+		if(!session('?admin')){
+			$this->redirect('Main/index');
+		}
+	}	
+	
 	//公告列表
     public function index(){
-    	if(!session('?admin'))$this->redirect('Main/index');
     	$database = M('article');
     	$list = $database->order('acid desc')->page(I('get.p/d').',25')->select();
     	$this->assign('list',$list);
@@ -36,7 +42,6 @@ class ArticleController extends SimpleController {
 	
 	//添加公告
     public function add(){
-    	if(!session('?admin'))$this->redirect('Main/index');
     	if(IS_POST){
             $database = D('article');
             if (!$database->create()){
@@ -49,9 +54,9 @@ class ArticleController extends SimpleController {
             $data['author'] = session('admin');
             $add = $database->strict(true)->data($data)->add();
             if($add){
-                    $this->success('添加成功',U('Article/index'));
+                $this->success('添加成功',U('Article/index'));
             }else{
-                    $this->error('添加失败');
+                $this->error('添加失败');
             }
     	}else{
             $this->display('admin-add');
@@ -60,9 +65,8 @@ class ArticleController extends SimpleController {
 	
 	//公告编辑
     public function edit(){
-    	if(!session('?admin'))$this->redirect('Main/index');
+		$database = D('article');
     	if(IS_POST){
-            $database = D('article');
             if (!$database->create()){
                 $this->error($database->getError());
             }             
@@ -75,42 +79,30 @@ class ArticleController extends SimpleController {
     			$this->error('更新失败');
     		}
     	}else{
-    		$article = M('article')->where('acid=:acid')->bind(':acid',I('get.acid'))->find();
+    		$article = $database->where('acid=:acid')->bind(':acid',I('get.acid'))->find();
     		$this->assign('article',$article);
     		$this->display('admin-edit');
     	}
     }
     
-	//ueditor
+	//加载百度编辑器
     public function ueditor(){
-    	if(!session('?admin'))$this->redirect('Main/index');
         $data = new \Org\Util\Ueditor();
         echo $data->output();
     }
 
 	//公告删除
     public function del(){
-        if(!session('?admin'))$this->redirect('Main/index');
-    	$database = M('article');
-    	if(IS_AJAX){
-    		if(is_array(I('post.id'))){
-				$count = count(I('post.uid'));
-    			$order = implode(',', I('post.id'));
-    			$res = $database->delete($order);
-    			if($res){
-					$this->success(intval($res).'/'.$count.'条记录删除成功');
-				}else{
-					$this->error(intval($res).'/'.$count.'条记录删除成功');
-				}				
-    		}else{
-    			$res = $database->delete(I('post.id'));
-    			if($res){
-					$this->success(I('post.id').'删除成功');
-				}else{
-					$this->error(I('post.id').'删除失败');
-				}				
-    		}
-
+    	if(IS_AJAX and IS_POST){
+			$acid = I('post.acid/a');
+			$total = count($acid);
+			$acid = implode(',', $acid);
+			$row = M('article')->delete($acid);
+			if($row){
+				$this->success($row.'/'.$total.'条记录删除成功');
+			}else{
+				$this->error($row.'/'.$total.'条记录删除成功');
+			}				
     	}    	
     }
 }

@@ -83,34 +83,32 @@
   <!-- content end -->
 </div>
 <script>
-$(function(){
-  //全选的实现
-  $(".check-all").click(function(){
-    $(".ids").prop("checked", this.checked);
-  });
-  $(".ids").click(function(){
-    var option = $(".ids");
-    option.each(function(i){
-      if(!this.checked){
-        $(".check-all").prop("checked", false);
-        return false;
-      }else{
-        $(".check-all").prop("checked", true);
-      }
-    });
-  });
-  $('.am-table>tbody>tr>td:gt(0)').click(function(){
-    $(this).parent().find('.ids').click();
-  });
-  $('#markDel').click(function(){
-    var string = '';
-    var config = {
-      action:'doctorDel',
-      error:'网络错误'
-    };
-    modal_confirm(string,config);
-  });
-
+$(function() {
+	$(".check-all").click(function() {
+		$(".ids").prop("checked", this.checked)
+	});
+	$(".ids").click(function() {
+		var option = $(".ids");
+		option.each(function(i) {
+			if (!this.checked) {
+				$(".check-all").prop("checked", false);
+				return false
+			} else {
+				$(".check-all").prop("checked", true)
+			}
+		})
+	});
+	$('.am-table>tbody>tr>td:gt(0)').click(function() {
+		$(this).parent().find('.ids').click()
+	});
+	$('#markDel').click(function() {
+		var string = '';
+		var config = {
+			action: 'doctorDel',
+			error: '网络错误'
+		};
+		modal_confirm(string, config)
+	})
 });
 </script>
 <include file="Public/footer" />

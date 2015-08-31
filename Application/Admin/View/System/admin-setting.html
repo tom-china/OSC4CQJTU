@@ -30,7 +30,7 @@
 
 	<div class="am-tabs-bd">
     	<div class="am-tab-panel am-active" id="set">
-			<form action="{:U('Main/setGlobal')}" method="post" class="am-form am-form-horizontal">
+			<form action="{:U('System/setGlobal')}" method="post" class="am-form am-form-horizontal">
 		    <div class="am-form-group">
 		      <label for="doc-select-1">是否开放站点</label>
 		      <select id="doc-select-1" name="global[isopen]">
@@ -82,7 +82,7 @@
     	</div>
 
     	<div class="am-tab-panel am-hide" id="copyright">
-    		<form action="{:U('Main/setCopyright')}" method="post" class="am-form am-form-horizontal">
+    		<form action="{:U('System/setCopyright')}" method="post" class="am-form am-form-horizontal">
 		    <div class="am-form-group">
 		      <label for="doc-cr-1">通用底部版权</label>
 		      <textarea class="" rows="5" id="doc-cr-1" name="copyright[buttom]" maxlength="255" placeholder="255字以内，不显示请留空">{$copyright.buttom}</textarea>
@@ -100,7 +100,7 @@
     	</div>
 
     	<div class="am-tab-panel am-hide" id="tips">
-    		<form action="{:U('Main/setTips')}" method="post" class="am-form am-form-horizontal">
+    		<form action="{:U('System/setTips')}" method="post" class="am-form am-form-horizontal">
 		    <div class="am-form-group">
 		      <label for="doc-ta-1">用户登录页面提示</label>
 		      <textarea class="" rows="5" id="doc-ta-1" name="tips[login]" maxlength="255" placeholder="255字以内，不显示请留空">{$tips.login}</textarea>

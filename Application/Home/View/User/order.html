@@ -60,49 +60,9 @@
 </div>
 
 <script>
-  function modal_alert(string){
-    $('#alert').find('.am-modal-bd').text(string);
-    $('#alert').modal();
-  }
-
-  function modal_confirm(string,config){
-    $('#confirm').find('.am-modal-bd>span').text(string);
-    $('#confirm').modal({
-        relatedTarget: this,
-        onConfirm: function(options) {
-             $.ajax({
-              'type':'post',
-              'url':"{:U('"+config.action+"')}",
-              'data':{order:string},
-              'dataType':'text',
-              success:function(res){
-                  if(res==1){
-                    modal_alert(config.success);
-                  }else{
-                    modal_alert(config.fail);
-                  }
-              },
-              error:function(res){
-                  modal_alert(config.error);
-              }
-            });         
-        },
-        onCancel: function() {
-
-        }   
-    });     
-  }
+function modal_alert(string){$('#alert').find('.am-modal-bd').text(string);$('#alert').modal()}function modal_confirm(string,config){$('#confirm').find('.am-modal-bd>span').text(string);$('#confirm').modal({relatedTarget:this,onConfirm:function(options){$.ajax({'type':'post','url':"<?=U('"+config.action+"')?>",'data':{order:string},'dataType':'text',success:function(res){if(res==1){modal_alert(config.success)}else{modal_alert(config.fail)}},error:function(res){modal_alert(config.error)}})},onCancel:function(){}})}
 </script>
 <script>
-function cancel(order){
-    var string = order;
-    var config = {
-      action:'cancel',
-      success:'取消报修成功',
-      fail:'取消报修失败',
-      error:'操作失败'
-    };
-    modal_confirm(string,config);
-}
+function cancel(order){var string=order;var config={action:'cancel',success:'取消报修成功',fail:'取消报修失败',error:'操作失败'};modal_confirm(string,config)}
 </script>
 <include file="Public/footer" />

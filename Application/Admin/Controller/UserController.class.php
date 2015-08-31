@@ -21,18 +21,27 @@
 namespace Admin\Controller;
 use Think\Controller;
 class UserController extends SimpleController {
+	public function __construct(){
+		parent::__construct();
+		if(!session('?admin')){
+			$this->redirect('Main/index');
+		}
+        if(session('right')!=1){
+			$this->error('访问无权限');
+		}
+	}	
+	
 	public function index(){
-		if(!session('?admin'))$this->redirect('Main/index');
-        if(session('right')!=1)$this->error('访问无权限');
-		$this->redirect('normal');
+		$this->redirect('Main/dashboard');
 	}
 
     public function normal(){
-    	if(!session('?admin'))$this->redirect('Main/index');
-        if(session('right')!=1)$this->error('访问无权限');
     	$database = M('user');
     	$map['uid'] = array('like','%'.I('get.uid').'%');
     	$list = $database->where($map)->page(I('get.p/d').',25')->select();
+		foreach($list as $k=>$v){
+			$list[$k]['report_num'] = M('order')->where('user=:user')->bind(':user',$v['uid'])->count();
+		}		
     	$this->assign('list',$list);
     	$count = $database->where($map)->count();
     	$this->assign('count',$count);
@@ -43,9 +52,8 @@ class UserController extends SimpleController {
 
     //上传方法
     public function upload()
-    {
-        if(!session('?admin'))$this->redirect('Main/index');
-        if(session('right')!=1)$this->error('访问无权限');        
+    {   
+		set_time_limit(0); // 防止超时
         header("Content-Type:text/html;charset=utf-8");
         $upload = new \Think\Upload();// 实例化上传类
         $upload->maxSize   =     3145728 ;// 设置附件上传大小
@@ -55,7 +63,6 @@ class UserController extends SimpleController {
         $info   =   $upload->uploadOne($_FILES['excelData']);
         $filename = './Uploads'.$info['savepath'].$info['savename'];
         $exts = $info['ext'];
-        //print_r($info);exit;
         if(!$info) {// 上传错误提示错误信息
               $this->error($upload->getError());
           }else{// 上传成功
@@ -65,17 +72,13 @@ class UserController extends SimpleController {
 
     //导入数据页面
     public function import()
-    {
-        if(!session('?admin'))$this->redirect('Main/index');
-        if(session('right')!=1)$this->error('访问无权限');        
+    {     
         $this->display('goods_import');
     }
 
     //导入数据方法
     protected function goods_import($filename, $exts='xls')
-    {
-        if(!session('?admin'))$this->redirect('Main/index');
-        if(session('right')!=1)$this->error('访问无权限');        
+    {        
         //导入PHPExcel类库，因为PHPExcel没有用命名空间，只能inport导入
         import("Org.Util.PHPExcel");
         //创建PHPExcel对象，注意，不能少了\
@@ -114,9 +117,7 @@ class UserController extends SimpleController {
 
     //保存导入数据
     public function save_import($data)
-    {          	
-        if(!session('?admin'))$this->redirect('Main/index');
-        if(session('right')!=1)$this->error('访问无权限');        
+    {          	       
         $database = M('user');
         foreach ($data as $k=>$v){
             if($k == 1){
@@ -155,8 +156,6 @@ class UserController extends SimpleController {
     }
 
     public function edit(){
-    	if(!session('?admin'))$this->redirect('Main/index');
-        if(session('right')!=1)$this->error('访问无权限');
     	//获取站点配置
         $global = M('setting')->where("`key`='global'")->find();
         $global = json_decode($global['value'],true); 
@@ -196,9 +195,6 @@ class UserController extends SimpleController {
     }
 
     public function add(){
-    	if(!session('?admin'))$this->redirect('Main/index');
-        if(session('right')!=1)$this->error('访问无权限');
-
     	//获取站点配置
         $global = M('setting')->where("`key`='global'")->find();
         $global = json_decode($global['value'],true);
@@ -235,34 +231,20 @@ class UserController extends SimpleController {
     }
 
     public function del(){
-    	if(!session('?admin'))$this->redirect('Main/index');
-        if(session('right')!=1)$this->error('访问无权限');
-    	$database = M('user');
     	if(IS_POST AND IS_AJAX){
-    		if(is_array(I('post.uid'))){
-				$count = count(I('post.uid'));
-    			$uid = implode(',', I('post.uid'));
-    			$res = $database->delete($uid);
-    			if($res){
-					$this->success(intval($res).'/'.$count.'条记录删除成功');
-				}else{
-					$this->error(intval($res).'/'.$count.'条记录删除成功');
-				}				
-    		}else{
-    			$res = $database->delete(I('post.uid'));
-    			if($res){
-					$this->success(I('post.uid').'删除成功');
-				}else{
-					$this->error(I('post.uid').'删除失败');
-				}				
-    		}
-
+    		$uid = I('post.uid/a');
+			$total = count(I('post.uid'));
+			$uid = implode(',', I('post.uid'));
+			$row = M('user')->delete($uid);
+			if($row){
+				$this->success($row.'/'.$total.'条记录删除成功');
+			}else{
+				$this->error($row.'/'.$total.'条记录删除成功');
+			}				
     	}
     } 
 
     public function doctor(){
-    	if(!session('?admin'))$this->redirect('Main/index');
-    	if(session('right')!=1)$this->error('访问无权限');
     	$database = M('admin');
     	$map['username'] = array('like','%'.I('get.username').'%');
     	$list = $database->where($map)->page(I('get.p/d').',25')->select();
@@ -275,8 +257,6 @@ class UserController extends SimpleController {
     }
 
     public function doctorAdd(){
-    	if(!session('?admin'))$this->redirect('Main/index');
-    	if(session('right')!=1)$this->error('访问无权限');
     	if(IS_POST){
     		$database = M('admin');
  	        if (!$database->autoCheckToken($_POST)){
@@ -298,37 +278,25 @@ class UserController extends SimpleController {
     }
 
     public function doctorDel(){
-    	if(!session('?admin'))$this->redirect('Main/index');
-    	if(session('right')!=1)$this->error('访问无权限');
-    	$database = M('admin');
-    	$user = $database->where('username=:username')->bind(':username',session('admin'))->find();
     	if(IS_POST AND IS_AJAX){
-    		if(is_array(I('post.uid'))){
-    			if(in_array($user['uid'],I('post.uid')))die;
-				$count = count(I('post.uid'));
-    			$uid = implode(',', I('post.uid'));
-    			$res = $database->delete($uid);
-    			if($res){
-					$this->success(intval($res).'/'.$count.'条记录删除成功');
-				}else{
-					$this->error(intval($res).'/'.$count.'条记录删除成功');
-				}				
-    		}else{
-    			if($user['uid']==I('post.uid'))die;
-    			$res = $database->delete(I('post.uid'));
-    			if($res){
-					$this->success(I('post.uid').'删除成功');
-				}else{
-					$this->error(I('post.uid').'删除失败');
-				}				
-    		}
-
+			$database = M('admin');
+			$user = $database->where('username=:username')->bind(':username',session('admin'))->find();			
+    		$uid = I('post.uid/a');
+			if(in_array($user['uid'],I('post.uid'))){
+				$this->error('不能删除自己');
+			}
+			$total = count(I('post.uid'));
+			$uid = implode(',', I('post.uid'));
+			$row = $database->delete($uid);
+			if($row){
+				$this->success($row.'/'.$total.'条记录删除成功');
+			}else{
+				$this->error($row.'/'.$total.'条记录删除成功');
+			}				
     	}
     } 
 
     public function doctorEdit(){
-    	if(!session('?admin'))$this->redirect('Main/index');
-    	if(session('right')!=1)$this->error('访问无权限');
     	$database = M('admin');
     	if(IS_POST){
 	        if (!$database->autoCheckToken($_POST)){
@@ -367,5 +335,5 @@ class UserController extends SimpleController {
             $this->assign('admin',$admin);
     		$this->display('admin-edit-doctor');
     	}
-    }       
+    }
 }

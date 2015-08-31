@@ -46,57 +46,52 @@
 </div>
 <script type="text/javascript" src="__PUBLIC__/assets/js/jquery.city.select.js"></script>
 <script type="text/javascript">
-$(function () {
+$(function() {
+	var data = {$data};
+	$('#province, #city').citylist({
+		data: data,
+		id: 'id',
+		children: 'citys',
+		name: 'name',
+		metaTag: 'name'
+	});
 
-    var data = {$data};
-
-    $('#province, #city').citylist({data:data, id:'id', children:'citys',name:'name',metaTag:'name'});
-    window.prettyPrint && prettyPrint();
 });
-
-  if ($.AMUI && $.AMUI.validator) {
-    $.AMUI.validator.patterns.mobile = /^\s*1\d{10}\s*$/;
-  }
-
-  $('form').validator({
-    onValid: function(validity) {
-      $(validity.field).closest('.am-form-group').find('.am-alert').hide();
-    },
-
-    onInValid: function(validity) {
-      var $field = $(validity.field);
-      var $group = $field.closest('.am-form-group');
-      var $alert = $group.find('.am-alert');
-      // 使用自定义的提示信息 或 插件内置的提示信息
-      var msg = $field.data('validationMessage') || this.getValidationMessage(validity);
-
-      if (!$alert.length) {
-        $alert = $('<div class="am-alert am-alert-danger"></div>').hide().
-          appendTo($group);
-      }
-
-      $alert.html(msg).show();
-    }
-  });
-
-  var timer = setInterval(function(){
-    $('#province').find('option[value="{$user['area']}"]').attr('selected',true);
-    if (!$.AMUI.support.mutationobserver) {
-      $('#province').trigger('changed.selected.amui');
-    }  
-    clearInterval(timer);
-  },100);
-  
-	<if condition="!empty(cookie('think_last_report'))">
-	var time = 60;
-	var interval = setInterval(function(){
-		time--;
-		$("fieldset>button[type=submit]").attr('disabled','disabled').text(time);
-		if(time <= 0) {
-			$("fieldset>button[type=submit]").removeAttr('disabled').text('提 交');
-			clearInterval(interval);
-		};
-	}, 1000);	
-	</if>  
+if ($.AMUI && $.AMUI.validator) {
+	$.AMUI.validator.patterns.mobile = /^\s*1\d{10}\s*$/
+}
+$('form').validator({
+	onValid: function(validity) {
+		$(validity.field).closest('.am-form-group').find('.am-alert').hide()
+	},
+	onInValid: function(validity) {
+		var $field = $(validity.field);
+		var $group = $field.closest('.am-form-group');
+		var $alert = $group.find('.am-alert');
+		var msg = $field.data('validationMessage') || this.getValidationMessage(validity);
+		if (!$alert.length) {
+			$alert = $('<div class="am-alert am-alert-danger"></div>').hide().appendTo($group)
+		}
+		$alert.html(msg).show()
+	}
+});
+var timer = setInterval(function() {
+	$('#province').find('option[value="{$user['area']}"]').attr('selected', true);
+	if (!$.AMUI.support.mutationobserver) {
+		$('#province').trigger('changed.selected.amui')
+	}
+	clearInterval(timer)
+}, 100); 
+<if condition="!empty(cookie('think_last_report'))">
+var time = 60;
+var interval = setInterval(function() {
+	time--;
+	$("fieldset>button[type=submit]").attr('disabled', 'disabled').text(time);
+	if (time <= 0) {
+		$("fieldset>button[type=submit]").removeAttr('disabled').text('提 交');
+		clearInterval(interval)
+	}
+}, 1000); 
+</if> 
 </script>
 <include file="Public/footer" />

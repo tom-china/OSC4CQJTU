@@ -1,28 +1,7 @@
 <include file="Public/header" />
 
 <style>
-	.content-list {
-	  border: 1px solid #e9ecf1;
-	  margin-bottom: 20px;
-	}
-
-	.content-list li {
-	  border: 1px solid #e9ecf1;
-	  border-width: 0 1px;
-	  margin-left: -1px;
-	}
-
-	.content-list li:first-child {
-	  border-left: none;
-	}
-
-	.content-list li:last-child {
-	  border-right: none;
-	}	
-
-	.am-alert a{
-		color:#666;
-	}
+.content-list{margin-bottom:20px;border:1px solid #e9ecf1}.content-list li{margin-left:-1px;border:1px solid #e9ecf1;border-width:0 1px}.content-list li:first-child{border-left:none}.content-list li:last-child{border-right:none}.am-alert a{color:#666}
 </style>
 
 <include file="Public/nav" />
@@ -91,29 +70,6 @@ $(function($){
 	}
 });
 
-$('#refresh').click(function(){
-	$(this).html('<span class="am-icon-refresh am-icon-spin"></span> 正在刷新');
-	$.AMUI.progress.start();
-	$.ajax({
-			'url': "{:U('Main/refresh')}",
-			'cache': false,
-			'type':'get',
-			'dataType':'text',
-			success:function(res){
-				$('#newest').html(res);
-				$('#refresh').html('<span class="am-icon-refresh"></span> 点击刷新');
-				$.AMUI.progress.done();
-
-            },
-            error:function(res){
-            	$('#refresh').html('<span class="am-icon-refresh"></span> 刷新失败，点击重试');
-            }
-		});
-
-});
-
-  var timer = setInterval(function(){
-  	$('#refresh').click();
-  },30000);
+$('#refresh').click(function(){$(this).html('<span class="am-icon-refresh am-icon-spin"></span> 正在刷新');$.AMUI.progress.start();$.ajax({'url':"<?=U('Main/refresh')?>",'cache':false,'type':'get','dataType':'text',success:function(res){$('#newest').html(res);$('#refresh').html('<span class="am-icon-refresh"></span> 点击刷新');$.AMUI.progress.done()},error:function(res){$('#refresh').html('<span class="am-icon-refresh"></span> 刷新失败，点击重试')}})});var timer=setInterval(function(){$('#refresh').click()},30000);
 </script>
 <include file="Public/footer" />
