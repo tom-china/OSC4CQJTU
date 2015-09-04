@@ -43,7 +43,7 @@
 			<div class="am-form-group">
 			  <label for="v">验证码</label>
 			  <img data-src="{:U('main/showVerify')}" onclick="$(this).attr('src','{:U('Main/showVerify')}'+'?random='+Math.random())" class="am-img-responsive">
-			  <input type="text" name="verify" class="" id="v" placeholder="请输入验证码" onfocus="$(this).prev().attr('src',$(this).prev().data('src'))" required>
+			  <input type="text" name="verify" class="" id="v" placeholder="请输入验证码" onfocus="$(this).removeAttr('onfocus').prev().attr('src',$(this).prev().data('src'))" required>
 			</div>
 
 			<p><button type="submit" class="am-btn am-btn-block am-btn-primary am-radius">提交</button></p>
