@@ -1,7 +1,7 @@
+<if condition="!IS_PJAX">
 <include file="Public/header" />
-
 <include file="Public/nav" />
-
+</if>
 <style>
 .am-table{margin-bottom:0}.filter span:hover{background-color:#19a7f0}
 </style>
@@ -51,14 +51,14 @@
         <if condition="$vo.emerg eq 1">
         	<tr class="am-active">
         	<td>{$vo.order}</td>
-        	<td class="am-show-md-up">{$vo.description}</td>
-        	<td class="am-show-md-up" colspan="2">{$vo.location}</td>
+        	<td class="am-show-md-up">{:mb_strimwidth($vo['description'],0,10,'...','utf-8')}</td>
+        	<td class="am-show-md-up" colspan="2">{:mb_strimwidth($vo['location'],0,30,'...','utf-8')}</td>
         <else/>
 			<tr>
 	        <td>{$vo.order}</td>
-	        <td class="am-show-md-up"><empty name="vo.building">-<else/>{$vo.good}</empty></td>
+	        <td class="am-show-md-up"><empty name="vo.building">-<else/>{:mb_strimwidth($vo['good'],0,8,'...','utf-8')}</empty></td>
 	        <td class="am-show-md-up"><empty name="vo.building">-<else/>{:building($vo['area'],$vo['building'])}</empty></td>
-			<td class="am-show-md-up">{$vo.location}</td>
+			<td class="am-show-md-up">{:mb_strimwidth($vo['location'],0,8,'...','utf-8')}</td>
         </if>
 			<td class="am-show-md-up">{$vo.user}</td>
 			<td class="am-show-md-up">{:date('Y年m月d日',$vo['time'])}</td>
@@ -71,4 +71,9 @@
 </div>
 {$page}
 </div>
+<script type="text/javascript">
+$(function(){$(".am-topbar-nav").find('.am-active:not(.am-dropdown)').removeClass('am-active');$(".am-topbar-nav").find("a[href='<?=U()?>']").parent().addClass('am-active')});
+</script>
+<if condition="!IS_PJAX">
 <include file="Public/footer" />
+</if>

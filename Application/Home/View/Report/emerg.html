@@ -1,7 +1,8 @@
+<if condition="!IS_PJAX">
 <include file="Public/header" />
-<link rel="stylesheet" href="__PUBLIC__/assets/css/amazeui.chosen.css"/>
 <include file="Public/nav" />
-
+</if>
+<link rel="stylesheet" href="__PUBLIC__/assets/css/amazeui.chosen.css"/>
 <div class="am-container">
 <notempty name="tips">
 <div class="am-alert am-alert-default" data-am-alert>
@@ -9,7 +10,7 @@
   <p>{$tips}</p>
 </div>
 </notempty>
-<form action="" method="post" class="am-form" data-am-validator>
+<form action="{:U('Report/emerg')}" method="post" class="am-form" data-am-validator>
   <fieldset>
     <div class="am-form-group">
       <label>报修区域：</label>
@@ -27,7 +28,7 @@
 
     <div class="am-form-group">
       <label for="report-2">报修地点：</label>
-      <input type="text" name="location" id="report-2" placeholder="请输入详细地点" required/>
+      <input type="text" name="location" id="report-2" maxlength="20" placeholder="请输入详细地点" required/>
     </div>
 
     <div class="am-form-group">
@@ -44,9 +45,8 @@
   </fieldset>
 </form>
 </div>
-<script type="text/javascript" src="__PUBLIC__/assets/js/jquery.city.select.js"></script>
 <script type="text/javascript">
-$(function() {
+$.getScript("__PUBLIC__/assets/js/jquery.city.select.js", function() {
 	var data = {$data};
 	$('#province, #city').citylist({
 		data: data,
@@ -55,7 +55,6 @@ $(function() {
 		name: 'name',
 		metaTag: 'name'
 	});
-
 });
 if ($.AMUI && $.AMUI.validator) {
 	$.AMUI.validator.patterns.mobile = /^\s*1\d{10}\s*$/
@@ -75,23 +74,28 @@ $('form').validator({
 		$alert.html(msg).show()
 	}
 });
-var timer = setInterval(function() {
-	$('#province').find('option[value="{$user['area']}"]').attr('selected', true);
-	if (!$.AMUI.support.mutationobserver) {
-		$('#province').trigger('changed.selected.amui')
-	}
-	clearInterval(timer)
-}, 100); 
-<if condition="!empty(cookie('think_last_report'))">
-var time = 60;
-var interval = setInterval(function() {
-	time--;
-	$("fieldset>button[type=submit]").attr('disabled', 'disabled').text(time);
-	if (time <= 0) {
-		$("fieldset>button[type=submit]").removeAttr('disabled').text('提 交');
-		clearInterval(interval)
-	}
-}, 1000); 
-</if> 
+$.getScript("__PUBLIC__/resource/js/jquery.timers.min.js", function() {
+	$(document).stopTime();	
+	$(document).oneTime('1das',function(){
+		$('#province').find('option[value="{$user['area']}"]').attr('selected', true);
+		if (!$.AMUI.support.mutationobserver) {
+			$('#province').trigger('changed.selected.amui')
+		}
+	});	
+	<if condition="!empty(cookie('last_emerg_report'))">
+	var time = 60;
+	$(document).everyTime('1s',function(){
+		time--;
+		$("fieldset>button[type=submit]").attr('disabled', 'disabled').text(time);
+		if (time <= 0)$("fieldset>button[type=submit]").removeAttr('disabled').text('提 交');
+	},60);
+	</if>
+});
 </script>
+<script type="text/javascript">
+$(function(){$(".am-topbar-nav").find('.am-active:not(.am-dropdown)').removeClass('am-active');$(".am-topbar-nav").find("a[href='<?=U()?>']").parent().addClass('am-active')});
+if(document.getElementsByTagName('meta').length==0)window.location.href="__SELF__";
+</script>
+<if condition="!IS_PJAX">
 <include file="Public/footer" />
+</if>

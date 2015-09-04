@@ -1,6 +1,7 @@
+<if condition="!IS_PJAX">
 <include file="Public/header" />
 <include file="Public/nav" />
-
+</if>
 <div class="am-container">
 <notempty name="tips">
 <div class="am-alert am-alert-default" data-am-alert>
@@ -8,32 +9,62 @@
   <p>{$tips}</p>
 </div>
 </notempty>
-    <form method="post" class="am-form" data-am-validator>
+    <form method="post" action="{:U('User/register')}" class="am-form" data-am-validator>
     <fieldset>
+	 <div class="am-form-group">
       <label for="uid">识别码:</label>
       <input type="text" name="uid" id="uid" placeholder="请输入学号（或教职工号/一卡通号）" required>
-      <br>
+     </div>
       <if condition="$quickreport eq 'true'">
+	 <div class="am-form-group"> 
       <label for="username">姓名:</label>
-      <input type="text" name="username" id="username" placeholder="请输入真实姓名" required>      
+      <input type="text" name="username" id="username" placeholder="请输入真实姓名" required>     
+	 </div> 
       <else/>
+	 <div class="am-form-group"> 
       <label for="password">密码:</label>
-      <input type="password" minlength="6" maxlength="20" name="password" id="password" placeholder="长度6-20位" required>
-      <br>
+      <input class="js-pattern-password" type="password" minlength="6" maxlength="20" name="password" id="password" placeholder="长度6-20位" required>
+     </div>
+	 <div class="am-form-group"> 
       <label for="password">确认密码:</label>
       <input type="password" minlength="6" maxlength="20" placeholder="请与上面输入的值一致" data-equal-to="#password" required>
+	 </div> 
       </if>
-      <br>
+     <div class="am-form-group">
       <label for="verify">验证码:</label>
       <img data-src="{:U('User/showVerify')}" onclick="$(this).attr('src','{:U('User/showVerify')}'+'?random='+Math.random())" class="am-img-responsive">
-      <input type="text" name="verify" id="verify" maxlength="5" placeholder="请输入验证码" onfocus="$(this).prev().attr('src',$(this).prev().data('src'))" required>
-      <br>    
+      <input type="text" name="verify" id="verify" maxlength="5" placeholder="请输入验证码" autocomplete="off" onfocus="$(this).removeAttr('onfocus').prev().attr('src',$(this).prev().data('src'))" required>
+     </div>    
+	  
       <div class="am-btn-group am-btn-group-justify am-cf">
         <input type="submit" value="注 册" class="am-btn am-btn-primary am-radius am-fl">
-        <input type="button" onclick="window.location.href='{:U('User/login')}'" value="已有账户?点此登录" class="am-btn am-btn-default am-radius am-fr">
+        <a href="{:U('User/login')}" class="am-btn am-btn-default am-radius am-fr">已有账户?点此登录</a>
       </div>
     </fieldset>
     </form>
 </div>
-
+<script type="text/javascript">
+$(function(){$(".am-topbar-nav").find('.am-active:not(.am-dropdown)').removeClass('am-active');});
+if(document.getElementsByTagName('meta').length==0)window.location.href="__SELF__";
+if ($.AMUI && $.AMUI.validator) {
+	$.AMUI.validator.patterns.password = /^[A-Za-z0-9]{6,20}$/
+}
+$('form').validator({
+	onValid: function(validity) {
+		$(validity.field).closest('.am-form-group').find('.am-alert').hide()
+	},
+	onInValid: function(validity) {
+		var $field = $(validity.field);
+		var $group = $field.closest('.am-form-group');
+		var $alert = $group.find('.am-alert');
+		var msg = $field.data('validationMessage') || this.getValidationMessage(validity);
+		if (!$alert.length) {
+			$alert = $('<div class="am-alert am-alert-danger"></div>').hide().appendTo($group)
+		}
+		$alert.html(msg).show()
+	}
+});
+</script>
+<if condition="!IS_PJAX">
 <include file="Public/footer" />
+</if>

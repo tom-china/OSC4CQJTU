@@ -27,7 +27,9 @@ class UserController extends SimpleController {
 
     //用户登录
     public function login(){
-    	if(session('?uid'))$this->redirect('order');
+    	if(session('?uid')){
+			$this->redirect('order');
+		}
 
         //是否允许注册
         $this->assign('allowregister',F('settings')['global']['allowregister']);
@@ -75,8 +77,8 @@ class UserController extends SimpleController {
 			if(!empty($user['username'])){
 				session('username',$user['username']);
 			}
-			if(!empty(I('get.returnURL'))){
-				redirect(base64_decode(base64_decode(I('get.returnURL'))));
+			if(session('?returnURL')){
+				redirect(session('returnURL'));
 			}
 			$this->redirect('Main/index');
     	}else{
@@ -87,7 +89,9 @@ class UserController extends SimpleController {
 
     //用户注册
     public function register(){
-    	if(session('?uid'))$this->redirect('order');
+    	if(session('?uid')){
+			$this->redirect('order');
+		}
 
         //是否允许注册
         $this->assign('allowregister',F('settings')['global']['allowregister']);
@@ -127,18 +131,49 @@ class UserController extends SimpleController {
 
     //找回密码
     public function findpsw(){
-    	$this->error('请联系网站管理员解决');
+		if(session('?uid')){
+			$this->redirect('/');
+		}
+		if(F('settings')['global']['quickreport']=='true'){
+			$this->error('请联系网站管理员解决');
+		}
+		if(IS_POST){
+			$database = M('user');
+			if(!$database->autoCheckToken($_POST)){
+				$this->error('令牌验证错误');
+			}
+			$map['uid'] = I('post.uid');
+			$map['tel'] = I('post.tel');
+			$map['area'] = I('post.area/d');
+			$map['building'] = I('post.building/d');
+			$map['location'] = I('post.location');			
+			if($database->where($map)->count()>0){				
+				$data['salt'] = salt();
+				$password = base64_encode(salt()); //自动生成临时新密码
+				$data['password'] = sha1(C('DB_PREFIX').$password.'_'.$data['salt']);
+				$update = $database->where('uid=:uid')->bind(':uid',$map['uid'])->save($data);
+				$this->assign('password',$password);
+			}else{
+				$this->error('信息不匹配');
+			}
+		}
+		$data = menu();
+		$this->assign('data',json_encode($data));		
+		$this->display('findpsw');
     }
 
     //用户注销
     public function logout(){
     	session(null);
-    	$this->redirect('login');
+		$this->success('注销成功');
     }
 
     //个人报修记录
     public function order(){
-    	if(!session('?uid'))$this->redirect('login');   
+    	if(!session('?uid')){
+			session('returnURL',__SELF__);
+			$this->redirect('login');
+		}   
     	$database = M('order');	
     	$list = $database->where('user=:user')->bind(':user',session('uid'))->order('time desc')->page(I('get.p/d').',25')->select();
     	$this->assign('list',$list);
@@ -150,7 +185,10 @@ class UserController extends SimpleController {
 
     //个人信息设置
     public function setting(){
-    	if(!session('?uid'))$this->redirect('login');
+    	if(!session('?uid')){
+			session('returnURL',__SELF__);
+			$this->redirect('login');
+		}
 
         $this->assign('quickreport',F('settings')['global']['quickreport']);//快速报修
 		
@@ -171,7 +209,7 @@ class UserController extends SimpleController {
     		$data['tel'] = I('post.tel');
     		if(!empty(I('post.password'))){
                 $data['salt'] = salt();
-                $data['pssword'] = sha1(C('DB_PREFIX').I('post.password').'_'.$data['salt']);
+                $data['password'] = sha1(C('DB_PREFIX').I('post.password').'_'.$data['salt']);
             }
     		$update = $database->where('uid=:uid')->bind(':uid',session('uid'))->filter('strip_tags')->save($data);
     		if($update){
@@ -190,7 +228,9 @@ class UserController extends SimpleController {
 	
 	//用户取消报修
     public function cancel(){
-    	if(!session('?uid'))$this->redirect('login');
+    	if(!session('?uid')){
+			$this->redirect('login');
+		}
     	if(IS_AJAX && IS_POST){
     		$database = M('order');
     		$map['order'] = ':order';

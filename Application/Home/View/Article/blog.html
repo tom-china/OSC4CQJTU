@@ -1,11 +1,10 @@
+<if condition="!IS_PJAX">
 <include file="Public/header" />
+<include file="Public/nav" />
+</if>
   <style>
 @media only screen and (min-width:1200px){.blog-g-fixed{max-width:1200px}}@media only screen and (min-width:641px){.blog-sidebar{font-size:1.4rem}}.blog-main{padding:20px 0}.blog-title{margin:10px 0 20px 0}.blog-meta{font-size:14px;margin:10px 0 20px 0;color:#222}.blog-meta a{color:#27ae60}.blog-pagination a{font-size:1.4rem}.blog-team li{padding:4px}.blog-team img{margin-bottom:0}.blog-content img,.blog-team img{max-width:100%;height:auto}.blog-footer{padding:10px 0;text-align:center}.am-article-title{overflow-x:visible}
   </style>
-</head>
-<body>
-<include file="Public/nav" />
-
 <div class="am-g am-g-fixed blog-g-fixed">
   <div class="am-u-md-8">
   <notempty name="list">
@@ -18,7 +17,7 @@
       <h4 class="am-article-meta blog-meta">{$value['author']} 发布于 {:date('Y年m月d日',$value['time'])} , {$value['view']} 次浏览</h4>
       <div class="am-g blog-content">
         <div class="am-u-sm-12">
-          <p>{:mb_strimwidth(strip_tags(htmlspecialchars_decode($value['content'])),0,150,'...','utf-8')}
+          <p>{:mb_strimwidth(strip_tags(htmlspecialchars_decode($value['content'])),0,300,'...','utf-8')}
           </p>
           <a class="am-btn am-btn-primary am-round" href="{:U('Article/show',array('acid'=>$value['acid']))}">阅读全文&raquo;</a>
         </div>
@@ -55,5 +54,9 @@
   </div>
 
 </div>
-
+<script type="text/javascript">
+$(function(){$(".am-topbar-nav").find('.am-active:not(.am-dropdown)').removeClass('am-active');$(".am-topbar-nav").find("a[href='<?=U()?>']").parent().addClass('am-active')});
+</script>
+<if condition="!IS_PJAX">
 <include file="Public/footer" />
+</if>

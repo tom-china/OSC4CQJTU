@@ -32,9 +32,13 @@ class ReportController extends SimpleController {
  			$user = $database->where('uid = :uid')->bind(':uid',session('uid'))->find(); 
  			$this->assign('user',$user);
     	}else{
-    		$this->redirect('User/login',array('returnURL'=>base64_encode(base64_encode(__SELF__))));
+			session('returnURL',__SELF__);
+    		$this->redirect('User/login');
     	}
     	if(IS_POST){
+			if(cookie('last_normal_report')){
+				$this->error('操作频繁请休息片刻~');
+			}
     		$database = D('order');
             if (!$database->create()){
                 $this->error($database->getError());
@@ -56,7 +60,7 @@ class ReportController extends SimpleController {
     		$data['emerg'] = 0;//是否紧急 普通0 紧急1
     		$add = $database->strict(true)->data($data)->filter('strip_tags')->add();
     		if($add){
-				cookie('last_report',time(),array('expire'=>60,'prefix'=>'think_'));
+				cookie('last_normal_report',time(),array('expire'=>60));
     			$this->success('报修提交成功',U('User/order'));
     		}else{
     			$this->error('报修提交失败');
@@ -76,9 +80,13 @@ class ReportController extends SimpleController {
  			$user = $database->where('uid = :uid')->bind(':uid',session('uid'))->find(); 
  			$this->assign('user',$user); 
     	}else{
-    		$this->redirect('User/login',array('returnURL'=>base64_encode(base64_encode(__SELF__))));
+			session('returnURL',__SELF__);
+    		$this->redirect('User/login');
     	}	
     	if(IS_POST){
+			if(cookie('last_emerg_report')){
+				$this->error('操作频繁请休息片刻~');
+			}			
     		$database = D('order');
             if (!$database->create()){
                 $this->error($database->getError());
@@ -97,7 +105,7 @@ class ReportController extends SimpleController {
     		$data['emerg'] = 1;//是否紧急 普通0 紧急1
     		$add = $database->strict(true)->data($data)->filter('strip_tags')->add();
     		if($add){
-				cookie('last_report',time(),array('expire'=>60,'prefix'=>'think_'));
+				cookie('last_emerg_report',time(),array('expire'=>60));
     			$this->success('报修提交成功',U('User/order'));
     		}else{
     			$this->error('报修提交失败');
@@ -144,25 +152,31 @@ class ReportController extends SimpleController {
 			$this->error('用户评价未开启');
 		}
 		
-		if(IS_POST){
+		if(IS_POST){			
 			$database = D('rank');
             if (!$database->create()){
                 $this->error($database->getError());
             }
-			$data['order'] = I('get.order');
+			$data['order'] = I('get.order');			
 			$order = M('order')->where($data)->find();
-			if($order['status']!=2){
+			if(empty($order)){
+				$this->error('工单不存在');
+			}
+			if(cookie('last_rank_'.$order['order'])){
+				$this->error('操作频繁请休息片刻~');
+			}			
+			if($order['status'] != 2){
 				$this->error('工单未完成');
 			}			
-			if(time()-$order['time']>3600*24*3){
+			if(time()-$order['donetime'] > 3600*24*3){
 				$this->error('评价超时关闭');
 			}
-			if(session('?uid') and I('get.type')==0){
+			if(session('?uid') AND I('get.type')==0){
 				$data['user']=session('uid');
 				if(session('uid') != $order['user'])$this->error('操作无权限');
 				$data['type']=0;
 			}
-			elseif(session('?admin') and I('get.type')==1){
+			elseif(session('?admin') AND I('get.type')==1){
 				$data['user']=session('admin');
 				$data['type']=1;
 			}
@@ -172,7 +186,9 @@ class ReportController extends SimpleController {
 			$data['content'] = I('post.content');
 			$data['time'] = time();
 			if($database->data($data)->filter('strip_tags')->add()){
-				cookie('last_rank',time(),array('expire'=>60,'prefix'=>'think_'));
+				if(session('?uid') AND !session('?admin')){
+					cookie('last_rank_'.$order['order'],time(),array('expire'=>60));
+				}
 				$this->success('操作成功');
 			}else{
 				$this->error('操作失败');
@@ -182,28 +198,28 @@ class ReportController extends SimpleController {
 	
 	//评价删除
 	public function rankDel(){
-		if(!session('?admin') and !session('?uid')){
+		if(!session('?admin') AND !session('?uid')){
 			$this->error('非法访问');
 		}
 		
 		//是否开启用户评价		
-		if(F('settings')['global']['allowrank']=='false'){
+		if(F('settings')['global']['allowrank'] == 'false'){
 			$this->error('用户评价未开启');	
 		}
 	
 		if(IS_POST && IS_AJAX){
 			$data['order'] = I('post.order');
 			$order = M('order')->where($data)->find();	
-			if($order['status']!=2){
+			if($order['status'] != 2){
 				$this->error('工单未完成');
 			}
-			if(time()-$order['time']>3600*24*3){
+			if(time()-$order['donetime'] > 3600*24*3){
 				$this->error('评价超时关闭');
 			}
-			if(session('?uid') && session('uid') != $order['user']){
+			if(session('?uid') AND session('uid') != $order['user']){
 				$this->error('操作无权限');
 			}
-			if(!session('?admin') and I('post.type')==1){
+			if(!session('?admin') AND I('post.type')==1){
 				$this->error('操作无权限');
 			}
 			$data['type'] = I('post.type');

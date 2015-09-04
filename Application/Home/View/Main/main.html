@@ -1,11 +1,10 @@
+<if condition="!IS_PJAX">
 <include file="Public/header" />
-
+<include file="Public/nav" />
+</if>
 <style>
 .content-list{margin-bottom:20px;border:1px solid #e9ecf1}.content-list li{margin-left:-1px;border:1px solid #e9ecf1;border-width:0 1px}.content-list li:first-child{border-left:none}.content-list li:last-child{border-right:none}.am-alert a{color:#666}
 </style>
-
-<include file="Public/nav" />
-
 <div class="am-container">
 <div class="am-alert am-alert-secondary" data-am-alert>
   <button type="button" class="am-close">&times;</button>
@@ -31,13 +30,13 @@
         <if condition="$vo.emerg eq 1">
         	<tr class="am-active">
         	<td>{$vo.order}</td>
-        	<td class="am-show-md-up">{$vo.description}</td>
+        	<td class="am-show-md-up">{:mb_strimwidth($vo['description'],0,16,'...','utf-8')}</td>
         <else/>
         	<tr>
         	<td>{$vo.order}</td>
 			<td class="am-show-md-up"><empty name="vo.building">-<else/>{:building($vo['area'],$vo['building'])}</empty></td>
         </if>
-			<td class="am-show-md-up">{$vo.location}</td>
+			<td class="am-show-md-up">{:mb_strimwidth($vo['location'],0,8,'...','utf-8')}</td>
 			<td class="am-show-md-up">{:date('Y年m月d日',$vo['time'])}</td>
 			<td>{:status($vo['status'])}</td>
 			<td><a href="{:U('Report/detail',array('order'=>$vo['order']))}">详细&raquo;</a></td>    
@@ -49,27 +48,53 @@
 
 </div>
 <script>
-$(function($){
-	var count = 1;
-	var notice = new Array();
-	<empty name="notice">
-	notice[0] = '暂无公告';
-	<else />
-	<foreach name="notice" item="vo" key="k" >
-	notice[{$k}] = '<a href="{:U('Article/index')}#{$vo.acid}">{$vo.title} <small>{:date('Y年m月d日',$vo['time'])}</small></a>';
-	</foreach>
-	</empty>
-	$("#notice").html(notice[0]);
-	if(notice.length>1){
-	 	function Scroller(){
-			$("#notice").hide().html(notice[count]).fadeIn(500);
-			count++;
-	 		if(count==notice.length)count=0;		
-	 	}
-	 	setInterval(Scroller, 5000);
-	}
+var count = 1;
+var notice = new Array();
+<empty name="notice">
+notice[0] = '暂无公告';
+<else />
+<foreach name="notice" item="vo" key="k" >
+notice[{$k}] = '<a href="{:U('Article/show',array('acid'=>$vo['acid']))}">{$vo.title} <small>{:date('Y年m月d日',$vo['time'])}</small></a>';
+</foreach>
+</empty>
+$("#notice").html(notice[0]);
+
+$('#refresh').click(function() {
+	$(this).html('<span class="am-icon-refresh am-icon-spin"></span> 正在刷新');
+	$.AMUI.progress.start();
+	$.ajax({
+		'url': "<?=U('Main/refresh')?>",
+		'cache': false,
+		'type': 'get',
+		'dataType': 'text',
+		success: function(res) {
+			$('#newest').html(res);
+			$('#refresh').html('<span class="am-icon-refresh"></span> 点击刷新');
+			$.AMUI.progress.done()
+		},
+		error: function(res) {
+			$('#refresh').html('<span class="am-icon-refresh"></span> 刷新失败，点击重试')
+		}
+	});
 });
 
-$('#refresh').click(function(){$(this).html('<span class="am-icon-refresh am-icon-spin"></span> 正在刷新');$.AMUI.progress.start();$.ajax({'url':"<?=U('Main/refresh')?>",'cache':false,'type':'get','dataType':'text',success:function(res){$('#newest').html(res);$('#refresh').html('<span class="am-icon-refresh"></span> 点击刷新');$.AMUI.progress.done()},error:function(res){$('#refresh').html('<span class="am-icon-refresh"></span> 刷新失败，点击重试')}})});var timer=setInterval(function(){$('#refresh').click()},30000);
+$.getScript("__PUBLIC__/resource/js/jquery.timers.min.js", function() {
+	$(document).stopTime();	
+	if(notice.length>1){
+	 	$(document).everyTime('5s',function(){
+			$("#notice").hide().html(notice[count]).fadeIn(500);
+			count++;
+			if(count==notice.length)count=0;		
+		});
+	}
+	$(document).everyTime('30s',function(){
+		$('#refresh').click();
+	});
+});
 </script>
+<script type="text/javascript">
+$(function(){$(".am-topbar-nav").find('.am-active:not(.am-dropdown)').removeClass('am-active');$(".am-topbar-nav").find("a[href='<?=U('/')?>']").parent().addClass('am-active')});
+</script>
+<if condition="!IS_PJAX">
 <include file="Public/footer" />
+</if>

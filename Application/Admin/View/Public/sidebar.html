@@ -8,6 +8,7 @@
             <li><a href="{:U('Task/todo')}" class="am-cf"><span class="am-icon-close"></span> 未处理<span class="am-badge am-badge-warning am-margin-right am-fr">{$countTodo}</span></a></li>
             <li><a href="{:U('Task/doing')}"><span class="am-icon-circle-o"></span> 处理中<span class="am-badge am-badge-danger am-margin-right am-fr">{$countDoing}</span></a></li>
             <li><a href="{:U('Task/done')}"><span class="am-icon-check"></span> 已处理</a></li>
+			<li><a href="{:U('Task/rank')}"><span class="am-icon-star"></span> 用户评价</a></li>
           </ul>
         </li> 
         <if condition="session('right') eq 1">
@@ -46,17 +47,41 @@
       </ul>
 
       <div class="am-panel am-panel-default admin-sidebar-panel">
-        <div class="am-panel-bd">
+        <div contenteditable class="am-panel-bd needsclick" data-id="welcome-{:session('admin')}">
+		<if condition="cookie('welcome-'.session('admin'))">
+		  {:cookie('welcome-'.session('admin'))}
+		<else/>		
           <p><span class="am-icon-bookmark"></span> 欢迎</p>
-          <p>欢迎登录重庆交通大学后勤在线服务中心后台!</p>
+          <p>欢迎登录重庆交通大学后勤在线服务中心后台 !</p>
+		</if>
         </div>
       </div>
+	  
+      <div class="am-panel am-panel-default admin-sidebar-panel">
+        <div contenteditable class="am-panel-bd needsclick" data-id="memo-{:session('admin')}">
+		<if condition="cookie('memo-'.session('admin'))">
+		  {:cookie('memo-'.session('admin'))}
+		<else/>		
+          <p><span class="am-icon-pencil"></span> 备忘</p>
+          <p>点击此处可修改便笺 , 我们只在本地保存 ;-)</p>
+		</if>
+        </div>
+      </div>	  
 
       <div class="am-panel am-panel-default admin-sidebar-panel">
-        <div class="am-panel-bd">
+        <div contenteditable class="am-panel-bd needsclick" data-id="thanks-{:session('admin')}">
+		<if condition="cookie('thanks-'.session('admin'))">
+		  {:cookie('thanks-'.session('admin'))}
+		<else/>
           <p><span class="am-icon-tag"></span> 鸣谢</p>
-          <p>ThinkPHP , AmazeUI , JQueryUI , Ueditor ...</p>
+          <p>ThinkPHP , AmazeUI , JQueryUI , Ueditor , Echart ...</p>		
+		</if>
         </div>
       </div>
     </div>
   </div>
+  <script>
+  $('.needsclick').blur(function(){
+	$.AMUI.utils.cookie.set($(this).data('id'), $(this).html(), new Date('{:date("m d,Y H:i:s",strtotime("+1 year"))}') , '/');
+  })
+  </script>

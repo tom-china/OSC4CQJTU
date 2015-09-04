@@ -1,0 +1,96 @@
+<if condition="!IS_PJAX">
+<include file="Public/header" />
+<include file="Public/nav" />
+</if>
+<link rel="stylesheet" href="__PUBLIC__/assets/css/amazeui.chosen.css"/>
+<div class="am-container">
+<div class="am-alert am-alert-default" data-am-alert>
+  <button type="button" class="am-close">&times;</button>
+  <p>请填写匹配的预留信息。忘记或未填写预留信息请联系网站管理员处理。</p>
+</div>
+<form action="" method="post" class="am-form" data-am-validator>
+  <fieldset>
+    <div class="am-form-group">
+      <label for="report-1">识别码：</label>
+      <input type="text" id="report-1" name="uid" placeholder="请输入学号（或教职工号/一卡通号）" required/>
+    </div>  
+  
+    <div class="am-form-group">
+      <label>常驻区域：</label>
+      <select id="province" name="area" required>
+        <option value="载入中">载入中</option>
+      </select>                     
+    </div>
+
+    <div class="am-form-group">
+      <label>常驻楼栋：</label>
+      <select id="city" name="building" required>
+        <option value="载入中">载入中</option>
+      </select>        
+    </div>
+
+    <div class="am-form-group">
+      <label for="report-2">常驻地点：</label>
+      <input type="text" id="report-2" name="location" maxlength="20" placeholder="请输入具体地址（详细到房间号）" required/>
+    </div>
+
+    <div class="am-form-group">
+      <label for="report-3">联系电话：</label>
+      <input type="text" name="tel" id="report-3" class="js-pattern-mobile" placeholder="请输入11位国内手机电话号码" required/>
+    </div>
+
+    <button class="am-btn am-btn-success am-btn-block am-radius" type="submit">提 交</button>
+  </fieldset>
+</form>
+</div>
+<notempty name="password">
+<div class="am-modal am-modal-alert" tabindex="-1" id="modal">
+  <div class="am-modal-dialog">
+    <div class="am-modal-hd"><span class="am-icon-check am-icon-lg am-text-success"></span></div>
+    <div class="am-modal-bd">
+      您的密码已重置为 <span class="am-text-danger">{$password}</span> ，请妥善保管。
+    </div>
+    <div class="am-modal-footer">
+      <span class="am-modal-btn">确定</span>
+    </div>	
+  </div>
+</div>
+<script>$("#modal").modal({closeViaDimmer: 0});$.getScript("__PUBLIC__/resource/js/jquery.zclip.min.js",function(){$(".am-text-danger").zclip({path:"__PUBLIC__/resource/js/ZeroClipboard.swf",copy:function(){return $.trim($(this).text())},afterCopy:function(){var data=new Object();data.name="重庆交通大学后勤在线服务中心";data.tag="JDLS";data.icon="__PUBLIC__/resource/images/app-icon72x72@2x.png";data.body="已复制到剪贴板，使用快捷键Ctrl+V粘贴。";showNotification(data)}})});function showNotification(data){Notification.requestPermission(function(perm){if(perm=="granted"){var notification=new Notification(data.name,{tag:data.tag,icon:data.icon,body:data.body});notification.onshow=function(){setTimeout(function(){notification.close()},10000)}}})};</script>
+</notempty>
+<script type="text/javascript">
+$.getScript("__PUBLIC__/assets/js/jquery.city.select.js", function() {
+	var data = {$data};
+	$('#province, #city').citylist({
+		data: data,
+		id: 'id',
+		children: 'citys',
+		name: 'name',
+		metaTag: 'name'
+	});
+});
+if ($.AMUI && $.AMUI.validator) {
+	$.AMUI.validator.patterns.mobile = /^1((3|5|8){1}\d{1}|70)\d{8}$/;
+	$.AMUI.validator.patterns.password = /^[A-Za-z0-9]{6,20}$/
+}
+$('form').validator({
+	onValid: function(validity) {
+		$(validity.field).closest('.am-form-group').find('.am-alert').hide()
+	},
+	onInValid: function(validity) {
+		var $field = $(validity.field);
+		var $group = $field.closest('.am-form-group');
+		var $alert = $group.find('.am-alert');
+		var msg = $field.data('validationMessage') || this.getValidationMessage(validity);
+		if (!$alert.length) {
+			$alert = $('<div class="am-alert am-alert-danger"></div>').hide().appendTo($group)
+		}
+		$alert.html(msg).show()
+	}
+});
+</script>
+<script type="text/javascript">
+$(function(){$(".am-topbar-nav").find('.am-active:not(.am-dropdown)').removeClass('am-active');});
+</script>
+<if condition="!IS_PJAX">
+<include file="Public/footer" />
+</if>

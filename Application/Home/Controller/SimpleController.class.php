@@ -32,6 +32,8 @@ class SimpleController extends Controller {
     //站点信息
     public function __construct(){
         parent::__construct();
+		
+		define('IS_PJAX',(strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' && $_SERVER['HTTP_X_PJAX'])?true : false);
 
 		//站点信息		
 		if(empty(F('settings'))){
@@ -42,7 +44,9 @@ class SimpleController extends Controller {
 		}
 			
 		//是否开启站点
-        if(F('settings')['global']['isopen']=='false')$this->error('站点已经关闭，请稍后访问~');
+        if(F('settings')['global']['isopen']=='false'){
+			$this->error('站点已经关闭，请稍后访问~');
+		}
 		 
 		//加载版权信息
         $this->assign('copyright',F('settings')['copyright']);   

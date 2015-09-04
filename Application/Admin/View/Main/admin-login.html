@@ -32,18 +32,18 @@
 
 			<div class="am-form-group">
 			  <label for="username">用户</label>
-			  <input type="text" name="username" class="" id="username" placeholder="输入用户名" required>
+			  <input type="text" name="username" id="username" placeholder="输入用户名" required>
 			</div>
 
 			<div class="am-form-group">
 			  <label for="password">密码</label>
-			  <input type="password" name="password" class="" id="password" placeholder="请输入密码" required>
+			  <input type="password" name="password" minlength="6" maxlength="20" id="password" placeholder="请输入密码" required>
 			</div>
 
 			<div class="am-form-group">
 			  <label for="v">验证码</label>
 			  <img data-src="{:U('main/showVerify')}" onclick="$(this).attr('src','{:U('Main/showVerify')}'+'?random='+Math.random())" class="am-img-responsive">
-			  <input type="text" name="verify" class="" id="v" placeholder="请输入验证码（不区分大小写）" onfocus="$(this).prev().attr('src',$(this).prev().data('src'))" required>
+			  <input type="text" name="verify" id="v" maxlength="5" placeholder="请输入验证码（不区分大小写）" autocomplete="off" onfocus="$(this).removeAttr('onfocus').prev().attr('src',$(this).prev().data('src'))" required>
 			</div>
 
 			<p><button type="submit" class="am-btn am-btn-block am-btn-primary am-radius">提交</button></p>

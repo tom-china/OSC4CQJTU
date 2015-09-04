@@ -41,20 +41,22 @@ class MainController extends SimpleController {
 
 	//自动刷新
     public function refresh(){
-    	$list = M('order')->cache(true,5)->order('time desc')->limit(5)->select();
-    	$html = '';
-    	foreach($list as $k=>$v){
-            $html .= ($v['emerg']==1)?'<tr class="am-active">':'<tr>';
-            $html .= '<td>'.$v['order'].'</td>';//工单号
-            $building = ($v['emerg']==1)?$v['description']:(empty($v['building'])?'-':building($v['area'],$v['building']));
-            $html .= '<td class="am-show-md-up">'.$building.'</td>';//报修楼栋
-            $html .= '<td class="am-show-md-up">'.$v['location'].'</td>';//报修寝室
-            $html .= '<td class="am-show-md-up">'.date("Y年m月d日",$v['time']).'</td>';//报修时间
-            $html .= '<td>'.status($v['status']).'</td>';//维修状态
-            $html .= '<td><a href="'.U('Report/detail',array('order'=>$v['order'])).'">详细&raquo;</a></td>';
-            $html .= '</tr>';
-    	}
-    	echo $html;
+		if(IS_AJAX){
+			$list = M('order')->cache(true,5)->order('time desc')->limit(5)->select();
+			$html = '';
+			foreach($list as $k=>$v){
+				$html .= ($v['emerg']==1)?'<tr class="am-active">':'<tr>';
+				$html .= '<td>'.$v['order'].'</td>';//工单号
+				$building = ($v['emerg']==1)?mb_strimwidth($v['description'],0,16,'...','utf-8'):(empty($v['building'])?'-':building($v['area'],$v['building']));
+				$html .= '<td class="am-show-md-up">'.$building.'</td>';//报修楼栋
+				$html .= '<td class="am-show-md-up">'.mb_strimwidth($v['location'],0,8,'...','utf-8').'</td>';//报修寝室
+				$html .= '<td class="am-show-md-up">'.date("Y年m月d日",$v['time']).'</td>';//报修时间
+				$html .= '<td>'.status($v['status']).'</td>';//维修状态
+				$html .= '<td><a href="'.U('Report/detail',array('order'=>$v['order'])).'">详细&raquo;</a></td>';
+				$html .= '</tr>';
+			}
+			echo $html;			
+		}
     }
 
 }

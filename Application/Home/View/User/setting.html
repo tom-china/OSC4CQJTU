@@ -1,13 +1,14 @@
+<if condition="!IS_PJAX">
 <include file="Public/header" />
-<link rel="stylesheet" href="__PUBLIC__/assets/css/amazeui.chosen.css"/>
 <include file="Public/nav" />
-
+</if>
+<link rel="stylesheet" href="__PUBLIC__/assets/css/amazeui.chosen.css"/>
 <div class="am-container">
 <div class="am-alert am-alert-default" data-am-alert>
   <button type="button" class="am-close">&times;</button>
-  <p>设置个人信息后在报修时无需再次输入。</p>
+  <p>设置个人信息后在报修时无需再次输入。<if condition="$quickreport eq 'false'">该预留信息同时作为找回密码的凭据。</if></p>
 </div>
-<form action="" method="post" class="am-form" data-am-validator>
+<form action="{:U('User/setting')}" method="post" class="am-form" data-am-validator>
   <fieldset>
     <div class="am-form-group">
       <label>报修区域：</label>
@@ -44,9 +45,8 @@
   </fieldset>
 </form>
 </div>
-<script type="text/javascript" src="__PUBLIC__/assets/js/jquery.city.select.js"></script>
 <script type="text/javascript">
-$(function() {
+$.getScript("__PUBLIC__/assets/js/jquery.city.select.js", function() {
 	var data = {$data};
 	$('#province, #city').citylist({
 		data: data,
@@ -75,18 +75,24 @@ $('form').validator({
 		$alert.html(msg).show()
 	}
 });
-var timer = setInterval(function() {
-	$('#province').find('option[value="{$user['
-	area ']}"]').attr('selected', 'selected');
-	if (!$.AMUI.support.mutationobserver) {
-		$('#province').trigger('changed.selected.amui')
-	}
-	$('#city').find('option[value="{$user['
-	building ']}"]').attr('selected', 'selected');
-	if (!$.AMUI.support.mutationobserver) {
-		$('#city').trigger('changed.selected.amui')
-	}
-	clearInterval(timer)
-}, 100);
+$.getScript("__PUBLIC__/resource/js/jquery.timers.min.js", function() {
+	$(document).stopTime();	
+	$(document).oneTime('1das',function(){
+		$('#province').find('option[value="{$user['area']}"]').attr('selected', true);
+		if (!$.AMUI.support.mutationobserver) {
+			$('#province').trigger('changed.selected.amui')
+		}
+		$('#city').find('option[value="{$user['building']}"]').attr('selected', 'selected');
+		if (!$.AMUI.support.mutationobserver) {
+			$('#city').trigger('changed.selected.amui')
+		}		
+	});	
+});
 </script>
+<script type="text/javascript">
+$(function(){$(".am-topbar-nav").find('.am-active:not(.am-dropdown)').removeClass('am-active');$(".am-topbar-nav").find("a[href='<?=U()?>']").parent().addClass('am-active')});
+if(document.getElementsByTagName('meta').length==0)window.location.href="__SELF__";
+</script>
+<if condition="!IS_PJAX">
 <include file="Public/footer" />
+</if>
