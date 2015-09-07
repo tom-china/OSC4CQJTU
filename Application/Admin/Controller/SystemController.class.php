@@ -27,17 +27,13 @@ class SystemController extends SimpleController {
 			$this->redirect('Main/index');
 		}
 	}	
-
-	public function index(){
-		$this->redirect('Main/dashboard');
-	}
 	
     //系统设置
     public function setting(){
         $database = D('setting');
         if(IS_POST){         
             if (!$database->autoCheckToken($_POST)){
-                $this->error('令牌验证错误');
+                $this->error('令牌验证错误，请刷新后重试');
             } 
             $menu = I('post.config');
             $menu = $menu['menu']['button'];
@@ -87,7 +83,7 @@ class SystemController extends SimpleController {
         if(IS_POST){
         	$database = M('setting');
             if (!$database->autoCheckToken($_POST)){
-                $this->error('令牌验证错误');
+                $this->error('令牌验证错误，请刷新后重试');
             } 
 	    	$global = I('post.global');
 	    	if(!in_array($global['isopen'],array(true,false))){
@@ -118,7 +114,7 @@ class SystemController extends SimpleController {
     	if(IS_POST){
     		$database = M('setting');
             if (!$database->autoCheckToken($_POST)){
-                $this->error('令牌验证错误');
+                $this->error('令牌验证错误，请刷新后重试');
             }     		
     		$tips = I('post.tips');
     		$data['key'] = 'tips';
@@ -140,7 +136,7 @@ class SystemController extends SimpleController {
     	if(IS_POST){
     		$database = M('setting');
             if (!$database->autoCheckToken($_POST)){
-                $this->error('令牌验证错误');
+                $this->error('令牌验证错误，请刷新后重试');
             }     		
     		$copyright = I('post.copyright');
     		$data['key'] = 'copyright';
@@ -188,7 +184,9 @@ class SystemController extends SimpleController {
 						break;						
 						case 'html':
 						$list = $this->listFiles(HTML_PATH); //应用静态缓存目录
-						break;												
+						break;
+						default:
+						$this->error('非法参数');													
 					}
 					$this->cleanCache($list);
 				}
@@ -207,6 +205,7 @@ class SystemController extends SimpleController {
 		}
 	}
 	
+	//列出目录下的所有文件
 	private function listFiles( $from = '.'){
 		if(! is_dir($from))
 			return false;

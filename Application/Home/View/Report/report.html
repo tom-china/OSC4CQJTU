@@ -2,7 +2,9 @@
 <include file="Public/header" />
 <include file="Public/nav" />
 </if>
+
 <link rel="stylesheet" href="__PUBLIC__/assets/css/amazeui.chosen.css"/>
+
 <div class="am-container">
 <notempty name="tips">
 <div class="am-alert am-alert-default" data-am-alert>
@@ -10,36 +12,41 @@
   <p>{$tips}</p>
 </div>
 </notempty>
-<form action="{:U('Report/index')}" method="post" class="am-form" data-am-validator>
+<form action="{:U('Report/index')}" method="post" class="am-form" enctype="multipart/form-data" data-am-validator>
   <fieldset>
     <div class="am-form-group">
-      <label>报修区域：</label>
+      <label>报修区域：（必选）</label>
       <select id="province" name="area" required>
         <option value="载入中">载入中</option>
       </select>                     
     </div>
 
     <div class="am-form-group">
-      <label>报修楼栋：</label>
+      <label>报修楼栋：（必选）</label>
       <select id="city" name="building" required>
         <option value="载入中">载入中</option>
       </select>        
     </div>
 
     <div class="am-form-group">
-      <label for="report-2">报修地点：</label>
+      <label for="report-2">报修地点：（必填）</label>
       <input type="text" id="report-2" name="location" maxlength="20" placeholder="请输入具体地址（详细到房间号）" value="{$user['location']}" required/>
     </div>
 
     <div class="am-form-group">
-      <label for="tel">联系电话：</label>
+      <label for="tel">联系电话：（必填）</label>
       <input type="text" id="tel" name="tel" placeholder="请输入11位国内手机电话号码" class="js-pattern-mobile" value="{$user['tel']}" required/>
     </div>    
 
     <div class="am-form-group">
-      <label class="am-form-label">报修物品：</label>
+      <label class="am-form-label">报修物品：（必填）</label>
       <input type="text" minlength="2" placeholder="请填写报修物品" maxlength="20" name="good" required/>
     </div>
+    
+	<div class="am-form-group am-form-file">
+	  <span class="am-icon-cloud-upload"> 选择要上传的图片</span>
+	  <input id="doc-form-file" name="uploadImg[]" type="file" multiple>
+	</div>    
 
     <div class="am-form-group">
       <label for="report-5">故障描述：</label>
@@ -51,7 +58,20 @@
 </form>
 </div>
 <script type="text/javascript">
-$.getScript("__PUBLIC__/assets/js/jquery.city.select.js", function() {
+if (typeof jQuery == 'undefined') { 	
+if(document.getElementsByTagName('meta').length==0){
+	window.location.href="__SELF__";
+}		
+}else{
+$('#doc-form-file').on('change', function() {
+  var fileNames = '';
+  $.each(this.files, function() {
+	fileNames += ' '+this.name;
+  });
+  if(fileNames.length==0)fileNames=' 选择要上传的图片';
+  $('.am-icon-cloud-upload').html(fileNames);
+});	
+$.getScript("__PUBLIC__/resource/js/jquery.city.select.js", function() {
 	var data = {$data};
 	$('#province, #city').citylist({
 		data: data,
@@ -99,12 +119,11 @@ $.getScript("__PUBLIC__/resource/js/jquery.timers.min.js", function() {
 		if (time <= 0)$("fieldset>button[type=submit]").removeAttr('disabled').text('提 交');
 	},60);
 	</if>
-});
+});	
+$(function(){$(".am-topbar-nav").find('.am-active:not(.am-dropdown)').removeClass('am-active');$(".am-topbar-nav").find("a[href='<?=U()?>']").parent().addClass('am-active')});	
+}
 </script>
-<script type="text/javascript">
-$(function(){$(".am-topbar-nav").find('.am-active:not(.am-dropdown)').removeClass('am-active');$(".am-topbar-nav").find("a[href='<?=U()?>']").parent().addClass('am-active')});
-if(document.getElementsByTagName('meta').length==0)window.location.href="__SELF__";
-</script>
+
 <if condition="!IS_PJAX">
 <include file="Public/footer" />
 </if>

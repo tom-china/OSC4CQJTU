@@ -36,14 +36,15 @@ class UserController extends SimpleController {
         $this->assign('quickreport',F('settings')['global']['quickreport']);
 
     	if(IS_POST){
+            if(!$this->checkVerify(I('post.verify'))){
+                $this->error('验证码错误');
+            } 
+			   		
             $database = D('user');  
             if(!$database->create()){
                 $this->error($database->getError()); 
             }         
-            if(!$this->checkVerify(I('post.verify'))){
-                $this->error('验证码错误');
-            } 
-			
+
 			//UC登陆（用户名+密码模式）
 			if(F('settings')['global']['quickreport']=='false' && F('settings')['global']['uclogin']=='normal'){
 				$this->ucLogin();
@@ -100,15 +101,19 @@ class UserController extends SimpleController {
         if(F('settings')['global']['allowregister']=='false')$this->error('站点已关闭注册');  	
 		
     	if(IS_POST){
+            if(!$this->checkVerify(I('post.verify'))){
+                $this->error('验证码错误');
+            }    		
+			
     		$database = D("User");          
             if(!$database->create()){
                 $this->error($database->getError());
             }
-            if(!$this->checkVerify(I('post.verify'))){
-                $this->error('验证码错误');
-            }
+
             $data['uid'] = I('post.uid');
-			if($database->where($data)->find())$this->error('用户已存在');
+			if($database->where($data)->find()){
+				$this->error('用户已存在');
+			}
             if(F('settings')['global']['quickreport']=='false'){
                 $salt = salt();
                 $data['salt'] = $salt;
@@ -140,7 +145,7 @@ class UserController extends SimpleController {
 		if(IS_POST){
 			$database = M('user');
 			if(!$database->autoCheckToken($_POST)){
-				$this->error('令牌验证错误');
+				$this->error('令牌验证错误，请刷新后重试');
 			}
 			$map['uid'] = I('post.uid');
 			$map['tel'] = I('post.tel');
@@ -195,7 +200,7 @@ class UserController extends SimpleController {
     	$database = M('user');
     	if(IS_POST){   
             if(!$database->autoCheckToken($_POST)){
-				$this->error('令牌验证错误');
+				$this->error('令牌验证错误，请刷新后重试');
 			}               
     		$data['area'] = I('post.area/d');
             if(!selectCheck($data['area'])){
@@ -207,7 +212,7 @@ class UserController extends SimpleController {
 			}
     		$data['location'] = I('post.location');
     		$data['tel'] = I('post.tel');
-    		if(!empty(I('post.password'))){
+    		if(!empty($_POST['password'])){
                 $data['salt'] = salt();
                 $data['password'] = sha1(C('DB_PREFIX').I('post.password').'_'.$data['salt']);
             }

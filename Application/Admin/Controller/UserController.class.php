@@ -164,16 +164,18 @@ class UserController extends SimpleController {
     	$database = M('user');
     	if(IS_POST){
 	        if (!$database->autoCheckToken($_POST)){
-	            $this->error('令牌验证错误');
+	            $this->error('令牌验证错误，请刷新后重试');
 	        }  
 	        $map['uid'] = ':uid';
 	        $bind[':uid'] = I('get.uid');
             //姓名+一卡通
             if($global['quickreport']=='true'){
-            $data['username'] = I('post.username');
+	            $data['username'] = I('post.username');
             }else{//用户名+密码
-	        $data['salt'] = salt();
-	        $data['password'] = sha1(C('DB_PREFIX').I('post.password').'_'.$data['salt']);
+	         	if(!empty($_POST['password'])){
+			        $data['salt'] = salt();
+			        $data['password'] = sha1(C('DB_PREFIX').I('post.password').'_'.$data['salt']);	         		
+	         	}
 	    	}
             $data['area'] = I('post.area');
             $data['building'] = I('post.building');
@@ -203,7 +205,7 @@ class UserController extends SimpleController {
     	if(IS_POST){
     		$database = M('user');
  	        if (!$database->autoCheckToken($_POST)){
-	            $this->error('令牌验证错误');
+	            $this->error('令牌验证错误，请刷新后重试');
 	        }   	
 	        $data['uid'] = I('post.uid');
             //姓名+一卡通
@@ -260,7 +262,7 @@ class UserController extends SimpleController {
     	if(IS_POST){
     		$database = M('admin');
  	        if (!$database->autoCheckToken($_POST)){
-	            $this->error('令牌验证错误');
+	            $this->error('令牌验证错误，请刷新后重试');
 	        }   	
 	        $data['username'] = I('post.username');
             if(in_array(I('post.right/d'), array(0,1)))$data['right'] = I('post.right/d');
@@ -279,14 +281,17 @@ class UserController extends SimpleController {
 
     public function doctorDel(){
     	if(IS_POST AND IS_AJAX){
-			$database = M('admin');
-			$user = $database->where('username=:username')->bind(':username',session('admin'))->find();			
+			$database = M('admin');		
     		$uid = I('post.uid/a');
-			if(in_array($user['uid'],I('post.uid'))){
+			if(in_array(1,$uid)){
+				$this->error('不能删除超级管理员');
+			}		
+			$user = $database->where('username=:username')->bind(':username',session('admin'))->find();		
+			if(in_array($user['uid'],$uid)){
 				$this->error('不能删除自己');
 			}
-			$total = count(I('post.uid'));
-			$uid = implode(',', I('post.uid'));
+			$total = count($uid);
+			$uid = implode(',', $uid);
 			$row = $database->delete($uid);
 			if($row){
 				$this->success($row.'/'.$total.'条记录删除成功');
@@ -304,11 +309,11 @@ class UserController extends SimpleController {
 	        }  
 	        $map['uid'] = ':uid';
 	        $bind[':uid'] = I('get.uid');
-	        if(!empty(I('post.password'))){
+	        if(!empty($_POST['password'])){
                 $data['salt'] = salt();
                 $data['password'] = sha1(C('DB_PREFIX').I('post.password').'_'.$data['salt']);
             }
-            if(!empty(I('post.area')) or !empty(I('post.building'))){
+            if(!empty($_POST['area']) or !empty($_post['building'])){
                 $data['location'] = json_encode(array(
                     'area'=>I('post.area'),
                     'building'=>I('post.building')

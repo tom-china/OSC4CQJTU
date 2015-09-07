@@ -6,7 +6,9 @@
   <!-- sidebar start -->
 <include file="Public/sidebar" />
   <!-- sidebar end -->
-  
+<style>
+.am-form-icon [class*=am-icon-]{top:48px}
+</style>    
   <!-- content start -->
   <div class="admin-content">
     <div class="am-cf am-padding">
@@ -37,18 +39,19 @@
             </div>
           </div>          
           <else/>
-          <div class="am-form-group">
+          <div class="am-form-group am-form-icon am-form-feedback">
             <label for="password" class="am-form-label">密码</label>
             <div class="">
-              <input type="password" name="password" minlength="6" maxlength="20" id="password" placeholder="输入密码6-20位" required>
-              <small></small>
+              <input type="password" class="js-pattern-password" name="password" minlength="6" maxlength="20" id="password" placeholder="输入密码6-20位" required>
+              <span class="am-icon-eye" onclick="$(this).prev().attr('type','text')"></span>
             </div>
           </div>
 
-          <div class="am-form-group">
+          <div class="am-form-group am-form-icon am-form-feedback">
             <label for="rpassword" class="am-form-label">确认密码</label>
             <div class="">
               <input type="password" id="rpassword" minlength="6" maxlength="20" placeholder="再次输入密码" data-equal-to="#password" required>
+              	<span class="am-icon-eye" onclick="$(this).prev().attr('type','text')"></span>
             </div>
           </div>
           </if>
@@ -73,7 +76,7 @@
 
 		    <div class="am-form-group">
 		      <label for="tel" class="am-form-label">联系电话：</label>
-		      <input type="text" name="tel" id="tel" placeholder="请输入联系电话" />
+		      <input type="text" class="js-pattern-mobile" name="tel" id="tel" placeholder="请输入联系电话" />
 		    </div>
 
           <div class="am-form-group">
@@ -89,7 +92,7 @@
   <!-- content end -->
 
 </div>
-<script type="text/javascript" src="__PUBLIC__/assets/js/jquery.city.select.js"></script>
+<script type="text/javascript" src="__PUBLIC__/resource/js/jquery.city.select.js"></script>
 <script>
 $(function() {
 	var data = {$data};
@@ -100,7 +103,10 @@ $(function() {
 		name: 'name',
 		metaTag: 'name'
 	});
-	window.prettyPrint && prettyPrint();
+if ($.AMUI && $.AMUI.validator) {
+	$.AMUI.validator.patterns.mobile = /^1((3|5|8){1}\d{1}|70)\d{8}$/;
+	$.AMUI.validator.patterns.password = /^[A-Za-z0-9]{6,20}$/
+}
 	$('#doc-vld-msg').validator({
 		onValid: function(validity) {
 			$(validity.field).closest('.am-form-group').find('.am-alert').hide()

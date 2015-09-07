@@ -24,7 +24,7 @@ class ArticleController extends SimpleController {
 	//公告列表
     public function index(){
     	$database = M('article');
-    	$list = $database->order('time desc')->page(I('get.p').',5')->select();
+    	$list = $database->order('time desc')->page(I('get.p/d').',5')->select();
     	$count = $database->count();
     	$page = pagination($count);
     	$this->assign('page',$page);

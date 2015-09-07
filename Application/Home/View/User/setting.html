@@ -2,7 +2,9 @@
 <include file="Public/header" />
 <include file="Public/nav" />
 </if>
+
 <link rel="stylesheet" href="__PUBLIC__/assets/css/amazeui.chosen.css"/>
+
 <div class="am-container">
 <div class="am-alert am-alert-default" data-am-alert>
   <button type="button" class="am-close">&times;</button>
@@ -35,9 +37,10 @@
     </div>
 
     <if condition="$quickreport eq 'false'">
-      <div class="am-form-group">
+      <div class="am-form-group am-form-icon am-form-feedback">
         <label for="report-4">修改密码：</label>
         <input type="password" name="password" id="report-4" placeholder="6-20位，不修改请留空" class="js-pattern-password" />
+        <span class="am-icon-eye" onclick="$(this).prev().attr('type','text')"></span>
       </div>      
     </if>
 
@@ -46,7 +49,7 @@
 </form>
 </div>
 <script type="text/javascript">
-$.getScript("__PUBLIC__/assets/js/jquery.city.select.js", function() {
+$.getScript("__PUBLIC__/resource/js/jquery.city.select.js", function() {
 	var data = {$data};
 	$('#province, #city').citylist({
 		data: data,
@@ -93,6 +96,7 @@ $.getScript("__PUBLIC__/resource/js/jquery.timers.min.js", function() {
 $(function(){$(".am-topbar-nav").find('.am-active:not(.am-dropdown)').removeClass('am-active');$(".am-topbar-nav").find("a[href='<?=U()?>']").parent().addClass('am-active')});
 if(document.getElementsByTagName('meta').length==0)window.location.href="__SELF__";
 </script>
-<if condition="!IS_PJAX">
+
+<if condition="IS_PJAX">
 <include file="Public/footer" />
 </if>

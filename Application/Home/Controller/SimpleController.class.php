@@ -33,7 +33,7 @@ class SimpleController extends Controller {
     public function __construct(){
         parent::__construct();
 		
-		define('IS_PJAX',(strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' && $_SERVER['HTTP_X_PJAX'])?true : false);
+		define('IS_PJAX',(strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' && $_SERVER['HTTP_X_PJAX'])?true:false);
 
 		//站点信息		
 		if(empty(F('settings'))){

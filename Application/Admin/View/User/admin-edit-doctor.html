@@ -6,7 +6,9 @@
   <!-- sidebar start -->
 <include file="Public/sidebar" />
   <!-- sidebar end -->
-  
+<style>
+.am-form-icon [class*=am-icon-]{top:48px}
+</style>    
   <!-- content start -->
   <div class="admin-content">
     <div class="am-cf am-padding">
@@ -52,11 +54,11 @@
             </div>
           </div>
 
-          <div class="am-form-group">
+          <div class="am-form-group am-form-icon am-form-feedback">
             <label for="password" class="am-form-label">修改密码</label>
             <div class="">
-              <input type="password" name="password" maxlength="20" id="password" placeholder="输入你的新密码6-20位，不修改请留空。">
-              <small></small>
+              <input type="password" name="password" maxlength="20" id="password" placeholder="输入新密码6-20位，不修改请留空。">
+              <span class="am-icon-eye" onclick="$(this).prev().attr('type','text')"></span>
             </div>
           </div>
 

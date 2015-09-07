@@ -25,6 +25,6 @@
 <script src="__PUBLIC__/assets/js/amazeui.min.js"></script>
 <script src="__PUBLIC__/resource/js/jquery.pjax.js"></script>
 <script>
-$(function(){if($.support.pjax){$(document).pjax("a","#dynamic-loading-contents");$(document).on("pjax:send",function(){$.AMUI.progress.start()});$(document).on("pjax:complete",function(){$.AMUI.progress.done()})}});
+$(function(){if($.support.pjax){$(document).pjax("a:not([data-nopjax])","#dynamic-loading-contents");$(document).on("pjax:send",function(){$.AMUI.progress.start()});$(document).on("pjax:complete",function(){$.AMUI.progress.done()})}});
 </script>
 <!--<![endif]-->

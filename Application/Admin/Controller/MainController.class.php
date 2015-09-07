@@ -27,13 +27,15 @@ class MainController extends SimpleController {
 			$this->redirect('Main/dashboard');
 		}
     	if(IS_POST){
+ 			if(!$this->checkVerify(I('post.verify'))){
+				$this->error('验证码错误');
+			}   		
+			
     		$database = D('admin');
             if(!$database->create()){
                 $this->error($database->getError()); 
             } 	
-			if(!$this->checkVerify(I('post.verify'))){
-				$this->error('验证码错误');
-			}
+
             $bind[':username'] = I('post.username'); 
             $admin = $database->where('username=:username')->bind($bind)->find();             		
     		if(empty($admin))$this->error('用户不存在');
@@ -103,7 +105,7 @@ class MainController extends SimpleController {
         if(IS_POST){
             $database = M('admin');
             if (!$database->autoCheckToken($_POST)){
-                $this->error('令牌验证错误');
+                $this->error('令牌验证错误，请刷新后重试');
             }           
             $bind[':username'] = session('admin');
             $admin = $database->where('username=:username')->bind($bind)->find();

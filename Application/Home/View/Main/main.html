@@ -2,9 +2,11 @@
 <include file="Public/header" />
 <include file="Public/nav" />
 </if>
+
 <style>
 .content-list{margin-bottom:20px;border:1px solid #e9ecf1}.content-list li{margin-left:-1px;border:1px solid #e9ecf1;border-width:0 1px}.content-list li:first-child{border-left:none}.content-list li:last-child{border-right:none}.am-alert a{color:#666}
 </style>
+
 <div class="am-container">
 <div class="am-alert am-alert-secondary" data-am-alert>
   <button type="button" class="am-close">&times;</button>
@@ -95,6 +97,7 @@ $.getScript("__PUBLIC__/resource/js/jquery.timers.min.js", function() {
 <script type="text/javascript">
 $(function(){$(".am-topbar-nav").find('.am-active:not(.am-dropdown)').removeClass('am-active');$(".am-topbar-nav").find("a[href='<?=U('/')?>']").parent().addClass('am-active')});
 </script>
+
 <if condition="!IS_PJAX">
 <include file="Public/footer" />
 </if>

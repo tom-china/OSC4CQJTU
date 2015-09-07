@@ -2,12 +2,12 @@
 <include file="Public/header" />
 <include file="Public/nav" />
 </if>
+
 <style>
 .am-table{margin-bottom:0}.filter span:hover{background-color:#19a7f0}
 </style>
 
 <div class="am-container">
-
 <div class="am-g filter">
  	<div class="am-u-md-6">
 	<h3>报修类型</h3>
@@ -71,9 +71,11 @@
 </div>
 {$page}
 </div>
+
 <script type="text/javascript">
 $(function(){$(".am-topbar-nav").find('.am-active:not(.am-dropdown)').removeClass('am-active');$(".am-topbar-nav").find("a[href='<?=U()?>']").parent().addClass('am-active')});
 </script>
+
 <if condition="!IS_PJAX">
 <include file="Public/footer" />
 </if>

@@ -2,9 +2,11 @@
 <include file="Public/header" />
 <include file="Public/nav" />
 </if>
+
 <style>
 .scrollspy-nav{top:0;z-index:100;background:#0e90d2;width:100%;padding:0 10px}.scrollspy-nav ul{margin:0;padding:0}.scrollspy-nav li{display:inline-block;list-style:none}.scrollspy-nav a{color:#eee;padding:10px 20px;display:inline-block}.scrollspy-nav a.am-active{color:#fff;font-weight:700}.am-panel{margin-top:20px}ul.timeline{margin-left:25px;border-left:2px solid #ddd;margin-bottom:0;padding-top:25px;padding-bottom:25px}ul.timeline li{margin-left:-42px;list-style:none}ul.timeline b{width:8px;height:8px;background:#fff;border:2px solid #555;margin-left:5px;margin-right:10px;margin-top:10px;border-radius:6px;-webkit-border-radius:6px;-moz-border-radius:6px;overflow:hidden;display:inline-block;float:left}ul.timeline p{padding-left:22px;line-height:1}
 </style>
+
 <div class="am-container">
 <notempty name="tips">
 <div class="am-alert am-alert-default" data-am-alert>
@@ -84,7 +86,32 @@
 </div>
 </div>
 
-<if condition="$allowrank eq 'true' and !empty($detail[donetime])">
+<notempty name="detail.img">
+<div class="am-panel am-panel-default">
+  <div class="am-panel-hd">报修图片</div>
+  <div class="am-panel-bd">
+  <if condition="($user['uid'] eq session('uid')) or session('?admin')">
+  <ul data-am-widget="gallery" class="am-gallery am-avg-sm-2
+  am-avg-md-3 am-avg-lg-4 am-gallery-default" data-am-gallery="{ pureview: true }" >
+  <foreach name="detail.img" item="vo">
+      <li>
+        <div class="am-gallery-item">
+            <a href="__ROOT__/Uploads/{$vo}">
+              <img src="__ROOT__/Uploads/{$vo}"/>
+            </a>
+        </div>
+      </li>
+  </foreach>
+  </ul>
+  <else/>
+  <p class="am-text-center">仅本人和管理员可见</p>
+  </if>
+  </div>
+</div>
+<script>if (typeof jQuery == 'undefined') { if(document.getElementsByTagName('meta').length==0){window.location.href="__SELF__";}	}else{$('.am-gallery').pureview();}</script>
+</notempty>
+
+<if condition="$allowrank eq 'true' and !empty($detail['donetime'])">
 <div class="am-panel am-panel-default">
   <div class="am-panel-hd">用户评价</div>
   <div class="am-panel-bd">
@@ -186,6 +213,9 @@
 </div>
 
 <script>
+if (typeof jQuery == 'undefined') { 
+if(document.getElementsByTagName('meta').length==0){window.location.href="__SELF__";}	
+}else{
 function modal_confirm(string,config){$('#confirm').find('.am-modal-bd>span').text(string);$('#confirm').modal({relatedTarget:this,onConfirm:function(options){$.ajax({'type':'post','url':"<?=U('"+config.action+"')?>",'data':{order:'<?=I('get.order')?>',type:config.obj.data('type')},'dataType':'json',success:function(res){modal_alert(res.info)},error:function(res){modal_alert(config.error)}})},onCancel:function(){}})}$('.am-icon-close').click(function(){var string='';var config={obj:$(this),action:'rankDel',error:'网络错误'};modal_confirm(string,config)});
 $.getScript("__PUBLIC__/resource/js/jquery.timers.min.js", function() {
 	$(document).stopTime();	
@@ -198,48 +228,20 @@ $.getScript("__PUBLIC__/resource/js/jquery.timers.min.js", function() {
 	},60);
 	</if>	
 }); 
-</script>
-</if>
-<script>
-$.getScript("__PUBLIC__/resource/js/jquery.zclip.min.js", function() {
-	$('.am-icon-copy').zclip({
-		path: '__PUBLIC__/resource/js/ZeroClipboard.swf',
-		copy: function() {
-			return $.trim($(this).parent().next().text());
-		},
-		afterCopy: function(){
-			var data = new Object(); 
-			data.name = "重庆交通大学后勤在线服务中心";
-			data.tag = "JDLS";
-			data.icon = "__PUBLIC__/resource/images/app-icon72x72@2x.png";
-			data.body = "已复制到剪贴板，使用快捷键Ctrl+V粘贴。";
-			showNotification(data);
-		}	
-	});
-});
-
-function showNotification(data){
-	Notification.requestPermission(function(perm) {
-		if (perm == "granted") {
-			var notification = new Notification(data.name, {
-				tag: data.tag,
-				icon: data.icon,
-				body: data.body
-			});
-			notification.onshow = function() {
-				setTimeout(function() {
-					notification.close();
-				}, 10000);
-			}
-		}
-	})
 }
 </script>
-<script>$('#qrcode').qrcode({text:location.href,width:96,height:96,correctLevel:1});</script>
+</if>
 <script type="text/javascript">
+if (typeof jQuery == 'undefined') { 
+if(document.getElementsByTagName('meta').length==0){window.location.href="__SELF__";}	
+}else{
+$.getScript("__PUBLIC__/resource/js/jquery.zclip.min.js",function(){$('.am-icon-copy').zclip({path:'__PUBLIC__/resource/js/ZeroClipboard.swf',copy:function(){return $.trim($(this).parent().next().text())},afterCopy:function(){var data=new Object();data.name="重庆交通大学后勤在线服务中心";data.tag="JDLS";data.icon="__PUBLIC__/resource/images/app-icon72x72@2x.png";data.body="已复制到剪贴板，使用快捷键Ctrl+V粘贴。";showNotification(data)}})});
+function showNotification(data){Notification.requestPermission(function(perm){if(perm=="granted"){var notification=new Notification(data.name,{tag:data.tag,icon:data.icon,body:data.body});notification.onshow=function(){setTimeout(function(){notification.close()},10000)}}})}
+$('#qrcode').qrcode({text:location.href,width:96,height:96,correctLevel:1});	
 $(function(){$(".am-topbar-nav").find('.am-active:not(.am-dropdown)').removeClass('am-active');});
-if(document.getElementsByTagName('meta').length==0)window.location.href="__SELF__";
+}
 </script>
+
 <if condition="!IS_PJAX">
 <include file="Public/footer" />
 </if>

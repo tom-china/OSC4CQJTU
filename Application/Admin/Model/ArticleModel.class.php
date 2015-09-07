@@ -22,9 +22,12 @@ namespace Home\Model;
 use Think\Model;
 class ArticleModel extends Model{
 
-   protected $_validate = array(
-     array('title','require','标题必须'),
-     array('content','require','内容必须')
-   );
+	protected $insertFields = array('title','content','time','author');
+	protected $updateFields = array('title','content');	
+
+	protected $_validate = array(
+		array('title','require','标题必须'),
+		array('content','require','内容必须')
+	);
    
 }

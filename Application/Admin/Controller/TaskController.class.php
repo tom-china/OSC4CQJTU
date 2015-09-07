@@ -26,11 +26,7 @@ class TaskController extends SimpleController {
 		if(!session('?admin')){
 			$this->redirect('Main/index');
 		}
-	}
-
-    public function index(){
-    	$this->redirect('Main/dashboard');
-    }	
+	}	
 	
 	//待处理
     public function todo(){   	
@@ -39,9 +35,9 @@ class TaskController extends SimpleController {
     	}else{
 			$database = M('order');
             $map = $this->getMap(0);
-            //EXCEL导出
+            
             if(I('get.action') == 'export'){
-				$this->export($database,$map);
+				$this->export($database,$map);//EXCEL导出
             }
 
 	    	$this->display('admin-table-todo');
@@ -55,9 +51,9 @@ class TaskController extends SimpleController {
     	}else{  
 			$database = M('order');
             $map = $this->getMap(1);
-            //EXCEL导出
+            
             if(I('get.action') == 'export'){
-                $this->export($database,$map);
+                $this->export($database,$map);//EXCEL导出
             }
    	
 	    	$this->display('admin-table-doing');
@@ -65,8 +61,7 @@ class TaskController extends SimpleController {
     }
 
 	//已处理
-    public function done(){
-    	
+    public function done(){  	
     	if(IS_AJAX && IS_POST){
     		$this->updateOrder(I('post.order/a'),ACTION_NAME);
     	}else{
@@ -95,6 +90,129 @@ class TaskController extends SimpleController {
 			}				
     	}
     } 
+	
+	/*
+	 * DataTables
+	 * @return json
+	 * */
+	public function getTable(){
+		if(IS_AJAX and IS_POST){
+			$database = M('order');
+			$map = $this->getMap(I('get.type'));
+
+			$columns = I('post.columns');
+			$order = I('post.order');
+			
+			$order[0]['column'] = $order[0]['column']?$order[0]['column']:5;
+			$order[0]['dir'] = $order[0]['dir']?$order[0]['dir']:'desc';
+			$orderby = trim($columns[$order[0]['column']]['name'].' '.$order[0]['dir']);
+	
+			$list = $database->where($map)->order($orderby)->limit(I('param.start/d'),I('param.length/d'))->select();
+
+			$draw = I('post.draw');
+			$recordsTotal = $database->count();	
+			$recordsFiltered = $database->where($map)->count();
+			foreach($list as $k=>$v){
+				$infos[] = array(
+					'<input class="ids" type="checkbox" name="order[]" value="'.$v['order'].'"/>',
+					'<a href="'.U('Home/Report/detail',array('order'=>$v['order'])).'" target="_blank">'.$v['order'].'</a>',
+					area($v['area']),
+					$v['building']?building($v['area'],$v['building']):'-',
+					$v['location'],
+					date('Y-m-d',$v['time']),
+					$v['user'],
+					$v['good']?$v['good']:'-',
+					$v['description']?'有':'无',
+					$v['doctor'],
+					$v['repairer']
+				);
+			}
+			
+			echo json_encode(array(
+				"draw" => intval($draw),
+				"recordsTotal" => intval($recordsTotal),
+				"recordsFiltered" => intval($recordsFiltered),
+				"data" => $infos?$infos:[]
+			),JSON_UNESCAPED_UNICODE);	
+		}
+	}
+	
+	//评价
+	public function rank(){
+		if(IS_POST AND IS_AJAX){
+			$id = I('post.autoid/a');
+			$total = count($id);
+			$id = implode(',', $id);
+			$row = M('rank')->delete($id);
+			if($row){
+				$this->success($row.'/'.$total.'条记录删除成功');
+			}else{
+				$this->error($row.'/'.$total.'条记录删除成功');
+			}			
+		}else{
+			$this->display('admin-table-rank');
+		}		
+	}
+
+	/*
+	 * DataTables
+	 * @return json
+	 * */		
+	public function getRankTable(){
+		if(IS_AJAX and IS_POST){
+			$database = M('rank');
+			$map = $this->getMap();
+
+			$columns = I('post.columns');
+			$order = I('post.order');
+			
+			$order[0]['column'] = $order[0]['column']?$order[0]['column']:3;
+			$order[0]['dir'] = $order[0]['dir']?$order[0]['dir']:'desc';
+			$orderby = trim($columns[$order[0]['column']]['name'].' '.$order[0]['dir']);
+			
+			$map['doctor'] = session('admin');
+			$subQuery = M('order')->where($map)->buildSql(); 
+			
+			//按时间搜索
+			if(!empty(I('param.startDate')) && !empty(I('param.endDate'))){ //之间
+				$where = C('DB_PREFIX').'rank.time >= '.strtotime(I('param.startDate')).' and '.C('DB_PREFIX').'rank.time <= '.strtotime(I('param.endDate').' 23:59:59');
+			}
+			elseif(!empty(I('param.startDate'))){ //大于起始日
+				$where = C('DB_PREFIX').'rank.time >= '.strtotime(I('param.startDate'));
+			}
+			elseif(!empty(I('param.endDate'))){ //小于截止日
+				$where = C('DB_PREFIX').'rank.time <= '.strtotime(I('param.endDate').' 23:59:59');
+			}
+			
+			$list = $database->table($subQuery.' a')
+							->join('__RANK__ ON a.order=__RANK__.order')
+							->where($where)
+							->order(C('DB_PREFIX').'rank.'.$orderby)
+							->limit(I('param.start/d'),I('param.length/d'))
+							->select();
+
+			$draw = I('post.draw');
+			$recordsTotal = $database->count();	
+			$recordsFiltered = $database->table($subQuery.' a')->join('__RANK__ ON a.order=__RANK__.order')->count();
+			foreach($list as $k=>$v){
+				$infos[] = array(
+					'<input class="ids" type="checkbox" name="autoid[]" value="'.$v['autoid'].'"/>',
+					'<a href="'.U('Home/Report/detail',array('order'=>$v['order'])).'" target="_blank">'.$v['order'].'</a>',
+					mb_strimwidth($v['content'],0,20,'...','utf-8'),
+					date('Y-m-d',$v['time']),
+					$v['type']==0?"用户评价":"管理员回复",
+					$v['user']
+				);
+			}
+			
+			echo json_encode(array(
+				"draw" => intval($draw),
+				"recordsTotal" => intval($recordsTotal),
+				"recordsFiltered" => intval($recordsFiltered),
+				"data" => $infos?$infos:[]
+			),JSON_UNESCAPED_UNICODE);	
+		}		
+	}
 
 	private function export($database,$map){
 		$goods_list = $database->where($map)->order('time desc')->select();
@@ -261,13 +379,13 @@ class TaskController extends SimpleController {
 					$database->dotime = time(); 
 					$database->donetime = '';
 					$database->doctor = session('admin'); //记录操作管理员
-					if(!empty(I('post.repairer')))$database->repairer = I('post.repairer'); //记录维修工人					
+					if(!empty($_POST['repairer']))$database->repairer = I('post.repairer'); //记录维修工人					
 				break;
 				case 'done':
 					$database->status = '2';
 					$database->donetime = time();  
 					$database->doctor = session('admin'); //记录操作管理员
-					if(!empty(I('post.repairer')))$database->repairer = I('post.repairer'); //记录维修工人							
+					if(!empty($_POST['repairer']))$database->repairer = I('post.repairer'); //记录维修工人							
 				break;					
 			}
 			$row = $database->lock(true)->where('`order`=:order')->bind(':order',$v)->save();
@@ -291,11 +409,11 @@ class TaskController extends SimpleController {
 		if(!empty($admin['area']) && !empty($admin['building'])){ //区域+楼栋
 			$where['area'] = array('in',$admin['area']);
 			$this->assign('area',$admin['area']);
-			if(!empty(I('get.area')))$where['area'] = array('in',I('get.area'));
+			if(!empty($_GET['area']))$where['area'] = array('in',I('get.area/d'));
             
 			$where['building'] = array('in',$admin['building']);
 			$this->assign('building',$admin['building']);
-			if(!empty(I('get.building')))$where['building'] = array('in',I('get.building'));
+			if(!empty($_GET['building']))$where['building'] = array('in',I('get.building/d'));
 
 			$where['_logic'] = 'or';
 			$map['_complex'] = $where;                
@@ -303,147 +421,34 @@ class TaskController extends SimpleController {
 		elseif(!empty($admin['area'])){ //仅区域
 			$map['area'] = array('in',$admin['area']);
 			$this->assign('area',$admin['area']);
-			if(!empty(I('get.area')))$map['area'] = array('in',I('get.area'));
+			if(!empty($_GET['area']))$map['area'] = array('in',I('get.area/d'));
 		}
 		elseif(!empty($admin['building'])){ //仅楼栋
 			$map['building'] = array('in',$admin['building']);
 			$this->assign('building',$admin['building']);
-			if(!empty(I('get.building')))$map['building'] = array('in',I('get.building'));
+			if(!empty($_GET['building']))$map['building'] = array('in',I('get.building/d'));
 		}
 		if(!empty($status)){
 			$map['status'] = $status;
 			//按时间搜索
-			if(!empty(I('param.startDate')) && !empty(I('param.endDate'))){ //之间
+			if(!empty($_REQUEST['startDate']) && !empty($_REQUEST['endDate'])){ //之间
 				$map['time'] = array(array('egt',strtotime(I('param.startDate'))),array('elt',strtotime(I('param.endDate').' 23:59:59')));
 			}
-			elseif(!empty(I('param.startDate'))){ //大于起始日
+			elseif(!empty($_REQUEST['startDate'])){ //大于起始日
 				$map['time'] = array('egt',strtotime(I('param.startDate')));
 			}
-			elseif(!empty(I('param.endDate'))){ //小于截止日
+			elseif(!empty($_REQUEST['endDate'])){ //小于截止日
 				$map['time'] = array('elt',strtotime(I('param.endDate').' 23:59:59'));
 			}			
 		}
-		if(!empty(I('param.emerg/d'))){
+		if(!empty($_REQUEST['emerg'])){
 			$map['emerg'] = I('param.emerg/d');
 		}
-		if(!empty(I('param.ordersn'))){
+		if(!empty($_REQUEST['ordersn'])){
 			$map['order'] = array('like','%'.I('param.ordersn').'%');
 		}		
 
 		return $map;
 	}
-	
-	public function getTable(){
-		if(IS_AJAX and IS_POST){
-			$database = M('order');
-			$map = $this->getMap(I('get.type'));
 
-			$columns = I('post.columns');
-			$order = I('post.order');
-			
-			$order[0]['column'] = $order[0]['column']?$order[0]['column']:5;
-			$order[0]['dir'] = $order[0]['dir']?$order[0]['dir']:'desc';
-			$orderby = trim($columns[$order[0]['column']]['name'].' '.$order[0]['dir']);
-	
-			$list = $database->where($map)->order($orderby)->limit(I('param.start/d'),I('param.length/d'))->select();
-
-			$draw = I('post.draw');
-			$recordsTotal = $database->count();	
-			$recordsFiltered = $database->where($map)->count();
-			foreach($list as $k=>$v){
-				$infos[] = array(
-					'<input class="ids" type="checkbox" name="order[]" value="'.$v['order'].'"/>',
-					'<a href="'.U('Home/Report/detail',array('order'=>$v['order'])).'" target="_blank">'.$v['order'].'</a>',
-					area($v['area']),
-					$v['building']?building($v['area'],$v['building']):'-',
-					$v['location'],
-					date('Y-m-d',$v['time']),
-					$v['user'],
-					$v['good']?$v['good']:'-',
-					$v['description']?'有':'无',
-					$v['doctor'],
-					$v['repairer']
-				);
-			}
-			
-			echo json_encode(array(
-				"draw" => intval($draw),
-				"recordsTotal" => intval($recordsTotal),
-				"recordsFiltered" => intval($recordsFiltered),
-				"data" => $infos?$infos:[]
-			),JSON_UNESCAPED_UNICODE);	
-		}
-	}
-	
-	public function rank(){
-		if(IS_POST AND IS_AJAX){
-			$id = I('post.autoid/a');
-			$total = count($id);
-			$id = implode(',', $id);
-			$row = M('rank')->delete($id);
-			if($row){
-				$this->success($row.'/'.$total.'条记录删除成功');
-			}else{
-				$this->error($row.'/'.$total.'条记录删除成功');
-			}			
-		}else{
-			$this->display('admin-table-rank');
-		}		
-	}
-	
-	public function getRankTable(){
-		if(IS_AJAX and IS_POST){
-			$database = M('rank');
-			$map = $this->getMap();
-
-			$columns = I('post.columns');
-			$order = I('post.order');
-			
-			$order[0]['column'] = $order[0]['column']?$order[0]['column']:3;
-			$order[0]['dir'] = $order[0]['dir']?$order[0]['dir']:'desc';
-			$orderby = trim($columns[$order[0]['column']]['name'].' '.$order[0]['dir']);
-			
-			$map['doctor'] = session('admin');
-			$subQuery = M('order')->where($map)->buildSql(); 
-			
-			//按时间搜索
-			if(!empty(I('param.startDate')) && !empty(I('param.endDate'))){ //之间
-				$where = C('DB_PREFIX').'rank.time >= '.strtotime(I('param.startDate')).' and '.C('DB_PREFIX').'rank.time <= '.strtotime(I('param.endDate').' 23:59:59');
-			}
-			elseif(!empty(I('param.startDate'))){ //大于起始日
-				$where = C('DB_PREFIX').'rank.time >= '.strtotime(I('param.startDate'));
-			}
-			elseif(!empty(I('param.endDate'))){ //小于截止日
-				$where = C('DB_PREFIX').'rank.time <= '.strtotime(I('param.endDate').' 23:59:59');
-			}
-			
-			$list = $database->table($subQuery.' a')
-							->join('__RANK__ ON a.order=__RANK__.order')
-							->where($where)
-							->order(C('DB_PREFIX').'rank.'.$orderby)
-							->limit(I('param.start/d'),I('param.length/d'))
-							->select();
-
-			$draw = I('post.draw');
-			$recordsTotal = $database->count();	
-			$recordsFiltered = $database->table($subQuery.' a')->join('__RANK__ ON a.order=__RANK__.order')->count();
-			foreach($list as $k=>$v){
-				$infos[] = array(
-					'<input class="ids" type="checkbox" name="autoid[]" value="'.$v['autoid'].'"/>',
-					'<a href="'.U('Home/Report/detail',array('order'=>$v['order'])).'" target="_blank">'.$v['order'].'</a>',
-					mb_strimwidth($v['content'],0,20,'...','utf-8'),
-					date('Y-m-d',$v['time']),
-					$v['type']==0?"用户评价":"管理员回复",
-					$v['user']
-				);
-			}
-			
-			echo json_encode(array(
-				"draw" => intval($draw),
-				"recordsTotal" => intval($recordsTotal),
-				"recordsFiltered" => intval($recordsFiltered),
-				"data" => $infos?$infos:[]
-			),JSON_UNESCAPED_UNICODE);	
-		}		
-	}
 }

@@ -42,8 +42,8 @@ class ReportController extends SimpleController {
     		$database = D('order');
             if (!$database->create()){
                 $this->error($database->getError());
-            }
-            if(!empty(I('post.tel'))){
+            }			
+            if(!empty($_POST['tel'])){
             	M('user')->where('uid=:uid')->bind(':uid',session('uid'))->save(array('tel'=>I('post.tel')));
             }
     		$data['area'] = I('post.area/d');//校区
@@ -58,6 +58,13 @@ class ReportController extends SimpleController {
     		$data['time'] = time();//时间
     		$data['status'] = 0;//状态 未处理0 处理中1 已处理2
     		$data['emerg'] = 0;//是否紧急 普通0 紧急1
+			if($_FILES){
+				$info = $this->upload();
+				foreach($info as $file){
+					$img[] = $file['savepath'].$file['savename'];
+				}
+				$data['img'] = json_encode($img);				
+			}    		
     		$add = $database->strict(true)->data($data)->filter('strip_tags')->add();
     		if($add){
 				cookie('last_normal_report',time(),array('expire'=>60));
@@ -90,7 +97,7 @@ class ReportController extends SimpleController {
     		$database = D('order');
             if (!$database->create()){
                 $this->error($database->getError());
-            }
+            }			
             if(!empty(I('post.tel'))){
             	M('user')->where('uid=:uid')->bind(':uid',session('uid'))->save(array('tel'=>I('post.tel')));
             }                        
@@ -103,6 +110,13 @@ class ReportController extends SimpleController {
     		$data['time'] = time();//时间
     		$data['status'] = 0;//状态 未处理0 处理中1 已处理2
     		$data['emerg'] = 1;//是否紧急 普通0 紧急1
+			if($_FILES){
+				$info = $this->upload();
+				foreach($info as $file){
+					$img[] = $file['savepath'].$file['savename'];
+				}
+				$data['img'] = json_encode($img);				
+			}    		
     		$add = $database->strict(true)->data($data)->filter('strip_tags')->add();
     		if($add){
 				cookie('last_emerg_report',time(),array('expire'=>60));
@@ -136,6 +150,7 @@ class ReportController extends SimpleController {
 			$rank['admin'] = M('rank')->where("`order` = :order and `type`='1'")->bind(':order',I('get.order'))->order('time desc')->find();//管理最新回复
 			$this->assign('rank',$rank);
 
+			$detail['img'] = json_decode($detail['img'],true);
 			$this->assign('detail',$detail); 
     		$this->display('detail');
     	}
@@ -153,10 +168,6 @@ class ReportController extends SimpleController {
 		}
 		
 		if(IS_POST){			
-			$database = D('rank');
-            if (!$database->create()){
-                $this->error($database->getError());
-            }
 			$data['order'] = I('get.order');			
 			$order = M('order')->where($data)->find();
 			if(empty($order)){
@@ -183,8 +194,13 @@ class ReportController extends SimpleController {
 			else{
 				$this->error('参数错误');
 			}
+			
+			$database = D('rank');
+            if (!$database->create()){
+                $this->error($database->getError());
+            }			
 			$data['content'] = I('post.content');
-			$data['time'] = time();
+			$data['time'] = time();			
 			if($database->data($data)->filter('strip_tags')->add()){
 				if(session('?uid') AND !session('?admin')){
 					cookie('last_rank_'.$order['order'],time(),array('expire'=>60));
@@ -193,6 +209,7 @@ class ReportController extends SimpleController {
 			}else{
 				$this->error('操作失败');
 			}
+			
 		}
 	}
 	
@@ -236,5 +253,19 @@ class ReportController extends SimpleController {
 		$data = I('get.data');
 		$identicon = new \Org\Identicon\Identicon();
 		$identicon->displayImage($data,256);
+	}	
+	
+	private function upload(){
+		$upload = new \Think\Upload();// 实例化上传类
+		$upload->maxSize   =     3145728 ;// 设置附件上传大小
+		$upload->exts      =     array('jpg', 'gif', 'png', 'jpeg');// 设置附件上传类型
+		$upload->rootPath  =     './Uploads/'; // 设置附件上传根目录
+		$upload->savePath  =     ''; // 设置附件上传（子）目录
+		// 上传文件 
+		$info   =   $upload->upload();
+		if(!$info){
+			$this->error($upload->getError());
+		}
+		return $info;
 	}	
 }

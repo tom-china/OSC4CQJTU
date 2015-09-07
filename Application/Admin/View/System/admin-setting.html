@@ -126,7 +126,7 @@
     	</div>
 
 		<div class="am-tab-panel am-hide" id="designer">
-		  <p>可以使用 <i class="am-icon-arrows"></i> 进行拖动排序 ; <a href="javascript:$('.add-button:eq(0)').click();"><i class="am-icon-plus"></i>点击添加一级菜单</a> ; 注意标识唯一</p>
+		  <p>可以使用 <i class="am-icon-arrows"></i> 进行拖动排序 ; <a href="javascript:$('.add-button:eq(0)').click();"><i class="am-icon-plus"></i>点击添加一级菜单</a> ; 注意标识为唯一自然数</p>
 		  	<form method="post" class="am-form am-form-horizontal">
 	        <div class="controls">
 	        	<if condition="empty($area) or empty($building)">
@@ -143,7 +143,7 @@
 	                    <label>名称： 
 	                    <input type="text" name="config[menu][button][0][sub_button][0][name]" class="text input-large" required></label>
 	                    <label>标识： 
-	                    <input type="text" name="config[menu][button][0][sub_button][0][key]" class="text input-large" required></label>
+	                    <input type="number" name="config[menu][button][0][sub_button][0][key]" class="text input-large" required></label>
 	                </div>
 	            </div>
 	        	<else/>
@@ -163,7 +163,7 @@
 	                    <label>名称： 
 	                    <input type="text" name="config[menu][button][{$k}][sub_button][{$key}][name]" class="text input-large" value="{$value.name}" required></label>
 	                    <label>标识： 
-	                    <input type="text" name="config[menu][button][{$k}][sub_button][{$key}][key]" class="text input-large" value="{$value.key}" required></label>
+	                    <input type="number" name="config[menu][button][{$k}][sub_button][{$key}][key]" class="text input-large" value="{$value.key}" required></label>
 	                </div>
 	                </foreach>
 	            </div>
@@ -208,7 +208,8 @@ $(document).delegate('.add-button', "click", function() {
 	t = t.replace(/(<input)(.*?)(value=")(.*?)("([^>]*?)>)/g, "$1$2$3$5");
 	$($(this).parents(c).parent(c)).append('<div class="controls">' + t + '</div>');
 	return false
-}) $(document).delegate('.add-sub-cate', "click", function() {
+}) 
+$(document).delegate('.add-sub-cate', "click", function() {
 	var c = '.controls',
 		cn = '.children';
 	var t = $(this).parent(cn).html();
@@ -220,7 +221,8 @@ $(document).delegate('.add-button', "click", function() {
 	t = t.replace(/(sub_button\]\[)(\d+)(\])/g, "$1" + parseInt(parseInt(s) + 1).toString() + "$3");
 	$($(this).parent(cn).parent(c)).append('<div class="children">' + t + '</div>');
 	return false
-}) $(document).delegate(".remove-sub-cate", "click", function() {
+}) 
+$(document).delegate(".remove-sub-cate", "click", function() {
 	$(this).parent('.children').remove()
 });
 $(document).delegate(".remove-button", "click", function() {

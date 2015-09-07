@@ -24,15 +24,13 @@ class ListController extends SimpleController {
 	//报修列表
     public function index(){
     	$database = M('order');
-        $status = I('get.status');
-        $emerg = I('get.emerg');
-    	if(isset($status)&&$status!=''){
-			$map['status'] = I('get.status');
+        if(!empty($_GET['status'])){
+			$map['status'] = I('get.status/d');
 		}
-        if(isset($emerg)&&$emerg!=''){
-			$map['emerg'] = I('get.emerg');
+        if(!empty($_GET['emerg'])){
+			$map['emerg'] = I('get.emerg/d');  
 		}
-    	$list = $database->where($map)->order('time desc')->page(I('get.p').',25')->select();
+    	$list = $database->where($map)->order('time desc')->page(I('get.p/d').',25')->select();
     	$this->assign('list',$list);
     	$count = $database->where($map)->count();
         $show = pagination($count);
@@ -43,13 +41,11 @@ class ListController extends SimpleController {
 	//工单搜索
     public function search(){
     	$database = M('order');
-        $status = I('get.status');
-        $emerg = I('get.emerg');
-        if(isset($status)&&$status!=''){
-			$map['status'] = I('get.status');
+        if(!empty($_GET['status'])){
+			$map['status'] = I('get.status/d');
 		}
-        if(isset($emerg)&&$emerg!=''){
-			$map['emerg'] = I('get.emerg');  
+        if(!empty($_GET['emerg'])){
+			$map['emerg'] = I('get.emerg/d');  
 		}
         $where['order'] = array('like','%'.I('param.order').'%');
         $where['user'] = I('param.user')?I('param.user'):I('param.order') ;
@@ -57,7 +53,7 @@ class ListController extends SimpleController {
         $where['repairer'] = I('param.repairer')?I('param.repairer'):I('param.order');    
         $where['_logic'] = 'or';
         $map['_complex'] = $where;         
-    	$list = $database->where($map)->order('time desc')->page(I('get.p').',25')->select();
+    	$list = $database->where($map)->order('time desc')->page(I('get.p/d').',25')->select();
     	$this->assign('list',$list);
     	$count = $database->where($map)->count();
         $show = pagination($count);

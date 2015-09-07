@@ -2,7 +2,9 @@
 <include file="Public/header" />
 <include file="Public/nav" />
 </if>
+
 <link rel="stylesheet" href="__PUBLIC__/assets/css/amazeui.chosen.css"/>
+
 <div class="am-container">
 <div class="am-alert am-alert-default" data-am-alert>
   <button type="button" class="am-close">&times;</button>
@@ -58,7 +60,7 @@
 <script>$("#modal").modal({closeViaDimmer: 0});$.getScript("__PUBLIC__/resource/js/jquery.zclip.min.js",function(){$(".am-text-danger").zclip({path:"__PUBLIC__/resource/js/ZeroClipboard.swf",copy:function(){return $.trim($(this).text())},afterCopy:function(){var data=new Object();data.name="重庆交通大学后勤在线服务中心";data.tag="JDLS";data.icon="__PUBLIC__/resource/images/app-icon72x72@2x.png";data.body="已复制到剪贴板，使用快捷键Ctrl+V粘贴。";showNotification(data)}})});function showNotification(data){Notification.requestPermission(function(perm){if(perm=="granted"){var notification=new Notification(data.name,{tag:data.tag,icon:data.icon,body:data.body});notification.onshow=function(){setTimeout(function(){notification.close()},10000)}}})};</script>
 </notempty>
 <script type="text/javascript">
-$.getScript("__PUBLIC__/assets/js/jquery.city.select.js", function() {
+$.getScript("__PUBLIC__/resource/js/jquery.city.select.js", function() {
 	var data = {$data};
 	$('#province, #city').citylist({
 		data: data,
@@ -91,6 +93,7 @@ $('form').validator({
 <script type="text/javascript">
 $(function(){$(".am-topbar-nav").find('.am-active:not(.am-dropdown)').removeClass('am-active');});
 </script>
+
 <if condition="!IS_PJAX">
 <include file="Public/footer" />
 </if>

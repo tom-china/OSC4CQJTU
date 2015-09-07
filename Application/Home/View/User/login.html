@@ -2,6 +2,9 @@
 <include file="Public/header" />
 <include file="Public/nav" />
 </if>
+
+<style>.am-form-icon label~[class*=am-icon-]{top:48px}</style>
+
 <div class="am-container">
 <notempty name="tips">
 <div class="am-alert am-alert-default" data-am-alert>
@@ -26,9 +29,10 @@
       <label for="uid">识别码:</label>
       <input type="text" name="uid" id="uid" placeholder="请输入学号（或教职工号/一卡通号）" required>
      </div>
-	 <div class="am-form-group"> 
+	 <div class="am-form-group am-form-icon am-form-feedback"> 
       <label for="password">密码:</label><a href="{:U('User/findpsw')}" class="am-fr">忘记密码?</a>
       <input class="js-pattern-password" type="password" minlength="6" maxlength="20" name="password" id="password" placeholder="请输入密码" required>
+	  <span class="am-icon-eye" onclick="$(this).prev().attr('type','text')"></span>
      </div>
 	  
       </if>
@@ -48,8 +52,16 @@
     </form>
 </div>
 <script type="text/javascript">
+if (typeof jQuery == 'undefined') { 
+	
+if(document.getElementsByTagName('meta').length==0){
+	window.location.href="__SELF__";
+}	
+	
+}else{
+	
 $(function(){$(".am-topbar-nav").find('.am-active:not(.am-dropdown)').removeClass('am-active');});
-if(document.getElementsByTagName('meta').length==0)window.location.href="__SELF__";
+
 if ($.AMUI && $.AMUI.validator) {
 	$.AMUI.validator.patterns.password = /^[A-Za-z0-9]{6,20}$/
 }
@@ -67,8 +79,11 @@ $('form').validator({
 		}
 		$alert.html(msg).show()
 	}
-});
+});	
+	
+}
 </script>
+
 <if condition="!IS_PJAX">
 <include file="Public/footer" />
 </if>

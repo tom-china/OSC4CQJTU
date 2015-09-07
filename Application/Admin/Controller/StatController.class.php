@@ -27,37 +27,27 @@ class StatController extends SimpleController {
 			$this->redirect('Main/index');
 		}
 	}	
-	
-	public function index(){
-		$this->redirect('Main/dashboard');
-	}
 
 	public function repairer(){
-		//EXCEL导出
 		if(I('get.action') == 'export'){
-			$goods_list = $this->getStatList(ACTION_NAME,true);
-			if(empty($goods_list)){
-				$this->error('没有搜索结果，无法导出数据');
-			}
-			$this->goods_export($goods_list);
+			$this->export(ACTION_NAME);
 		}	
 		$this->assignAdmin();
 		$this->display('admin-table-repairer');
 	}
 	
 	public function doctor(){
-		//EXCEL导出
 		if(I('get.action') == 'export'){
-			$goods_list = $this->getStatList(ACTION_NAME,true);
-			if(empty($goods_list)){
-				$this->error('没有搜索结果，无法导出数据');
-			}
-			$this->goods_export($goods_list);
-		}		   	
+			$this->export(ACTION_NAME);
+		}
 		$this->assignAdmin();
 		$this->display('admin-table-doctor');
 	}	
 
+	/*
+	 * DataTables
+	 * @return	json
+	 * */
 	public function getTable(){
 		if(IS_POST AND IS_AJAX){
 			$character = I('get.character');
@@ -103,13 +93,27 @@ class StatController extends SimpleController {
 		}
 	}
 	
-	private function getStatList($character,$export=false){
+	//EXCEL导出
+	private function export($character){
+		$goods_list = $this->getStatList($character,FALSE);
+		if(empty($goods_list)){
+			$this->error('没有搜索结果，无法导出数据');
+		}
+		$this->goods_export($goods_list);
+	}
+		
+	/*
+	 * 获取统计数据
+	 * @param	$character		分组字段
+	 * @param	$pagination		是否分页
+	 */
+	private function getStatList($character,$pagination=true){
 		$map = $this->getMap();
 		$database = M('order');
-		if($export){
-			$users = $database->field("{$character}")->where($map)->group("{$character}")->select();
+		if($pagination){
+			$users = $database->field("{$character}")->where($map)->group("{$character}")->page(I('get.p/d').',25')->select();			
 		}else{
-			$users = $database->field("{$character}")->where($map)->group("{$character}")->page(I('get.p/d').',25')->select();
+			$users = $database->field("{$character}")->where($map)->group("{$character}")->select();
 		}
 		foreach($users as $k=>$v){
 			$map[$character] = $v[$character];		
@@ -124,6 +128,9 @@ class StatController extends SimpleController {
 		return $list;		
 	}
 	
+	/*
+	 * 模板管理范围赋值
+	 * */
 	private function assignAdmin(){
 		$admin = M('admin')->where('username=:username')->bind(':username',session('admin'))->find(); //获取管理权限范围
 		$admin = json_decode($admin['location'],true);
@@ -131,6 +138,10 @@ class StatController extends SimpleController {
 		if(!empty($admin['building']))$this->assign('building',$admin['building']);		
 	}
 	
+	/*
+	 * 获取数据筛选条件
+	 * @return	array
+	 * */
 	private function getMap(){
 		$admin = M('admin')->where('username=:username')->bind(':username',session('admin'))->find(); //获取管理权限范围
 		$admin = json_decode($admin['location'],true);
@@ -138,11 +149,11 @@ class StatController extends SimpleController {
 		if(!empty($admin['area']) && !empty($admin['building'])){ //区域+楼栋
 			$where['area'] = array('in',$admin['area']);
 			$this->assign('area',$admin['area']);
-			if(!empty(I('param.area')))$where['area'] = array('in',I('param.area'));
+			if(!empty($_REQUEST['area']))$where['area'] = array('in',I('param.area/d'));
             
 			$where['building'] = array('in',$admin['building']);
 			$this->assign('building',$admin['building']);
-			if(!empty(I('param.building')))$where['building'] = array('in',I('param.building'));
+			if(!empty($_REQUEST['building']))$where['building'] = array('in',I('param.building/d'));
 
 			$where['_logic'] = 'or';
 			$map['_complex'] = $where;                
@@ -150,26 +161,26 @@ class StatController extends SimpleController {
 		elseif(!empty($admin['area'])){ //仅区域
 			$map['area'] = array('in',$admin['area']);
 			$this->assign('area',$admin['area']);
-			if(!empty(I('param.area')))$map['area'] = array('in',I('param.area'));
+			if(!empty($_REQUEST['area']))$map['area'] = array('in',I('param.area/d'));
 		}
 		elseif(!empty($admin['building'])){ //仅楼栋
 			$map['building'] = array('in',$admin['building']);
 			$this->assign('building',$admin['building']);
-			if(!empty(I('param.building')))$map['building'] = array('in',I('param.building'));
+			if(!empty($_REQUEST['building']))$map['building'] = array('in',I('param.building/d'));
 		}		
 		//按时间搜索
-		if(!empty(I('param.startDate')) && !empty(I('param.endDate'))){ //之间
+		if(!empty($_REQUEST['startDate']) && !empty($_REQUEST['endDate'])){ //之间
 			$map['time'] = array(array('egt',strtotime(I('param.startDate'))),array('elt',strtotime(I('param.endDate').' 23:59:59')));
 		}
-		elseif(!empty(I('param.startDate'))){ //大于起始日
+		elseif(!empty($_REQUEST['startDate'])){ //大于起始日
 			$map['time'] = array('egt',strtotime(I('param.startDate')));
 		}
-		elseif(!empty(I('param.endDate'))){ //小于截止日
+		elseif(!empty($_REQUEST['endDate'])){ //小于截止日
 			$map['time'] = array('elt',strtotime(I('param.endDate').' 23:59:59'));
 		}
-		if(!empty(I('param.emerg/d')))$map['emerg'] = I('param.emerg/d');
-		if(!empty(I('param.repairer')))$map['repairer'] = array('like','%'.I('param.repairer').'%');
-		if(!empty(I('param.doctor')))$map['doctor'] = array('like','%'.I('param.doctor').'%');
+		if(!empty($_REQUEST['emerg']))$map['emerg'] = I('param.emerg/d');
+		if(!empty($_REQUEST['repairer']))$map['repairer'] = array('like','%'.I('param.repairer').'%');
+		if(!empty($_REQUEST['doctor']))$map['doctor'] = array('like','%'.I('param.doctor').'%');
 
 		return $map;		
 	}	
@@ -264,6 +275,12 @@ class StatController extends SimpleController {
         exit;
     }  	
 	
+	/*
+	 * 多维数组按制定列排序
+	 * @param	&$array	排序数组
+	 * @param	$field	排序字段
+	 * @param	$method	排序方式
+	 * */
 	private function sortArrByField(&$array, $field, $method = 'asc'){
 		$fieldArr = array();
 		foreach ($array as $k => $v) {

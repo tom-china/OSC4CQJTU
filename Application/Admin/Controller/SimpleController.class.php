@@ -32,7 +32,7 @@ class SimpleController extends Controller {
     //统计
     public function __construct(){
         parent::__construct();
-        if(session('?admin') && session('?security')){
+        if(session('?admin')){
 			
 			//安全验证
 			if(sha1(get_client_ip().$_SERVER['HTTP_USER_AGENT']) != session('security')){
